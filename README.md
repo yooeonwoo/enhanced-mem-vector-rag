@@ -34,6 +34,7 @@ This implementation creates a sophisticated knowledge retrieval system by integr
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 - [Claude Code Development](#claude-code-development)
+- [Deployment](#deployment)
 
 ## Overview
 
@@ -55,6 +56,7 @@ The system leverages:
 - 📊 **Extensible Architecture** - Easy to customize and extend for specific use cases
 - 🛠️ **Developer-Friendly APIs** - Simple interfaces for complex retrieval operations
 - 📈 **Performance Optimization** - Efficient retrieval strategies for reduced latency
+- 🐳 **Docker Deployment** - Containerized architecture for easy deployment
 
 ## Architecture
 
@@ -284,16 +286,28 @@ sequenceDiagram
 
 ### Installation
 
+#### Local Development
+
 ```bash
 # Clone the repository
 git clone https://github.com/BjornMelin/enhanced-mem-vector-rag.git
 cd enhanced-mem-vector-rag
 
 # Install dependencies using uv
-uv pip install -e .
+uv pip install -r requirements.txt
+```
 
-# Or using traditional pip
-pip install -e .
+#### Docker Deployment
+
+```bash
+# Navigate to deployment directory
+cd emvr/deployment
+
+# Setup environment
+./setup_local.sh
+
+# Start services
+docker compose up -d
 ```
 
 ### Quick Start
@@ -445,7 +459,11 @@ Performance benchmarks comparing EMVR to traditional RAG systems will be availab
 
 ## Roadmap
 
-- [ ] Initial release with core functionality
+- [x] Initial release with core functionality
+- [x] Basic documentation
+- [x] Agent orchestration implementation
+- [x] UI implementation with Chainlit
+- [x] Docker containerization and deployment
 - [ ] Comprehensive documentation
 - [ ] Performance benchmarks
 - [ ] Advanced examples
@@ -550,3 +568,69 @@ This project provides a detailed development guide for Claude Code users. The gu
 - Key architectural components and their roles
 
 For Claude Code development, please refer to [CLAUDE.md](CLAUDE.md) for comprehensive guidelines.
+
+## Deployment
+
+The project includes a complete deployment system using Docker Compose:
+
+### Docker Components
+
+- **MCP Server**: FastAPI server implementing the Model Context Protocol
+- **Chainlit UI**: Web interface for user interaction
+- **Qdrant**: Vector database for semantic search
+- **Neo4j**: Graph database for knowledge graphs
+- **Supabase**: PostgreSQL for structured data and metadata
+- **Grafana/Prometheus**: Monitoring and observability
+
+### Deployment Options
+
+#### Local Deployment
+
+```bash
+# Navigate to deployment directory
+cd emvr/deployment
+
+# Set up environment
+./setup_local.sh
+
+# Start services using docker-compose
+docker compose up -d
+```
+
+#### Using Makefile
+
+```bash
+cd emvr/deployment
+make setup    # Run setup script
+make up       # Start all services
+```
+
+### Security
+
+The deployment includes comprehensive security features:
+
+- JWT-based authentication
+- Role-Based Access Control (RBAC)
+- Secure environment variable management
+- Container-based isolation
+
+### Monitoring & Observability
+
+Access system metrics and logs through:
+
+- Grafana dashboard: http://localhost:3000
+- Prometheus metrics: http://localhost:9090
+
+### Backup & Restore
+
+The system includes scripts for data backup and restoration:
+
+```bash
+# Create backup
+./scripts/backup.sh
+
+# Restore from backup
+./scripts/restore.sh ./backups/emvr_backup_20250506_120000.tar.gz
+```
+
+For detailed deployment instructions, see the [deployment README](emvr/deployment/README.md).
