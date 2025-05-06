@@ -158,3 +158,4 @@ output/
 debug_dump/
 debug.log
 debug.json
+**/.claude/settings.local.json
