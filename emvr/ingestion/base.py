@@ -1,33 +1,33 @@
 """Base classes for the ingestion pipeline."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel
 
 
 class Document(BaseModel):
     """Document representation for ingestion."""
-    
+
     content: str
-    metadata: Dict[str, Any]
-    id: Optional[str] = None
+    metadata: dict[str, Any]
+    id: str | None = None
 
 
 class IngestResult(BaseModel):
     """Result of an ingestion operation."""
-    
+
     document_id: str
     success: bool
-    message: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    message: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class BaseIngestionConnector(ABC):
     """Base class for ingestion connectors."""
-    
+
     @abstractmethod
-    async def ingest(self, documents: List[Document]) -> List[IngestResult]:
+    async def ingest(self, documents: list[Document]) -> list[IngestResult]:
         """Ingest documents into the system.
         
         Args:
@@ -37,9 +37,9 @@ class BaseIngestionConnector(ABC):
             List of ingestion results
         """
         pass
-    
+
     @abstractmethod
-    async def delete(self, document_ids: List[str]) -> List[IngestResult]:
+    async def delete(self, document_ids: list[str]) -> list[IngestResult]:
         """Delete documents from the system.
         
         Args:

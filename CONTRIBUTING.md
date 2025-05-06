@@ -4,16 +4,18 @@ Thank you for your interest in contributing to Enhanced Memory Vector RAG (EMVR)
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Workflow](#development-workflow)
-- [Pull Request Process](#pull-request-process)
-- [Coding Standards](#coding-standards)
-- [Testing Guidelines](#testing-guidelines)
-- [Documentation](#documentation)
-- [Issue Reporting](#issue-reporting)
-- [Feature Requests](#feature-requests)
-- [Community](#community)
+- [Contributing to Enhanced Memory Vector RAG](#contributing-to-enhanced-memory-vector-rag)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+  - [Development Workflow](#development-workflow)
+  - [Pull Request Process](#pull-request-process)
+  - [Coding Standards](#coding-standards)
+  - [Testing Guidelines](#testing-guidelines)
+  - [Documentation](#documentation)
+  - [Issue Reporting](#issue-reporting)
+  - [Feature Requests](#feature-requests)
+  - [Community](#community)
 
 ## Code of Conduct
 

@@ -4,10 +4,10 @@ Memory tools for EMVR agents.
 This module implements tools for interacting with the memory system.
 """
 
-from typing import Dict, List, Optional, Any, Type
 import logging
+from typing import Any
 
-from langchain.tools import BaseTool, StructuredTool, tool
+from langchain.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 from emvr.memory.memory_manager import memory_manager
@@ -26,22 +26,22 @@ class SearchNodesInput(BaseModel):
 
 class CreateEntitiesInput(BaseModel):
     """Input schema for create_entities tool."""
-    entities: List[Dict[str, Any]] = Field(..., description="List of entities to create")
+    entities: list[dict[str, Any]] = Field(..., description="List of entities to create")
 
 
 class CreateRelationsInput(BaseModel):
     """Input schema for create_relations tool."""
-    relations: List[Dict[str, Any]] = Field(..., description="List of relations to create")
+    relations: list[dict[str, Any]] = Field(..., description="List of relations to create")
 
 
 class AddObservationsInput(BaseModel):
     """Input schema for add_observations tool."""
-    observations: List[Dict[str, Any]] = Field(..., description="List of observations to add")
+    observations: list[dict[str, Any]] = Field(..., description="List of observations to add")
 
 
 class DeleteEntitiesInput(BaseModel):
     """Input schema for delete_entities tool."""
-    entity_names: List[str] = Field(..., description="List of entity names to delete")
+    entity_names: list[str] = Field(..., description="List of entity names to delete")
 
 
 # ----- Memory Tools -----
@@ -50,7 +50,7 @@ class DeleteEntitiesInput(BaseModel):
 async def search_memory(
     query: str,
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Search the memory system for nodes matching the query.
     
@@ -64,10 +64,10 @@ async def search_memory(
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Execute the search
         result = await memory_manager.search_nodes(query, limit)
-        
+
         return result
     except Exception as e:
         logger.error(f"Memory search failed: {e}")
@@ -78,7 +78,7 @@ async def search_memory(
 
 
 @tool
-async def read_memory_graph() -> Dict[str, Any]:
+async def read_memory_graph() -> dict[str, Any]:
     """
     Read the entire memory graph.
     
@@ -88,10 +88,10 @@ async def read_memory_graph() -> Dict[str, Any]:
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Read the graph
         result = await memory_manager.read_graph()
-        
+
         return result
     except Exception as e:
         logger.error(f"Reading memory graph failed: {e}")
@@ -102,7 +102,7 @@ async def read_memory_graph() -> Dict[str, Any]:
 
 
 @tool
-async def create_memory_entities(entities: List[Dict[str, Any]]) -> Dict[str, Any]:
+async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Create new entities in the memory system.
     
@@ -115,10 +115,10 @@ async def create_memory_entities(entities: List[Dict[str, Any]]) -> Dict[str, An
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Create the entities
         result = await memory_manager.create_entities(entities)
-        
+
         return result
     except Exception as e:
         logger.error(f"Entity creation failed: {e}")
@@ -129,7 +129,7 @@ async def create_memory_entities(entities: List[Dict[str, Any]]) -> Dict[str, An
 
 
 @tool
-async def create_memory_relations(relations: List[Dict[str, Any]]) -> Dict[str, Any]:
+async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Create new relations between entities in the memory system.
     
@@ -142,10 +142,10 @@ async def create_memory_relations(relations: List[Dict[str, Any]]) -> Dict[str, 
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Create the relations
         result = await memory_manager.create_relations(relations)
-        
+
         return result
     except Exception as e:
         logger.error(f"Relation creation failed: {e}")
@@ -156,7 +156,7 @@ async def create_memory_relations(relations: List[Dict[str, Any]]) -> Dict[str, 
 
 
 @tool
-async def add_memory_observations(observations: List[Dict[str, Any]]) -> Dict[str, Any]:
+async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Add new observations to existing entities in the memory system.
     
@@ -169,10 +169,10 @@ async def add_memory_observations(observations: List[Dict[str, Any]]) -> Dict[st
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Add the observations
         result = await memory_manager.add_observations(observations)
-        
+
         return result
     except Exception as e:
         logger.error(f"Adding observations failed: {e}")
@@ -183,7 +183,7 @@ async def add_memory_observations(observations: List[Dict[str, Any]]) -> Dict[st
 
 
 @tool
-async def delete_memory_entities(entity_names: List[str]) -> Dict[str, Any]:
+async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
     """
     Delete entities from the memory system.
     
@@ -196,10 +196,10 @@ async def delete_memory_entities(entity_names: List[str]) -> Dict[str, Any]:
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Delete the entities
         result = await memory_manager.delete_entities(entity_names)
-        
+
         return result
     except Exception as e:
         logger.error(f"Entity deletion failed: {e}")
@@ -211,7 +211,7 @@ async def delete_memory_entities(entity_names: List[str]) -> Dict[str, Any]:
 
 # ----- Tool Collection -----
 
-def get_memory_tools() -> List[BaseTool]:
+def get_memory_tools() -> list[BaseTool]:
     """
     Get all memory tools.
     

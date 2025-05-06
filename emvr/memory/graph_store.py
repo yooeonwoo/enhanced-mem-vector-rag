@@ -1,12 +1,11 @@
 """Graph store implementation using Neo4j and Graphiti."""
 
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from dotenv import load_dotenv
 from llama_index.core.graph_stores import Neo4jGraphStore
-from llama_index.core.schema import BaseNode, TextNode
-from neo4j import AsyncGraphDatabase, AsyncDriver
+from neo4j import AsyncGraphDatabase
 
 from emvr.memory.base import Entity, Relation
 
@@ -16,12 +15,12 @@ load_dotenv()
 
 class Neo4jMemoryStore:
     """Graph memory store implementation using Neo4j."""
-    
+
     def __init__(
         self,
-        uri: Optional[str] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        uri: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
         database: str = "neo4j",
     ):
         """Initialize the Neo4j memory store.
@@ -36,13 +35,13 @@ class Neo4jMemoryStore:
         self.username = username or os.environ.get("NEO4J_USERNAME", "neo4j")
         self.password = password or os.environ.get("NEO4J_PASSWORD", "password")
         self.database = database
-        
+
         # Initialize Neo4j driver
         self.driver = AsyncGraphDatabase.driver(
             self.uri,
             auth=(self.username, self.password),
         )
-        
+
         # Initialize LlamaIndex graph store
         self.graph_store = Neo4jGraphStore(
             username=self.username,
@@ -50,8 +49,8 @@ class Neo4jMemoryStore:
             url=self.uri,
             database=self.database,
         )
-    
-    async def create_entity(self, entity: Entity) -> Dict[str, Any]:
+
+    async def create_entity(self, entity: Entity) -> dict[str, Any]:
         """Create a new entity in the knowledge graph.
         
         Args:
@@ -64,7 +63,7 @@ class Neo4jMemoryStore:
         CREATE (e:`Entity` {name: $name, entity_type: $entity_type})
         RETURN e
         """
-        
+
         async with self.driver.session(database=self.database) as session:
             result = await session.run(
                 query,
@@ -73,18 +72,18 @@ class Neo4jMemoryStore:
             )
             record = await result.single()
             entity_node = record["e"]
-            
+
             # Create observations
             for observation in entity.observations:
                 await self._add_observation(entity.name, observation)
-                
+
             return {
                 "id": entity_node.id,
                 "name": entity_node["name"],
                 "entity_type": entity_node["entity_type"],
             }
-    
-    async def create_entities(self, entities: List[Entity]) -> Dict[str, Any]:
+
+    async def create_entities(self, entities: list[Entity]) -> dict[str, Any]:
         """Create multiple new entities in the knowledge graph.
         
         Args:
@@ -97,10 +96,10 @@ class Neo4jMemoryStore:
         for entity in entities:
             result = await self.create_entity(entity)
             created.append(result)
-            
+
         return {"created": created}
-    
-    async def create_relation(self, relation: Relation) -> Dict[str, Any]:
+
+    async def create_relation(self, relation: Relation) -> dict[str, Any]:
         """Create a new relation between entities in the knowledge graph.
         
         Args:
@@ -115,7 +114,7 @@ class Neo4jMemoryStore:
         CREATE (from)-[r:`RELATION` {type: $relation_type}]->(to)
         RETURN from, r, to
         """
-        
+
         async with self.driver.session(database=self.database) as session:
             result = await session.run(
                 query,
@@ -124,14 +123,14 @@ class Neo4jMemoryStore:
                 relation_type=relation.relation_type,
             )
             record = await result.single()
-            
+
             return {
                 "from": record["from"]["name"],
                 "relation": record["r"]["type"],
                 "to": record["to"]["name"],
             }
-    
-    async def create_relations(self, relations: List[Relation]) -> Dict[str, Any]:
+
+    async def create_relations(self, relations: list[Relation]) -> dict[str, Any]:
         """Create multiple new relations between entities in the knowledge graph.
         
         Args:
@@ -144,9 +143,9 @@ class Neo4jMemoryStore:
         for relation in relations:
             result = await self.create_relation(relation)
             created.append(result)
-            
+
         return {"created": created}
-    
+
     async def _add_observation(self, entity_name: str, observation: str) -> None:
         """Add an observation to an entity.
         
@@ -159,17 +158,17 @@ class Neo4jMemoryStore:
         CREATE (o:`Observation` {text: $observation})
         CREATE (e)-[r:`HAS_OBSERVATION`]->(o)
         """
-        
+
         async with self.driver.session(database=self.database) as session:
             await session.run(
                 query,
                 entity_name=entity_name,
                 observation=observation,
             )
-    
+
     async def add_observations(
-        self, entity_name: str, observations: List[str]
-    ) -> Dict[str, Any]:
+        self, entity_name: str, observations: list[str]
+    ) -> dict[str, Any]:
         """Add new observations to an existing entity in the knowledge graph.
         
         Args:
@@ -181,13 +180,13 @@ class Neo4jMemoryStore:
         """
         for observation in observations:
             await self._add_observation(entity_name, observation)
-            
+
         return {
             "entity": entity_name,
             "added_observations": len(observations),
         }
-    
-    async def delete_entities(self, entity_names: List[str]) -> Dict[str, Any]:
+
+    async def delete_entities(self, entity_names: list[str]) -> dict[str, Any]:
         """Delete multiple entities and their associated relations from the knowledge graph.
         
         Args:
@@ -202,20 +201,20 @@ class Neo4jMemoryStore:
         OPTIONAL MATCH (e)-[r]-()
         DELETE r, e
         """
-        
+
         async with self.driver.session(database=self.database) as session:
             await session.run(
                 query,
                 entity_names=entity_names,
             )
-            
+
         return {
             "deleted": entity_names,
         }
-    
+
     async def delete_observations(
-        self, entity_name: str, observations: List[str]
-    ) -> Dict[str, Any]:
+        self, entity_name: str, observations: list[str]
+    ) -> dict[str, Any]:
         """Delete specific observations from an entity in the knowledge graph.
         
         Args:
@@ -230,20 +229,20 @@ class Neo4jMemoryStore:
         WHERE o.text IN $observations
         DELETE r, o
         """
-        
+
         async with self.driver.session(database=self.database) as session:
             await session.run(
                 query,
                 entity_name=entity_name,
                 observations=observations,
             )
-            
+
         return {
             "entity": entity_name,
             "deleted_observations": len(observations),
         }
-    
-    async def delete_relations(self, relations: List[Relation]) -> Dict[str, Any]:
+
+    async def delete_relations(self, relations: list[Relation]) -> dict[str, Any]:
         """Delete multiple relations from the knowledge graph.
         
         Args:
@@ -259,7 +258,7 @@ class Neo4jMemoryStore:
               (to:`Entity` {name: relation.to_entity})
         DELETE r
         """
-        
+
         relation_data = [
             {
                 "from_entity": r.from_entity,
@@ -268,18 +267,18 @@ class Neo4jMemoryStore:
             }
             for r in relations
         ]
-        
+
         async with self.driver.session(database=self.database) as session:
             await session.run(
                 query,
                 relations=relation_data,
             )
-            
+
         return {
             "deleted": len(relations),
         }
-    
-    async def read_graph(self) -> Dict[str, Any]:
+
+    async def read_graph(self) -> dict[str, Any]:
         """Read the entire knowledge graph.
         
         Returns:
@@ -291,16 +290,16 @@ class Neo4jMemoryStore:
         RETURN e.name AS name, e.entity_type AS entity_type, 
                COLLECT(o.text) AS observations
         """
-        
+
         relations_query = """
         MATCH (from:`Entity`)-[r:`RELATION`]->(to:`Entity`)
         RETURN from.name AS from_entity, r.type AS relation_type, 
                to.name AS to_entity
         """
-        
+
         entities = []
         relations = []
-        
+
         async with self.driver.session(database=self.database) as session:
             # Get entities
             result = await session.run(entities_query)
@@ -310,7 +309,7 @@ class Neo4jMemoryStore:
                     "entity_type": record["entity_type"],
                     "observations": record["observations"],
                 })
-                
+
             # Get relations
             result = await session.run(relations_query)
             async for record in result:
@@ -319,13 +318,13 @@ class Neo4jMemoryStore:
                     "relation": record["relation_type"],
                     "to": record["to_entity"],
                 })
-                
+
         return {
             "entities": entities,
             "relations": relations,
         }
-    
-    async def search_nodes(self, query: str) -> Dict[str, Any]:
+
+    async def search_nodes(self, query: str) -> dict[str, Any]:
         """Search for nodes in the knowledge graph based on a query.
         
         Args:
@@ -345,9 +344,9 @@ class Neo4jMemoryStore:
                matching_observations,
                COLLECT(DISTINCT o2.text) AS all_observations
         """
-        
+
         entities = []
-        
+
         async with self.driver.session(database=self.database) as session:
             result = await session.run(
                 search_query,
@@ -360,13 +359,13 @@ class Neo4jMemoryStore:
                     "matching_observations": record["matching_observations"],
                     "all_observations": record["all_observations"],
                 })
-                
+
         return {
             "query": query,
             "entities": entities,
         }
-    
-    async def open_nodes(self, names: List[str]) -> Dict[str, Any]:
+
+    async def open_nodes(self, names: list[str]) -> dict[str, Any]:
         """Open specific nodes in the knowledge graph by their names.
         
         Args:
@@ -382,9 +381,9 @@ class Neo4jMemoryStore:
         RETURN e.name AS name, e.entity_type AS entity_type, 
                COLLECT(o.text) AS observations
         """
-        
+
         entities = []
-        
+
         async with self.driver.session(database=self.database) as session:
             result = await session.run(
                 query,
@@ -396,7 +395,7 @@ class Neo4jMemoryStore:
                     "entity_type": record["entity_type"],
                     "observations": record["observations"],
                 })
-                
+
         return {
             "entities": entities,
         }

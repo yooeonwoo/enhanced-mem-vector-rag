@@ -6,13 +6,12 @@ This module implements the endpoints for agent operations in the custom 'memory'
 
 import logging
 import uuid
-from typing import Dict, List, Optional, Any, Union, Annotated
+from typing import Annotated, Any
 
-from fastmcp import MCPServer, Context
-from pydantic import Field, BaseModel
+from fastmcp import Context, MCPServer
+from pydantic import BaseModel, Field
 
 from emvr.agent.workflows import AgentWorkflowFactory
-from emvr.config import get_settings
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -23,45 +22,45 @@ logger = logging.getLogger(__name__)
 class AgentRunRequest(BaseModel):
     """Request schema for running an agent."""
     query: str
-    thread_id: Optional[str] = None
-    context: Optional[List[Dict[str, Any]]] = None
-    params: Optional[Dict[str, Any]] = None
+    thread_id: str | None = None
+    context: list[dict[str, Any]] | None = None
+    params: dict[str, Any] | None = None
 
 
 class WorkerRunRequest(BaseModel):
     """Request schema for running a worker agent."""
     worker_name: str
     query: str
-    thread_id: Optional[str] = None
-    context: Optional[List[Dict[str, Any]]] = None
-    params: Optional[Dict[str, Any]] = None
+    thread_id: str | None = None
+    context: list[dict[str, Any]] | None = None
+    params: dict[str, Any] | None = None
 
 
 # ----- MCP Endpoint Functions -----
 
 async def register_agent_endpoints(mcp: MCPServer) -> None:
     """Register all agent MCP endpoints."""
-    
+
     # Agent workflow singleton
     agent_workflow = None
-    
+
     def get_agent_workflow():
         """Get or create the agent workflow."""
         nonlocal agent_workflow
         if agent_workflow is None:
             agent_workflow = AgentWorkflowFactory.create_workflow()
         return agent_workflow
-    
+
     # ----- Agent Operations -----
-    
+
     @mcp.tool()
     async def agent_run(
         query: Annotated[str, Field(description="The query to process")],
-        thread_id: Annotated[Optional[str], Field(description="Optional thread ID for conversation context")] = None,
-        context: Annotated[Optional[List[Dict[str, Any]]], Field(description="Optional context for the agent")] = None,
-        params: Annotated[Optional[Dict[str, Any]], Field(description="Optional parameters for the agent")] = None,
+        thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
+        context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
+        params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run the agent workflow on a query.
         
@@ -69,24 +68,24 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Running agent workflow with query: {query}")
-            
+
             # Get the agent workflow
             workflow = get_agent_workflow()
-            
+
             # Process parameters
             thread_id = thread_id or str(uuid.uuid4())
-            
+
             # Process context if provided
             workflow_params = params or {}
             workflow_params["thread_id"] = thread_id
-            
+
             if context:
                 # TODO: Handle context integration
                 pass
-            
+
             # Execute the workflow
             result = await workflow.run(query, **workflow_params)
-            
+
             # Format response
             return {
                 "success": result.success,
@@ -98,7 +97,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         except Exception as e:
             logger.error(f"Agent workflow execution failed: {e}")
             await ctx.error(f"Failed to execute agent workflow: {e}")
-            
+
             return {
                 "success": False,
                 "output": "",
@@ -106,16 +105,16 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "error": str(e),
                 "status": "error"
             }
-    
+
     @mcp.tool()
     async def agent_run_worker(
         worker_name: Annotated[str, Field(description="Name of the worker agent to run")],
         query: Annotated[str, Field(description="The query to process")],
-        thread_id: Annotated[Optional[str], Field(description="Optional thread ID for conversation context")] = None,
-        context: Annotated[Optional[List[Dict[str, Any]]], Field(description="Optional context for the agent")] = None,
-        params: Annotated[Optional[Dict[str, Any]], Field(description="Optional parameters for the agent")] = None,
+        thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
+        context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
+        params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run a specific worker agent on a query.
         
@@ -123,10 +122,10 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Running worker agent '{worker_name}' with query: {query}")
-            
+
             # Get the agent workflow
             workflow = get_agent_workflow()
-            
+
             # Check if worker exists
             if worker_name not in workflow.worker_agents:
                 return {
@@ -136,22 +135,22 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                     "error": f"Worker agent '{worker_name}' not found",
                     "status": "error"
                 }
-            
+
             # Process parameters
             thread_id = thread_id or str(uuid.uuid4())
-            
+
             # Process context if provided
             worker_params = params or {}
             worker_params["thread_id"] = thread_id
-            
+
             if context:
                 # TODO: Handle context integration
                 pass
-            
+
             # Execute the worker agent directly
             worker_agent = workflow.worker_agents[worker_name]
             result = await worker_agent.run(query, **worker_params)
-            
+
             # Format response
             return {
                 "success": result.success,
@@ -163,7 +162,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         except Exception as e:
             logger.error(f"Worker agent execution failed: {e}")
             await ctx.error(f"Failed to execute worker agent: {e}")
-            
+
             return {
                 "success": False,
                 "output": "",
@@ -177,7 +176,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
 
 async def register_agent_resources(mcp: MCPServer) -> None:
     """Register all agent MCP resources."""
-    
+
     @mcp.resource(
         uri="memory://agent-guide",
         name="AgentSystemGuide",

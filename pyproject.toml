@@ -32,14 +32,14 @@ target-version = "py311"
 select = ["E", "F", "I", "W", "N", "B", "C4", "UP", "ANN", "PYI"]
 ignore = ["ANN101", "ANN102", "ANN401"]
 exclude = [
-    ".git",
-    ".ruff_cache",
-    ".mypy_cache",
-    ".tox",
-    ".venv",
-    "venv",
-    "__pycache__",
-    "dist"
+  ".git",
+  ".ruff_cache",
+  ".mypy_cache",
+  ".tox",
+  ".venv",
+  "venv",
+  "__pycache__",
+  "dist",
 ]
 
 [tool.ruff.per-file-ignores]

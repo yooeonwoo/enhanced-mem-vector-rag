@@ -4,23 +4,21 @@ Supervisor agent implementation for EMVR.
 This module implements the supervisor agent that orchestrates worker agents.
 """
 
-from typing import Dict, List, Optional, Any, Union, Tuple
 import logging
 from enum import Enum
+from typing import Any
 
-from langchain.agents import AgentExecutor
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain_core.language_models import BaseLanguageModel
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema import HumanMessage, SystemMessage
 from langchain.tools import BaseTool
-from langgraph.graph import StateGraph, END
+from langchain_core.language_models import BaseLanguageModel
+from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolExecutor
-import langgraph.graph.message as message_graph
 
 from emvr.agents.base import BaseAgent
+from emvr.agents.tools.ingestion_tools import get_ingestion_tools
 from emvr.agents.tools.memory_tools import get_memory_tools
 from emvr.agents.tools.retrieval_tools import get_retrieval_tools
-from emvr.agents.tools.ingestion_tools import get_ingestion_tools
 from emvr.config import get_settings
 
 # Configure logging
@@ -42,41 +40,41 @@ class AgentState(Enum):
 
 # ----- State Management -----
 
-class SupervisorState(Dict[str, Any]):
+class SupervisorState(dict[str, Any]):
     """State object for the supervisor agent workflow."""
-    
+
     @property
-    def messages(self) -> List[Dict[str, Any]]:
+    def messages(self) -> list[dict[str, Any]]:
         """Get the messages from the state."""
         return self.get("messages", [])
-    
+
     @property
     def current_state(self) -> AgentState:
         """Get the current state."""
         return self.get("current_state", AgentState.PLANNING)
-    
+
     @property
-    def plan(self) -> Optional[Dict[str, Any]]:
+    def plan(self) -> dict[str, Any] | None:
         """Get the current plan."""
         return self.get("plan")
-    
+
     @property
-    def context(self) -> List[Dict[str, Any]]:
+    def context(self) -> list[dict[str, Any]]:
         """Get the retrieved context."""
         return self.get("context", [])
-    
+
     @property
-    def execution_results(self) -> List[Dict[str, Any]]:
+    def execution_results(self) -> list[dict[str, Any]]:
         """Get the execution results."""
         return self.get("execution_results", [])
-    
+
     @property
-    def reflection(self) -> Optional[str]:
+    def reflection(self) -> str | None:
         """Get the reflection."""
         return self.get("reflection")
-    
+
     @property
-    def final_response(self) -> Optional[str]:
+    def final_response(self) -> str | None:
         """Get the final response."""
         return self.get("final_response")
 
@@ -90,13 +88,13 @@ class SupervisorAgent(BaseAgent):
     This agent is responsible for managing the workflow and delegating
     tasks to specialized worker agents.
     """
-    
+
     def __init__(
         self,
         llm: BaseLanguageModel,
-        worker_agents: Optional[Dict[str, BaseAgent]] = None,
-        additional_tools: Optional[List[BaseTool]] = None,
-        system_prompt: Optional[str] = None,
+        worker_agents: dict[str, BaseAgent] | None = None,
+        additional_tools: list[BaseTool] | None = None,
+        system_prompt: str | None = None,
         memory_enabled: bool = True,
     ):
         """
@@ -117,12 +115,12 @@ class SupervisorAgent(BaseAgent):
                 "and synthesize their work into a coherent response. "
                 "Think step-by-step to determine the best course of action."
             )
-        
+
         # Initialize basic tools
         self.memory_tools = get_memory_tools()
         self.retrieval_tools = get_retrieval_tools()
         self.ingestion_tools = get_ingestion_tools()
-        
+
         # Combine all tools
         all_tools = []
         all_tools.extend(self.memory_tools)
@@ -130,7 +128,7 @@ class SupervisorAgent(BaseAgent):
         all_tools.extend(self.ingestion_tools)
         if additional_tools:
             all_tools.extend(additional_tools)
-        
+
         # Initialize the base agent
         super().__init__(
             name="Supervisor Agent",
@@ -140,23 +138,23 @@ class SupervisorAgent(BaseAgent):
             system_prompt=system_prompt,
             memory_enabled=memory_enabled,
         )
-        
+
         # Store worker agents
         self.worker_agents = worker_agents or {}
-        
+
         # Initialize the workflow
         self._initialize_workflow()
-    
+
     def _initialize_workflow(self) -> None:
         """Initialize the LangGraph workflow."""
         self.settings = get_settings()
-        
+
         # Create tool executor
         self.tool_executor = ToolExecutor(self.tools)
-        
+
         # Define the workflow
         workflow = StateGraph(SupervisorState)
-        
+
         # Define nodes
         workflow.add_node(AgentState.PLANNING, self._planning_step)
         workflow.add_node(AgentState.RETRIEVING, self._retrieving_step)
@@ -165,7 +163,7 @@ class SupervisorAgent(BaseAgent):
         workflow.add_node(AgentState.EXECUTING, self._executing_step)
         workflow.add_node(AgentState.REFLECTING, self._reflecting_step)
         workflow.add_node(AgentState.RESPONDING, self._responding_step)
-        
+
         # Define edges
         workflow.add_edge(AgentState.PLANNING, AgentState.RETRIEVING)
         workflow.add_edge(AgentState.RETRIEVING, AgentState.ANALYZING)
@@ -182,13 +180,13 @@ class SupervisorAgent(BaseAgent):
         workflow.add_edge(AgentState.EXECUTING, AgentState.REFLECTING)
         workflow.add_edge(AgentState.REFLECTING, AgentState.RESPONDING)
         workflow.add_edge(AgentState.RESPONDING, END)
-        
+
         # Set the entry point
         workflow.set_entry_point(AgentState.PLANNING)
-        
+
         # Compile the workflow
         self.workflow = workflow.compile()
-    
+
     async def _planning_step(self, state: SupervisorState) -> SupervisorState:
         """
         Planning step of the workflow.
@@ -209,10 +207,10 @@ class SupervisorAgent(BaseAgent):
                 )),
                 HumanMessage(content=state["input"] if "input" in state else ""),
             ])
-            
+
             # Get the plan
             plan_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["plan"] = {
@@ -220,7 +218,7 @@ class SupervisorAgent(BaseAgent):
                 "current_step": 0,
             }
             new_state["current_state"] = AgentState.RETRIEVING
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Planning step failed: {e}")
@@ -229,7 +227,7 @@ class SupervisorAgent(BaseAgent):
             new_state["error"] = str(e)
             new_state["current_state"] = AgentState.RESPONDING
             return new_state
-    
+
     async def _retrieving_step(self, state: SupervisorState) -> SupervisorState:
         """
         Retrieving step of the workflow.
@@ -243,7 +241,7 @@ class SupervisorAgent(BaseAgent):
         try:
             # Get the query from the input
             query = state["input"] if "input" in state else ""
-            
+
             # Use hybrid search to get relevant context
             retrieval_result = await self.tool_executor.ainvoke({
                 "tool": "hybrid_search",
@@ -253,12 +251,12 @@ class SupervisorAgent(BaseAgent):
                     "rerank": True,
                 }
             })
-            
+
             # Update state
             new_state = state.copy()
             new_state["context"] = retrieval_result.get("results", [])
             new_state["current_state"] = AgentState.ANALYZING
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Retrieving step failed: {e}")
@@ -268,7 +266,7 @@ class SupervisorAgent(BaseAgent):
             new_state["context"] = []
             new_state["current_state"] = AgentState.ANALYZING
             return new_state
-    
+
     async def _analyzing_step(self, state: SupervisorState) -> SupervisorState:
         """
         Analyzing step of the workflow.
@@ -285,7 +283,7 @@ class SupervisorAgent(BaseAgent):
                 f"Document {i+1}:\n{doc.get('content', '')}"
                 for i, doc in enumerate(state.get("context", []))
             ])
-            
+
             # Create analyzing prompt
             prompt = ChatPromptTemplate.from_messages([
                 SystemMessage(content=(
@@ -302,14 +300,14 @@ class SupervisorAgent(BaseAgent):
                     f"Retrieved context: {context_str}"
                 )),
             ])
-            
+
             # Get the analysis
             analysis_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["analysis"] = analysis_result.content
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Analyzing step failed: {e}")
@@ -318,7 +316,7 @@ class SupervisorAgent(BaseAgent):
             new_state["error"] = str(e)
             new_state["analysis"] = "execute"
             return new_state
-    
+
     def _analyze_condition(self, state: SupervisorState) -> str:
         """
         Condition function for analyzing step.
@@ -330,14 +328,14 @@ class SupervisorAgent(BaseAgent):
             Next state
         """
         analysis = state.get("analysis", "")
-        
+
         if "needs_ingestion" in analysis.lower():
             return "needs_ingestion"
         elif "execute" in analysis.lower():
             return "execute"
         else:
             return "respond"
-    
+
     async def _ingesting_step(self, state: SupervisorState) -> SupervisorState:
         """
         Ingesting step of the workflow.
@@ -362,20 +360,20 @@ class SupervisorAgent(BaseAgent):
                     f"Analysis: {state.get('analysis', '')}"
                 )),
             ])
-            
+
             # Get the ingestion plan
             ingestion_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["ingestion_plan"] = ingestion_result.content
-            
+
             # For now, we'll just add a placeholder for ingestion
             # In a real implementation, we would parse the ingestion plan
             # and execute the appropriate ingestion tools
-            
+
             new_state["current_state"] = AgentState.ANALYZING
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Ingesting step failed: {e}")
@@ -384,7 +382,7 @@ class SupervisorAgent(BaseAgent):
             new_state["error"] = str(e)
             new_state["current_state"] = AgentState.ANALYZING
             return new_state
-    
+
     async def _executing_step(self, state: SupervisorState) -> SupervisorState:
         """
         Executing step of the workflow.
@@ -401,7 +399,7 @@ class SupervisorAgent(BaseAgent):
                 f"Document {i+1}:\n{doc.get('content', '')}"
                 for i, doc in enumerate(state.get("context", []))
             ])
-            
+
             # Create execution prompt
             prompt = ChatPromptTemplate.from_messages([
                 SystemMessage(content=(
@@ -415,15 +413,15 @@ class SupervisorAgent(BaseAgent):
                     f"Retrieved context: {context_str}"
                 )),
             ])
-            
+
             # Execute the plan
             execution_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["execution_result"] = execution_result.content
             new_state["current_state"] = AgentState.REFLECTING
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Executing step failed: {e}")
@@ -433,7 +431,7 @@ class SupervisorAgent(BaseAgent):
             new_state["execution_result"] = f"Error during execution: {str(e)}"
             new_state["current_state"] = AgentState.REFLECTING
             return new_state
-    
+
     async def _reflecting_step(self, state: SupervisorState) -> SupervisorState:
         """
         Reflecting step of the workflow.
@@ -458,15 +456,15 @@ class SupervisorAgent(BaseAgent):
                     f"Execution result: {state.get('execution_result', '')}"
                 )),
             ])
-            
+
             # Get the reflection
             reflection_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["reflection"] = reflection_result.content
             new_state["current_state"] = AgentState.RESPONDING
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Reflecting step failed: {e}")
@@ -476,7 +474,7 @@ class SupervisorAgent(BaseAgent):
             new_state["reflection"] = f"Error during reflection: {str(e)}"
             new_state["current_state"] = AgentState.RESPONDING
             return new_state
-    
+
     async def _responding_step(self, state: SupervisorState) -> SupervisorState:
         """
         Responding step of the workflow.
@@ -491,7 +489,7 @@ class SupervisorAgent(BaseAgent):
             # Determine what to include in the final response
             execution_result = state.get("execution_result", "")
             reflection = state.get("reflection", "")
-            
+
             # Create response prompt
             prompt = ChatPromptTemplate.from_messages([
                 SystemMessage(content=(
@@ -505,14 +503,14 @@ class SupervisorAgent(BaseAgent):
                     f"Reflection: {reflection}"
                 )),
             ])
-            
+
             # Get the final response
             response_result = await self.llm.ainvoke(prompt)
-            
+
             # Update state
             new_state = state.copy()
             new_state["final_response"] = response_result.content
-            
+
             return new_state
         except Exception as e:
             logger.error(f"Responding step failed: {e}")
@@ -524,8 +522,8 @@ class SupervisorAgent(BaseAgent):
                 f"Error: {str(e)}"
             )
             return new_state
-    
-    async def run(self, input_text: str, **kwargs: Any) -> Dict[str, Any]:
+
+    async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
         
@@ -543,10 +541,10 @@ class SupervisorAgent(BaseAgent):
                 "messages": [],
                 "current_state": AgentState.PLANNING,
             })
-            
+
             # Execute the workflow
             result = await self.workflow.ainvoke(initial_state)
-            
+
             # Return the result
             return {
                 "response": result.get("final_response", "I'm sorry, I couldn't generate a response."),

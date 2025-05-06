@@ -4,10 +4,10 @@ Retrieval tools for EMVR agents.
 This module implements tools for interacting with the retrieval pipeline.
 """
 
-from typing import Dict, List, Optional, Any, Type
 import logging
+from typing import Any
 
-from langchain.tools import BaseTool, StructuredTool, tool
+from langchain.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 from emvr.retrievers.retrieval_pipeline import retrieval_pipeline
@@ -40,7 +40,7 @@ async def hybrid_search(
     query: str,
     limit: int = 10,
     rerank: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform a hybrid search across vector and graph stores.
     
@@ -55,14 +55,14 @@ async def hybrid_search(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Execute the search
         result = await retrieval_pipeline.retrieve(
             query=query,
             limit=limit,
             rerank=rerank,
         )
-        
+
         return {
             "results": result,
             "status": "success"
@@ -79,7 +79,7 @@ async def hybrid_search(
 async def vector_search(
     query: str,
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform a vector search using embeddings.
     
@@ -93,13 +93,13 @@ async def vector_search(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Execute the search
         result = await retrieval_pipeline.hybrid_retriever.vector_search(
             query=query,
             limit=limit,
         )
-        
+
         return {
             "results": result,
             "status": "success"
@@ -116,7 +116,7 @@ async def vector_search(
 async def graph_search(
     query: str,
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform a graph search using knowledge graph.
     
@@ -130,13 +130,13 @@ async def graph_search(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Execute the search
         result = await retrieval_pipeline.graph_retriever.retrieve(
             query=query,
             limit=limit,
         )
-        
+
         return {
             "results": result,
             "status": "success"
@@ -155,7 +155,7 @@ async def retrieve_and_generate(
     limit: int = 10,
     context_limit: int = 5,
     rerank: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Retrieve information and generate a response.
     
@@ -171,7 +171,7 @@ async def retrieve_and_generate(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Execute the retrieval and generation
         result = await retrieval_pipeline.retrieve_and_generate(
             query=query,
@@ -179,7 +179,7 @@ async def retrieve_and_generate(
             context_limit=context_limit,
             rerank=rerank,
         )
-        
+
         return {
             "response": result["response"],
             "context": result["context"],
@@ -198,7 +198,7 @@ async def retrieve_and_generate(
 async def find_entities(
     query: str,
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Extract entities from text and find them in the knowledge graph.
     
@@ -212,13 +212,13 @@ async def find_entities(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Extract entities
         result = await retrieval_pipeline.graph_retriever.extract_entities(
             text=query,
             limit=limit,
         )
-        
+
         return {
             "entities": result,
             "status": "success"
@@ -234,10 +234,10 @@ async def find_entities(
 @tool
 async def find_relationships(
     entity_name: str,
-    relation_type: Optional[str] = None,
+    relation_type: str | None = None,
     direction: str = "outgoing",
     limit: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find relationships for an entity in the knowledge graph.
     
@@ -253,7 +253,7 @@ async def find_relationships(
     try:
         # Initialize retrieval pipeline if needed
         await retrieval_pipeline.initialize()
-        
+
         # Find relationships
         result = await retrieval_pipeline.graph_retriever.find_relationships(
             entity_name=entity_name,
@@ -261,7 +261,7 @@ async def find_relationships(
             direction=direction,
             limit=limit,
         )
-        
+
         return {
             "relationships": result,
             "status": "success"
@@ -276,7 +276,7 @@ async def find_relationships(
 
 # ----- Tool Collection -----
 
-def get_retrieval_tools() -> List[BaseTool]:
+def get_retrieval_tools() -> list[BaseTool]:
     """
     Get all retrieval tools.
     

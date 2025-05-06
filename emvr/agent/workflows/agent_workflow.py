@@ -2,19 +2,18 @@
 
 import os
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from dotenv import load_dotenv
 from langchain.schema import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from emvr.agent.base import AgentResult
 from emvr.agent.supervisor import (
-    SupervisorAgent,
-    ResearchWorkerAgent,
     KnowledgeGraphWorkerAgent,
     MemoryManagementWorkerAgent,
+    ResearchWorkerAgent,
+    SupervisorAgent,
 )
 from emvr.memory.memory_manager import MemoryManager
 from emvr.retrieval.pipeline import RetrievalPipeline
@@ -25,22 +24,22 @@ load_dotenv()
 
 class WorkflowOutput(BaseModel):
     """Output from the agent workflow."""
-    
+
     success: bool
     output: str
-    intermediate_steps: Optional[List[Dict[str, Any]]] = None
-    error: Optional[str] = None
+    intermediate_steps: list[dict[str, Any]] | None = None
+    error: str | None = None
 
 
 class AgentWorkflow:
     """Agent workflow for the Enhanced Memory-Vector RAG system."""
-    
+
     def __init__(
         self,
-        supervisor_llm: Optional[BaseLanguageModel] = None,
-        worker_llm: Optional[BaseLanguageModel] = None,
-        memory_manager: Optional[MemoryManager] = None,
-        retrieval_pipeline: Optional[RetrievalPipeline] = None,
+        supervisor_llm: BaseLanguageModel | None = None,
+        worker_llm: BaseLanguageModel | None = None,
+        memory_manager: MemoryManager | None = None,
+        retrieval_pipeline: RetrievalPipeline | None = None,
     ):
         """Initialize the agent workflow.
         
@@ -55,23 +54,23 @@ class AgentWorkflow:
             temperature=0.2,
             model=os.environ.get("SUPERVISOR_LLM_MODEL", "gpt-4o"),
         )
-        
+
         self.worker_llm = worker_llm or ChatOpenAI(
             temperature=0.0,
             model=os.environ.get("WORKER_LLM_MODEL", "gpt-3.5-turbo"),
         )
-        
+
         # Initialize components
         self.memory_manager = memory_manager or MemoryManager()
         self.retrieval_pipeline = retrieval_pipeline or RetrievalPipeline()
-        
+
         # Initialize worker agents
         self.worker_agents = self._create_worker_agents()
-        
+
         # Initialize supervisor agent
         self.supervisor_agent = self._create_supervisor_agent()
-    
-    def _create_worker_agents(self) -> Dict[str, Any]:
+
+    def _create_worker_agents(self) -> dict[str, Any]:
         """Create worker agents.
         
         Returns:
@@ -91,7 +90,7 @@ class AgentWorkflow:
                 memory_manager=self.memory_manager,
             ),
         }
-    
+
     def _create_supervisor_agent(self) -> SupervisorAgent:
         """Create supervisor agent.
         
@@ -102,7 +101,7 @@ class AgentWorkflow:
             llm=self.supervisor_llm,
             worker_agents=self.worker_agents,
         )
-    
+
     async def run(self, query: str, **kwargs) -> WorkflowOutput:
         """Run the agent workflow with a query.
         
@@ -122,13 +121,13 @@ class AgentWorkflow:
                     "contents": [query],
                 }
             ])
-            
+
             # Get thread ID if available
             thread_id = kwargs.get("thread_id", str(uuid.uuid4()))
-            
+
             # Run the supervisor agent
             result = await self.supervisor_agent.run(query, thread_id=thread_id)
-            
+
             # Record the result in memory
             if result.success:
                 await self.memory_manager.add_observations([
@@ -144,7 +143,7 @@ class AgentWorkflow:
                         "contents": [f"Failed to process query: {query}", f"Error: {result.error}"],
                     }
                 ])
-            
+
             # Return workflow output
             return WorkflowOutput(
                 success=result.success,
@@ -160,7 +159,7 @@ class AgentWorkflow:
                     "contents": [f"Exception while processing query: {query}", f"Error: {str(e)}"],
                 }
             ])
-            
+
             # Return error output
             return WorkflowOutput(
                 success=False,

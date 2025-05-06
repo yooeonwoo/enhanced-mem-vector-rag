@@ -5,14 +5,13 @@ This module implements the endpoints for the custom 'memory' MCP server.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Union, Annotated
-import json
+from typing import Annotated, Any
 
-from fastmcp import MCPServer, Context
-from pydantic import Field, BaseModel
+from fastmcp import Context, MCPServer
+from pydantic import BaseModel, Field
 
-from emvr.memory.memory_manager import memory_manager
 from emvr.ingestion.pipeline import ingestion_pipeline
+from emvr.memory.memory_manager import memory_manager
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -24,12 +23,12 @@ class Entity(BaseModel):
     """Entity schema for memory operations."""
     name: str
     entityType: str
-    observations: List[str]
+    observations: list[str]
 
 
 class CreateEntitiesRequest(BaseModel):
     """Request schema for creating entities."""
-    entities: List[Entity]
+    entities: list[Entity]
 
 
 class Relation(BaseModel):
@@ -41,43 +40,43 @@ class Relation(BaseModel):
 
 class CreateRelationsRequest(BaseModel):
     """Request schema for creating relations."""
-    relations: List[Relation]
+    relations: list[Relation]
 
 
 class Observation(BaseModel):
     """Observation schema for memory operations."""
     entityName: str
-    contents: List[str]
+    contents: list[str]
 
 
 class AddObservationsRequest(BaseModel):
     """Request schema for adding observations."""
-    observations: List[Observation]
+    observations: list[Observation]
 
 
 class DeleteEntitiesRequest(BaseModel):
     """Request schema for deleting entities."""
-    entityNames: List[str]
+    entityNames: list[str]
 
 
 class SearchRequest(BaseModel):
     """Request schema for search operations."""
     query: str
-    limit: Optional[int] = 10
+    limit: int | None = 10
 
 
 # ----- MCP Endpoint Functions -----
 
 async def register_endpoints(mcp: MCPServer) -> None:
     """Register all memory MCP endpoints."""
-    
+
     # ----- Memory Operations -----
-    
+
     @mcp.tool()
     async def memory_create_entities(
-        entities: Annotated[List[Dict[str, Any]], Field(description="List of entities to create")],
+        entities: Annotated[list[dict[str, Any]], Field(description="List of entities to create")],
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create multiple new entities in the knowledge graph.
         
@@ -85,24 +84,24 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Creating {len(entities)} entities")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.create_entities(entities)
-            
+
             return result
         except Exception as e:
             logger.error(f"Entity creation failed: {e}")
             await ctx.error(f"Failed to create entities: {e}")
             raise
-    
+
     @mcp.tool()
     async def memory_create_relations(
-        relations: Annotated[List[Dict[str, Any]], Field(description="List of relations to create")],
+        relations: Annotated[list[dict[str, Any]], Field(description="List of relations to create")],
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create multiple new relations between entities in the knowledge graph.
         
@@ -110,24 +109,24 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Creating {len(relations)} relations")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.create_relations(relations)
-            
+
             return result
         except Exception as e:
             logger.error(f"Relation creation failed: {e}")
             await ctx.error(f"Failed to create relations: {e}")
             raise
-    
+
     @mcp.tool()
     async def memory_add_observations(
-        observations: Annotated[List[Dict[str, Any]], Field(description="List of observations to add")],
+        observations: Annotated[list[dict[str, Any]], Field(description="List of observations to add")],
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Add new observations to existing entities in the knowledge graph.
         
@@ -135,25 +134,25 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Adding observations to {len(observations)} entities")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.add_observations(observations)
-            
+
             return result
         except Exception as e:
             logger.error(f"Adding observations failed: {e}")
             await ctx.error(f"Failed to add observations: {e}")
             raise
-    
+
     @mcp.tool()
     async def memory_search_nodes(
         query: Annotated[str, Field(description="The search query string")],
         limit: Annotated[int, Field(description="Maximum number of results to return")] = 10,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search for nodes in the knowledge graph based on a query.
         
@@ -161,23 +160,23 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Searching nodes with query: {query}")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.search_nodes(query, limit)
-            
+
             return result
         except Exception as e:
             logger.error(f"Node search failed: {e}")
             await ctx.error(f"Failed to search nodes: {e}")
             raise
-    
+
     @mcp.tool()
     async def memory_read_graph(
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Read the entire knowledge graph.
         
@@ -185,24 +184,24 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info("Reading entire graph")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.read_graph()
-            
+
             return result
         except Exception as e:
             logger.error(f"Reading graph failed: {e}")
             await ctx.error(f"Failed to read graph: {e}")
             raise
-    
+
     @mcp.tool()
     async def memory_delete_entities(
-        entityNames: Annotated[List[str], Field(description="List of entity names to delete")],
+        entityNames: Annotated[list[str], Field(description="List of entity names to delete")],
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Delete multiple entities and their associated relations from the knowledge graph.
         
@@ -210,27 +209,27 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Deleting {len(entityNames)} entities")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # Process the request
             result = await memory_manager.delete_entities(entityNames)
-            
+
             return result
         except Exception as e:
             logger.error(f"Entity deletion failed: {e}")
             await ctx.error(f"Failed to delete entities: {e}")
             raise
-    
+
     # ----- Search Operations -----
-    
+
     @mcp.tool()
     async def search_hybrid(
         query: Annotated[str, Field(description="The search query string")],
         limit: Annotated[int, Field(description="Maximum number of results to return")] = 10,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Perform a hybrid search across vector and graph stores.
         
@@ -239,28 +238,28 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Performing hybrid search with query: {query}")
-            
+
             # Initialize memory manager
             await memory_manager.initialize()
-            
+
             # For now, hybrid search is the same as node search
             # In the future, this will be enhanced with additional capabilities
             result = await memory_manager.search_nodes(query, limit)
-            
+
             return result
         except Exception as e:
             logger.error(f"Hybrid search failed: {e}")
             await ctx.error(f"Failed to perform hybrid search: {e}")
             raise
-    
+
     # ----- Graph Operations -----
-    
+
     @mcp.tool()
     async def graph_query(
         query: Annotated[str, Field(description="The Cypher query to execute")],
-        parameters: Annotated[Optional[Dict[str, Any]], Field(description="Query parameters")] = None,
+        parameters: Annotated[dict[str, Any] | None, Field(description="Query parameters")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Execute a Cypher query against the Neo4j graph database.
         
@@ -268,28 +267,28 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Executing graph query: {query}")
-            
+
             # Initialize memory manager and get Graphiti interface
             await memory_manager.initialize()
-            
+
             # Execute the query
             result = await memory_manager._graphiti.execute_cypher(query, parameters)
-            
+
             return result
         except Exception as e:
             logger.error(f"Graph query failed: {e}")
             await ctx.error(f"Failed to execute graph query: {e}")
             raise
-    
+
     # ----- Ingestion Operations -----
-    
+
     @mcp.tool()
     async def ingest_text(
         content: Annotated[str, Field(description="Text content to ingest")],
-        metadata: Annotated[Optional[Dict[str, Any]], Field(description="Optional metadata for the text")] = None,
-        source_name: Annotated[Optional[str], Field(description="Optional source name for the text")] = None,
+        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the text")] = None,
+        source_name: Annotated[str | None, Field(description="Optional source name for the text")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Ingest raw text into the memory system.
         
@@ -298,25 +297,25 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Ingesting text (length: {len(content)})")
-            
+
             # Initialize ingestion pipeline
             await ingestion_pipeline.initialize()
-            
+
             # Process the request
             result = await ingestion_pipeline.ingest_text(content, metadata, source_name)
-            
+
             return result
         except Exception as e:
             logger.error(f"Text ingestion failed: {e}")
             await ctx.error(f"Failed to ingest text: {e}")
             raise
-    
+
     @mcp.tool()
     async def ingest_file(
         file_path: Annotated[str, Field(description="Path to the file to ingest")],
-        metadata: Annotated[Optional[Dict[str, Any]], Field(description="Optional metadata for the file")] = None,
+        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the file")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Ingest a file into the memory system.
         
@@ -325,25 +324,25 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Ingesting file: {file_path}")
-            
+
             # Initialize ingestion pipeline
             await ingestion_pipeline.initialize()
-            
+
             # Process the request
             result = await ingestion_pipeline.ingest_file(file_path, metadata)
-            
+
             return result
         except Exception as e:
             logger.error(f"File ingestion failed: {e}")
             await ctx.error(f"Failed to ingest file: {e}")
             raise
-    
+
     @mcp.tool()
     async def ingest_url(
         url: Annotated[str, Field(description="URL to ingest")],
-        metadata: Annotated[Optional[Dict[str, Any]], Field(description="Optional metadata for the URL content")] = None,
+        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the URL content")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Ingest content from a URL into the memory system.
         
@@ -351,28 +350,28 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Ingesting URL: {url}")
-            
+
             # Initialize ingestion pipeline
             await ingestion_pipeline.initialize()
-            
+
             # Process the request
             result = await ingestion_pipeline.ingest_url(url, metadata)
-            
+
             return result
         except Exception as e:
             logger.error(f"URL ingestion failed: {e}")
             await ctx.error(f"Failed to ingest URL: {e}")
             raise
-    
+
     @mcp.tool()
     async def ingest_directory(
         directory_path: Annotated[str, Field(description="Path to the directory to ingest")],
         recursive: Annotated[bool, Field(description="Whether to search subdirectories")] = True,
-        metadata: Annotated[Optional[Dict[str, Any]], Field(description="Optional metadata for all documents")] = None,
+        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for all documents")] = None,
         exclude_hidden: Annotated[bool, Field(description="Whether to exclude hidden files/dirs")] = True,
-        file_extensions: Annotated[Optional[List[str]], Field(description="List of file extensions to include")] = None,
+        file_extensions: Annotated[list[str] | None, Field(description="List of file extensions to include")] = None,
         ctx: Context = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Ingest all files from a directory into the memory system.
         
@@ -380,10 +379,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
         """
         try:
             await ctx.info(f"Ingesting directory: {directory_path} (recursive={recursive})")
-            
+
             # Initialize ingestion pipeline
             await ingestion_pipeline.initialize()
-            
+
             # Process the request
             result = await ingestion_pipeline.ingest_directory(
                 directory_path,
@@ -392,7 +391,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
                 exclude_hidden,
                 file_extensions
             )
-            
+
             return result
         except Exception as e:
             logger.error(f"Directory ingestion failed: {e}")
@@ -404,7 +403,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
 async def register_resources(mcp: MCPServer) -> None:
     """Register all memory MCP resources."""
-    
+
     @mcp.resource(
         uri="memory://api-guide",
         name="MemoryAPIGuide",

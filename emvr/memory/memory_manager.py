@@ -1,7 +1,6 @@
 """Memory manager implementation integrating vector and graph stores."""
 
-import asyncio
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from emvr.memory.base import Entity, MemoryInterface, Relation
 from emvr.memory.graph_store import Neo4jMemoryStore
@@ -10,11 +9,11 @@ from emvr.memory.vector_store import QdrantMemoryStore
 
 class MemoryManager(MemoryInterface):
     """Memory manager integrating vector and graph stores."""
-    
+
     def __init__(
         self,
-        vector_store: Optional[QdrantMemoryStore] = None,
-        graph_store: Optional[Neo4jMemoryStore] = None,
+        vector_store: QdrantMemoryStore | None = None,
+        graph_store: Neo4jMemoryStore | None = None,
     ):
         """Initialize the memory manager.
         
@@ -24,8 +23,8 @@ class MemoryManager(MemoryInterface):
         """
         self.vector_store = vector_store or QdrantMemoryStore()
         self.graph_store = graph_store or Neo4jMemoryStore()
-    
-    async def create_entities(self, entities: List[Entity]) -> Dict[str, Any]:
+
+    async def create_entities(self, entities: list[Entity]) -> dict[str, Any]:
         """Create multiple new entities in the knowledge graph.
         
         Args:
@@ -42,15 +41,15 @@ class MemoryManager(MemoryInterface):
             )
             for entity in entities
         ]
-        
+
         result = await self.graph_store.create_entities(entities_data)
-        
+
         # Also index entities in vector store for semantic search
         # This would be implemented based on specific requirements
-        
+
         return result
-    
-    async def create_relations(self, relations: List[Relation]) -> Dict[str, Any]:
+
+    async def create_relations(self, relations: list[Relation]) -> dict[str, Any]:
         """Create multiple new relations between entities in the knowledge graph.
         
         Args:
@@ -67,12 +66,12 @@ class MemoryManager(MemoryInterface):
             )
             for relation in relations
         ]
-        
+
         return await self.graph_store.create_relations(relations_data)
-    
+
     async def add_observations(
-        self, entity_name: str, observations: List[str]
-    ) -> Dict[str, Any]:
+        self, entity_name: str, observations: list[str]
+    ) -> dict[str, Any]:
         """Add new observations to an existing entity in the knowledge graph.
         
         Args:
@@ -83,8 +82,8 @@ class MemoryManager(MemoryInterface):
             Dictionary with operation result
         """
         return await self.graph_store.add_observations(entity_name, observations)
-    
-    async def delete_entities(self, entity_names: List[str]) -> Dict[str, Any]:
+
+    async def delete_entities(self, entity_names: list[str]) -> dict[str, Any]:
         """Delete multiple entities and their associated relations from the knowledge graph.
         
         Args:
@@ -94,10 +93,10 @@ class MemoryManager(MemoryInterface):
             Dictionary with operation result
         """
         return await self.graph_store.delete_entities(entity_names)
-    
+
     async def delete_observations(
-        self, entity_name: str, observations: List[str]
-    ) -> Dict[str, Any]:
+        self, entity_name: str, observations: list[str]
+    ) -> dict[str, Any]:
         """Delete specific observations from an entity in the knowledge graph.
         
         Args:
@@ -108,8 +107,8 @@ class MemoryManager(MemoryInterface):
             Dictionary with operation result
         """
         return await self.graph_store.delete_observations(entity_name, observations)
-    
-    async def delete_relations(self, relations: List[Relation]) -> Dict[str, Any]:
+
+    async def delete_relations(self, relations: list[Relation]) -> dict[str, Any]:
         """Delete multiple relations from the knowledge graph.
         
         Args:
@@ -126,18 +125,18 @@ class MemoryManager(MemoryInterface):
             )
             for relation in relations
         ]
-        
+
         return await self.graph_store.delete_relations(relations_data)
-    
-    async def read_graph(self) -> Dict[str, Any]:
+
+    async def read_graph(self) -> dict[str, Any]:
         """Read the entire knowledge graph.
         
         Returns:
             Dictionary with entities and relations
         """
         return await self.graph_store.read_graph()
-    
-    async def search_nodes(self, query: str) -> Dict[str, Any]:
+
+    async def search_nodes(self, query: str) -> dict[str, Any]:
         """Search for nodes in the knowledge graph based on a query.
         
         Args:
@@ -147,8 +146,8 @@ class MemoryManager(MemoryInterface):
             Dictionary with matching entities
         """
         return await self.graph_store.search_nodes(query)
-    
-    async def open_nodes(self, names: List[str]) -> Dict[str, Any]:
+
+    async def open_nodes(self, names: list[str]) -> dict[str, Any]:
         """Open specific nodes in the knowledge graph by their names.
         
         Args:
@@ -158,10 +157,10 @@ class MemoryManager(MemoryInterface):
             Dictionary with matching entities
         """
         return await self.graph_store.open_nodes(names)
-    
+
     async def hybrid_search(
-        self, query: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Perform hybrid search across vector and graph stores.
         
         Args:
@@ -176,15 +175,15 @@ class MemoryManager(MemoryInterface):
         vector_results = await self.vector_store.hybrid_search(
             query, top_k=top_k, filters=filters
         )
-        
+
         # Perform graph search (simplified here)
         graph_results = await self.graph_store.search_nodes(query)
-        
+
         # Combine results (in a real implementation, would need more sophisticated fusion)
         combined_results = {
             "query": query,
             "vector_results": vector_results,
             "graph_results": graph_results.get("entities", []),
         }
-        
+
         return combined_results

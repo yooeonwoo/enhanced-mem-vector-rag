@@ -1,7 +1,7 @@
 """Knowledge Graph retriever implementation."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from llama_index.core import QueryBundle
 from llama_index.core.graph_stores import Neo4jGraphStore
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 class KnowledgeGraphRetriever(BaseRetriever):
     """Knowledge Graph retriever using Neo4j and LlamaIndex."""
-    
+
     def __init__(
         self,
-        graph_store: Optional[Neo4jMemoryStore] = None,
+        graph_store: Neo4jMemoryStore | None = None,
         include_text: bool = True,
     ):
         """Initialize the knowledge graph retriever.
@@ -30,7 +30,7 @@ class KnowledgeGraphRetriever(BaseRetriever):
         """
         # Initialize graph store
         self.graph_store = graph_store or Neo4jMemoryStore()
-        
+
         # LlamaIndex graph store for query engine
         self.llama_graph_store = Neo4jGraphStore(
             username=self.graph_store.username,
@@ -38,13 +38,13 @@ class KnowledgeGraphRetriever(BaseRetriever):
             url=self.graph_store.uri,
             database=self.graph_store.database,
         )
-        
+
         # Configurable parameters
         self.include_text = include_text
-        
+
         # Initialize query engine
         self._query_engine = None
-    
+
     @property
     def query_engine(self):
         """Get the knowledge graph query engine, lazy-loading if needed."""
@@ -54,10 +54,10 @@ class KnowledgeGraphRetriever(BaseRetriever):
                 include_text=self.include_text,
             )
         return self._query_engine
-    
+
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None
-    ) -> List[RetrievalResult]:
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+    ) -> list[RetrievalResult]:
         """Retrieve knowledge graph paths based on a query.
         
         Args:
@@ -70,14 +70,14 @@ class KnowledgeGraphRetriever(BaseRetriever):
         """
         try:
             logger.info(f"Performing knowledge graph retrieval for query: {query}")
-            
+
             # Create query bundle
             query_bundle = QueryBundle(query)
-            
+
             # Additional Cypher parameters based on filters
             cypher_params = {}
             cypher_where_clause = ""
-            
+
             if filters:
                 # Apply entity type filter
                 if "entity_types" in filters:
@@ -85,14 +85,14 @@ class KnowledgeGraphRetriever(BaseRetriever):
                     if isinstance(entity_types, list) and len(entity_types) > 0:
                         cypher_params["entityTypes"] = entity_types
                         cypher_where_clause += "AND n.entity_type IN $entityTypes "
-                
+
                 # Apply relation type filter
                 if "relation_types" in filters:
                     relation_types = filters["relation_types"]
                     if isinstance(relation_types, list) and len(relation_types) > 0:
                         cypher_params["relationTypes"] = relation_types
                         cypher_where_clause += "AND r.type IN $relationTypes "
-            
+
             # Custom query based on the natural language query
             # This is a simplified approach - in a real implementation,
             # you would use a more sophisticated method to convert natural language to Cypher
@@ -127,21 +127,21 @@ class KnowledgeGraphRetriever(BaseRetriever):
                 LIMIT {top_k}
                 """
                 cypher_params["query"] = query
-            
+
             # Execute custom Cypher query
             async with self.graph_store.driver.session(database=self.graph_store.database) as session:
                 result = await session.run(cypher_query, **cypher_params)
-                
+
                 # Process results
                 retrieval_results = []
                 async for record in result:
                     source = record["n"]
                     relation = record["r"]
                     target = record["m"]
-                    
+
                     result_id = f"{source.id}-{relation.id}-{target.id}"
                     result_text = f"{source['name']} --{relation['type']}--> {target['name']}"
-                    
+
                     # Get observations for entities if available
                     source_obs_query = """
                     MATCH (e:Entity {name: $name})-[:HAS_OBSERVATION]->(o:Observation)
@@ -153,24 +153,24 @@ class KnowledgeGraphRetriever(BaseRetriever):
                     RETURN o.text as text
                     LIMIT 3
                     """
-                    
+
                     source_obs_result = await session.run(source_obs_query, name=source["name"])
                     target_obs_result = await session.run(target_obs_query, name=target["name"])
-                    
+
                     source_obs = []
                     async for obs_record in source_obs_result:
                         source_obs.append(obs_record["text"])
-                    
+
                     target_obs = []
                     async for obs_record in target_obs_result:
                         target_obs.append(obs_record["text"])
-                    
+
                     # Add observations to result text if available
                     if source_obs:
                         result_text += f"\nSource ({source['name']}): {'; '.join(source_obs)}"
                     if target_obs:
                         result_text += f"\nTarget ({target['name']}): {'; '.join(target_obs)}"
-                    
+
                     # Create retrieval result
                     retrieval_results.append(
                         RetrievalResult(
@@ -186,10 +186,10 @@ class KnowledgeGraphRetriever(BaseRetriever):
                             },
                         )
                     )
-                
+
                 logger.info(f"Found {len(retrieval_results)} knowledge graph results")
                 return retrieval_results
-        
+
         except Exception as e:
             logger.error(f"Error in knowledge graph retrieval: {str(e)}")
             return []

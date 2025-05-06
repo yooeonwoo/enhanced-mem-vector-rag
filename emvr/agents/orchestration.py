@@ -4,20 +4,19 @@ Agent orchestration module for EMVR.
 This module implements the main orchestration framework for the agent system.
 """
 
-from typing import Dict, List, Optional, Any, Type, Union
 import logging
-import asyncio
+from typing import Any
 
-from langchain_core.language_models import BaseLanguageModel
 from langchain.tools import BaseTool
+from langchain_core.language_models import BaseLanguageModel
 
 from emvr.agents.base import BaseAgent
 from emvr.agents.supervisors import SupervisorAgent
 from emvr.agents.workers.specialized import (
-    ResearchAgent,
-    IngestionAgent,
     AnalysisAgent,
     CreativeAgent,
+    IngestionAgent,
+    ResearchAgent,
 )
 from emvr.config import get_settings
 
@@ -32,12 +31,12 @@ class AgentOrchestrator:
     This class creates and manages a team of agents, including a supervisor
     and specialized workers.
     """
-    
+
     def __init__(
         self,
         llm: BaseLanguageModel,
-        additional_tools: Optional[List[BaseTool]] = None,
-        custom_agents: Optional[Dict[str, BaseAgent]] = None,
+        additional_tools: list[BaseTool] | None = None,
+        custom_agents: dict[str, BaseAgent] | None = None,
     ):
         """
         Initialize the agent orchestrator.
@@ -50,16 +49,16 @@ class AgentOrchestrator:
         self.llm = llm
         self.additional_tools = additional_tools or []
         self.settings = get_settings()
-        
+
         # Initialize worker agents
         self.workers = self._initialize_workers(custom_agents)
-        
+
         # Initialize supervisor agent
         self.supervisor = self._initialize_supervisor()
-        
+
         logger.info("Agent orchestrator initialized with supervisor and workers")
-    
-    def _initialize_workers(self, custom_agents: Optional[Dict[str, BaseAgent]] = None) -> Dict[str, BaseAgent]:
+
+    def _initialize_workers(self, custom_agents: dict[str, BaseAgent] | None = None) -> dict[str, BaseAgent]:
         """
         Initialize the worker agents.
         
@@ -70,11 +69,11 @@ class AgentOrchestrator:
             Dict of worker agents
         """
         workers = {}
-        
+
         # Use custom implementations if provided
         if custom_agents:
             workers.update(custom_agents)
-        
+
         # Create default workers if not overridden
         if "research" not in workers:
             workers["research"] = ResearchAgent(
@@ -82,30 +81,30 @@ class AgentOrchestrator:
                 additional_tools=self.additional_tools,
                 memory_enabled=True,
             )
-        
+
         if "ingestion" not in workers:
             workers["ingestion"] = IngestionAgent(
                 llm=self.llm,
                 additional_tools=self.additional_tools,
                 memory_enabled=True,
             )
-        
+
         if "analysis" not in workers:
             workers["analysis"] = AnalysisAgent(
                 llm=self.llm,
                 additional_tools=self.additional_tools,
                 memory_enabled=True,
             )
-        
+
         if "creative" not in workers:
             workers["creative"] = CreativeAgent(
                 llm=self.llm,
                 additional_tools=self.additional_tools,
                 memory_enabled=True,
             )
-        
+
         return workers
-    
+
     def _initialize_supervisor(self) -> SupervisorAgent:
         """
         Initialize the supervisor agent.
@@ -119,8 +118,8 @@ class AgentOrchestrator:
             additional_tools=self.additional_tools,
             memory_enabled=True,
         )
-    
-    async def run(self, input_text: str, **kwargs: Any) -> Dict[str, Any]:
+
+    async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent system on the given input.
         
@@ -134,7 +133,7 @@ class AgentOrchestrator:
         try:
             # Execute the supervisor agent
             result = await self.supervisor.run(input_text, **kwargs)
-            
+
             # Return the result
             return result
         except Exception as e:
@@ -144,8 +143,8 @@ class AgentOrchestrator:
                 "error": str(e),
                 "status": "error"
             }
-    
-    async def run_worker(self, worker_name: str, input_text: str, **kwargs: Any) -> Dict[str, Any]:
+
+    async def run_worker(self, worker_name: str, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run a specific worker agent on the given input.
         
@@ -161,10 +160,10 @@ class AgentOrchestrator:
             # Check if worker exists
             if worker_name not in self.workers:
                 raise ValueError(f"Worker agent '{worker_name}' not found")
-            
+
             # Execute the worker agent
             result = await self.workers[worker_name].run(input_text, **kwargs)
-            
+
             # Return the result
             return result
         except Exception as e:
@@ -174,7 +173,7 @@ class AgentOrchestrator:
                 "error": str(e),
                 "status": "error"
             }
-    
+
     async def shutdown(self) -> None:
         """Shutdown the agent system and clean up resources."""
         # Clean up tasks if needed
@@ -182,13 +181,13 @@ class AgentOrchestrator:
 
 
 # Global orchestrator instance
-_orchestrator: Optional[AgentOrchestrator] = None
+_orchestrator: AgentOrchestrator | None = None
 
 
 async def initialize_orchestration(
     llm: BaseLanguageModel,
-    additional_tools: Optional[List[BaseTool]] = None,
-    custom_agents: Optional[Dict[str, BaseAgent]] = None,
+    additional_tools: list[BaseTool] | None = None,
+    custom_agents: dict[str, BaseAgent] | None = None,
 ) -> AgentOrchestrator:
     """
     Initialize the agent orchestration system.
@@ -202,18 +201,18 @@ async def initialize_orchestration(
         Agent orchestrator instance
     """
     global _orchestrator
-    
+
     if _orchestrator is None:
         _orchestrator = AgentOrchestrator(
             llm=llm,
             additional_tools=additional_tools,
             custom_agents=custom_agents,
         )
-    
+
     return _orchestrator
 
 
-def get_orchestrator() -> Optional[AgentOrchestrator]:
+def get_orchestrator() -> AgentOrchestrator | None:
     """
     Get the global orchestrator instance.
     

@@ -5,12 +5,11 @@ This module provides loaders for web-based content using LlamaIndex.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
 import urllib.parse
+from typing import Any
 
 # Will use LlamaIndex loaders when integrated
 # from llama_index.readers.web import SimpleWebPageReader
-
 from emvr.config import get_settings
 
 # Configure logging
@@ -23,39 +22,39 @@ class WebLoader:
     
     Provides methods for loading content from URLs.
     """
-    
+
     def __init__(self):
         """Initialize the web loader."""
         self._settings = get_settings()
         self._initialized = False
-    
+
     def initialize(self):
         """Initialize the loader."""
         if self._initialized:
             return
-            
+
         try:
             logger.info("Initializing web loader")
-            
+
             # Any initialization logic would go here
-            
+
             self._initialized = True
             logger.info("Web loader initialized")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize web loader: {e}")
             raise
-    
+
     def ensure_initialized(self):
         """Ensure the loader is initialized."""
         if not self._initialized:
             self.initialize()
-    
+
     def load_url(
         self,
         url: str,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+        metadata: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """
         Load content from a URL.
         
@@ -67,32 +66,32 @@ class WebLoader:
             List[Dict]: List of document dictionaries with "text" and "metadata"
         """
         self.ensure_initialized()
-        
+
         try:
             logger.info(f"Loading URL: {url}")
-            
+
             # Validate URL
             parsed_url = urllib.parse.urlparse(url)
             if not parsed_url.scheme or not parsed_url.netloc:
                 logger.error(f"Invalid URL: {url}")
                 return []
-            
+
             # Placeholder implementation
             # This will be replaced with actual LlamaIndex usage
-            
+
             # Create a document dict with placeholder content
             doc_metadata = metadata or {}
             doc_metadata.update({
                 "source": url,
                 "source_type": "web"
             })
-            
+
             # Return as a list of documents (empty for now)
             return [{
                 "text": f"Placeholder content for URL: {url}",
                 "metadata": doc_metadata
             }]
-            
+
             # TODO: Implement with LlamaIndex SimpleWebPageReader
             # documents = SimpleWebPageReader(html_to_text=True).load_data([url])
             #
@@ -104,16 +103,16 @@ class WebLoader:
             #     }
             #     for doc in documents
             # ]
-            
+
         except Exception as e:
             logger.error(f"Failed to load URL {url}: {e}")
             return []
-    
+
     def load_urls(
         self,
-        urls: List[str],
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+        urls: list[str],
+        metadata: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """
         Load content from multiple URLs.
         
@@ -125,12 +124,12 @@ class WebLoader:
             List[Dict]: List of document dictionaries with "text" and "metadata"
         """
         self.ensure_initialized()
-        
+
         try:
             logger.info(f"Loading {len(urls)} URLs")
-            
+
             all_documents = []
-            
+
             # Load each URL individually
             for url in urls:
                 try:
@@ -138,10 +137,10 @@ class WebLoader:
                     all_documents.extend(documents)
                 except Exception as e:
                     logger.error(f"Error loading URL {url}: {e}")
-            
+
             logger.info(f"Loaded {len(all_documents)} documents from {len(urls)} URLs")
             return all_documents
-            
+
             # TODO: Implement with LlamaIndex SimpleWebPageReader
             # documents = SimpleWebPageReader(html_to_text=True).load_data(urls)
             #
@@ -153,7 +152,7 @@ class WebLoader:
             #     }
             #     for doc in documents
             # ]
-            
+
         except Exception as e:
             logger.error(f"Failed to load URLs: {e}")
             return []

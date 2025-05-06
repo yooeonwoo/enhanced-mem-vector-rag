@@ -1,7 +1,7 @@
 """Retrieval endpoints for the MCP server."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from fastapi import HTTPException
 from fastmcp import MCPServer, ToolConfig
@@ -22,26 +22,26 @@ async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
         mcp_server: MCP server instance
     """
     global retrieval_pipeline
-    
+
     try:
         # Initialize retrieval pipeline if not already initialized
         if retrieval_pipeline is None:
             from emvr.memory.memory_manager import MemoryManager
-            
+
             # Get memory manager from MCP server
             memory_manager = mcp_server.state.get("memory_manager")
             if memory_manager is None:
                 # Create new memory manager if not in server state
                 memory_manager = MemoryManager()
                 mcp_server.state["memory_manager"] = memory_manager
-            
+
             # Create retrieval pipeline
             retrieval_pipeline = RetrievalPipeline(
                 memory_manager=memory_manager,
                 retrieval_mode="fusion",
             )
             mcp_server.state["retrieval_pipeline"] = retrieval_pipeline
-        
+
         # Register search endpoints
         search_tools = [
             ToolConfig(
@@ -65,13 +65,13 @@ async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
                 description="Enrich context with retrieved information",
             ),
         ]
-        
+
         # Register all search tools
         for tool in search_tools:
             mcp_server.register_tool(tool)
-        
+
         logger.info("Retrieval endpoints registered successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to register retrieval endpoints: {str(e)}")
         raise
@@ -82,8 +82,8 @@ async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
 async def hybrid_search(
     query: str,
     top_k: int = 5,
-    filters: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    filters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Perform hybrid search across vector and graph stores.
     
     Args:
@@ -109,8 +109,8 @@ async def hybrid_search(
 async def vector_search(
     query: str,
     top_k: int = 5,
-    filters: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    filters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Perform vector search against the vector store.
     
     Args:
@@ -137,8 +137,8 @@ async def vector_search(
 async def graph_search(
     query: str,
     top_k: int = 5,
-    filters: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    filters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Perform graph search against the knowledge graph.
     
     Args:
@@ -164,9 +164,9 @@ async def graph_search(
 
 async def enrich_context(
     query: str,
-    context: Optional[str] = None,
+    context: str | None = None,
     top_k: int = 3,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Enrich context with retrieved information.
     
     Args:

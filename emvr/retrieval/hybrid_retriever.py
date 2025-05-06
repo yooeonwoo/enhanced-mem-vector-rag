@@ -1,11 +1,10 @@
 """Hybrid retriever implementation."""
 
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import fastembed
 from dotenv import load_dotenv
-from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle
 
 from emvr.memory.vector_store import QdrantMemoryStore
@@ -17,11 +16,11 @@ load_dotenv()
 
 class HybridRetriever(BaseRetriever):
     """Hybrid retriever using vector search, keyword search, and graph context."""
-    
+
     def __init__(
         self,
-        vector_store: Optional[QdrantMemoryStore] = None,
-        embedding_model: Optional[str] = None,
+        vector_store: QdrantMemoryStore | None = None,
+        embedding_model: str | None = None,
         use_reranking: bool = True,
     ):
         """Initialize the hybrid retriever.
@@ -33,18 +32,18 @@ class HybridRetriever(BaseRetriever):
         """
         # Initialize vector store
         self.vector_store = vector_store or QdrantMemoryStore()
-        
+
         # Initialize embedding model
         self.embedding_model_name = embedding_model or os.environ.get(
             "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"
         )
-        
+
         # Will lazy-load the embedding model when needed
         self._embedding_model = None
-        
+
         # Reranking flag
         self.use_reranking = use_reranking
-    
+
     @property
     def embedding_model(self):
         """Get the embedding model, lazy-loading if needed."""
@@ -54,10 +53,10 @@ class HybridRetriever(BaseRetriever):
                 max_length=512,
             )
         return self._embedding_model
-    
+
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None
-    ) -> List[RetrievalResult]:
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+    ) -> list[RetrievalResult]:
         """Retrieve documents based on a query.
         
         Args:
@@ -73,17 +72,17 @@ class HybridRetriever(BaseRetriever):
             similarity_top_k=top_k * 2 if self.use_reranking else top_k,
             filters=filters,
         )
-        
+
         # Create query bundle
         query_bundle = QueryBundle(query)
-        
+
         # Retrieve similar documents
         nodes = await retriever.aretrieve(query_bundle)
-        
+
         # Apply reranking if enabled
         if self.use_reranking:
             nodes = self._rerank_nodes(query, nodes, top_k)
-        
+
         # Convert to retrieval results
         results = []
         for node in nodes[:top_k]:
@@ -95,12 +94,12 @@ class HybridRetriever(BaseRetriever):
                     metadata=node.metadata,
                 )
             )
-        
+
         return results
-    
+
     def _rerank_nodes(
-        self, query: str, nodes: List[NodeWithScore], top_k: int
-    ) -> List[NodeWithScore]:
+        self, query: str, nodes: list[NodeWithScore], top_k: int
+    ) -> list[NodeWithScore]:
         """Rerank nodes based on relevance to query.
         
         Note: In a more complex implementation, this would use a dedicated
@@ -118,18 +117,18 @@ class HybridRetriever(BaseRetriever):
         for node in nodes:
             if not hasattr(node, "score") or node.score is None:
                 node.score = 0.0
-            
+
             # Calculate term overlap - very basic approach
             query_terms = set(query.lower().split())
             text_terms = set(node.text.lower().split())
             overlap = len(query_terms.intersection(text_terms))
-            
+
             # Adjust score with term overlap (0.1 weight to original score)
             if overlap > 0:
                 boost = min(overlap / len(query_terms), 1.0) * 0.5
                 node.score = (node.score * 0.5) + boost
-        
+
         # Sort by adjusted score
         reranked_nodes = sorted(nodes, key=lambda x: getattr(x, "score", 0.0), reverse=True)
-        
+
         return reranked_nodes[:top_k]

@@ -2,11 +2,10 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from fastapi import HTTPException
 from fastmcp import MCPServer, ToolConfig
-from pydantic import BaseModel
 
 from emvr.ingestion.base import Document
 
@@ -24,26 +23,26 @@ async def register_ingestion_endpoints(mcp_server: MCPServer) -> None:
         mcp_server: MCP server instance
     """
     global ingestion_pipeline
-    
+
     try:
         # Initialize ingestion pipeline if not already initialized
         if ingestion_pipeline is None:
             from emvr.ingestion.pipeline import IngestionPipeline
             from emvr.memory.memory_manager import MemoryManager
-            
+
             # Get memory manager from MCP server
             memory_manager = mcp_server.state.get("memory_manager")
             if memory_manager is None:
                 # Create new memory manager if not in server state
                 memory_manager = MemoryManager()
                 mcp_server.state["memory_manager"] = memory_manager
-            
+
             # Create ingestion pipeline
             ingestion_pipeline = IngestionPipeline(
                 vector_store=memory_manager.vector_store,
             )
             mcp_server.state["ingestion_pipeline"] = ingestion_pipeline
-        
+
         # Register ingestion endpoints
         ingestion_tools = [
             ToolConfig(
@@ -67,13 +66,13 @@ async def register_ingestion_endpoints(mcp_server: MCPServer) -> None:
                 description="Delete a document from the memory system",
             ),
         ]
-        
+
         # Register all ingestion tools
         for tool in ingestion_tools:
             mcp_server.register_tool(tool)
-        
+
         logger.info("Ingestion endpoints registered successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to register ingestion endpoints: {str(e)}")
         raise
@@ -83,9 +82,9 @@ async def register_ingestion_endpoints(mcp_server: MCPServer) -> None:
 
 async def ingest_text(
     content: str,
-    metadata: Optional[Dict[str, Any]] = None,
-    document_id: Optional[str] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+    document_id: str | None = None,
+) -> dict[str, Any]:
     """Ingest text content into the memory system.
     
     Args:
@@ -103,10 +102,10 @@ async def ingest_text(
             content=content,
             metadata=metadata or {},
         )
-        
+
         # Ingest document
         results = await ingestion_pipeline.ingest([document])
-        
+
         return {
             "success": all(result.success for result in results),
             "results": [result.dict() for result in results],
@@ -118,8 +117,8 @@ async def ingest_text(
 
 async def ingest_url(
     url: str,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Ingest content from a URL into the memory system.
     
     Args:
@@ -135,9 +134,9 @@ async def ingest_url(
         # 1. Fetch content from the URL
         # 2. Process and chunk the content
         # 3. Call the ingestion pipeline
-        
+
         logger.warning("URL ingestion not fully implemented yet")
-        
+
         # Return a placeholder result
         return {
             "success": False,
@@ -151,8 +150,8 @@ async def ingest_url(
 
 async def ingest_file(
     file_path: str,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Ingest a file into the memory system.
     
     Args:
@@ -168,16 +167,16 @@ async def ingest_file(
         # 1. Read the file
         # 2. Process and chunk the content
         # 3. Call the ingestion pipeline
-        
+
         logger.warning("File ingestion not fully implemented yet")
-        
+
         # Verify file exists
         if not os.path.exists(file_path):
             return {
                 "success": False,
                 "error": f"File not found: {file_path}",
             }
-        
+
         # Return a placeholder result
         return {
             "success": False,
@@ -190,8 +189,8 @@ async def ingest_file(
 
 
 async def delete_document(
-    document_ids: List[str],
-) -> Dict[str, Any]:
+    document_ids: list[str],
+) -> dict[str, Any]:
     """Delete documents from the memory system.
     
     Args:
@@ -203,7 +202,7 @@ async def delete_document(
     try:
         # Delete documents
         results = await ingestion_pipeline.delete(document_ids)
-        
+
         return {
             "success": all(result.success for result in results),
             "results": [result.dict() for result in results],

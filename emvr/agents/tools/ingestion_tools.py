@@ -4,10 +4,10 @@ Ingestion tools for EMVR agents.
 This module implements tools for ingesting data into the system.
 """
 
-from typing import Dict, List, Optional, Any, Type
 import logging
+from typing import Any
 
-from langchain.tools import BaseTool, StructuredTool, tool
+from langchain.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 from emvr.ingestion.pipeline import ingestion_pipeline
@@ -21,29 +21,29 @@ logger = logging.getLogger(__name__)
 class IngestTextInput(BaseModel):
     """Input schema for ingest_text tool."""
     content: str = Field(..., description="Text content to ingest")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata for the text")
-    source_name: Optional[str] = Field(None, description="Optional source name for the text")
+    metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the text")
+    source_name: str | None = Field(None, description="Optional source name for the text")
 
 
 class IngestFileInput(BaseModel):
     """Input schema for ingest_file tool."""
     file_path: str = Field(..., description="Path to the file to ingest")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata for the file")
+    metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the file")
 
 
 class IngestUrlInput(BaseModel):
     """Input schema for ingest_url tool."""
     url: str = Field(..., description="URL to ingest")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata for the URL content")
+    metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the URL content")
 
 
 class IngestDirectoryInput(BaseModel):
     """Input schema for ingest_directory tool."""
     directory_path: str = Field(..., description="Path to the directory to ingest")
     recursive: bool = Field(True, description="Whether to search subdirectories")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata for all documents")
+    metadata: dict[str, Any] | None = Field(None, description="Optional metadata for all documents")
     exclude_hidden: bool = Field(True, description="Whether to exclude hidden files/dirs")
-    file_extensions: Optional[List[str]] = Field(None, description="List of file extensions to include")
+    file_extensions: list[str] | None = Field(None, description="List of file extensions to include")
 
 
 # ----- Ingestion Tools -----
@@ -51,9 +51,9 @@ class IngestDirectoryInput(BaseModel):
 @tool
 async def ingest_text(
     content: str,
-    metadata: Optional[Dict[str, Any]] = None,
-    source_name: Optional[str] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+    source_name: str | None = None,
+) -> dict[str, Any]:
     """
     Ingest raw text into the memory system.
     
@@ -68,14 +68,14 @@ async def ingest_text(
     try:
         # Initialize ingestion pipeline if needed
         await ingestion_pipeline.initialize()
-        
+
         # Process the text
         result = await ingestion_pipeline.ingest_text(
             content=content,
             metadata=metadata,
             source_name=source_name,
         )
-        
+
         return {
             "id": result.get("id"),
             "chunks": result.get("chunks", 0),
@@ -93,8 +93,8 @@ async def ingest_text(
 @tool
 async def ingest_file(
     file_path: str,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Ingest a file into the memory system.
     
@@ -108,13 +108,13 @@ async def ingest_file(
     try:
         # Initialize ingestion pipeline if needed
         await ingestion_pipeline.initialize()
-        
+
         # Process the file
         result = await ingestion_pipeline.ingest_file(
             file_path=file_path,
             metadata=metadata,
         )
-        
+
         return {
             "id": result.get("id"),
             "chunks": result.get("chunks", 0),
@@ -132,8 +132,8 @@ async def ingest_file(
 @tool
 async def ingest_url(
     url: str,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Ingest content from a URL into the memory system.
     
@@ -147,13 +147,13 @@ async def ingest_url(
     try:
         # Initialize ingestion pipeline if needed
         await ingestion_pipeline.initialize()
-        
+
         # Process the URL
         result = await ingestion_pipeline.ingest_url(
             url=url,
             metadata=metadata,
         )
-        
+
         return {
             "id": result.get("id"),
             "chunks": result.get("chunks", 0),
@@ -172,10 +172,10 @@ async def ingest_url(
 async def ingest_directory(
     directory_path: str,
     recursive: bool = True,
-    metadata: Optional[Dict[str, Any]] = None,
+    metadata: dict[str, Any] | None = None,
     exclude_hidden: bool = True,
-    file_extensions: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    file_extensions: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Ingest all files from a directory into the memory system.
     
@@ -192,7 +192,7 @@ async def ingest_directory(
     try:
         # Initialize ingestion pipeline if needed
         await ingestion_pipeline.initialize()
-        
+
         # Process the directory
         result = await ingestion_pipeline.ingest_directory(
             directory_path=directory_path,
@@ -201,7 +201,7 @@ async def ingest_directory(
             exclude_hidden=exclude_hidden,
             file_extensions=file_extensions,
         )
-        
+
         return {
             "files_processed": result.get("files_processed", 0),
             "files_failed": result.get("files_failed", 0),
@@ -219,7 +219,7 @@ async def ingest_directory(
 
 # ----- Tool Collection -----
 
-def get_ingestion_tools() -> List[BaseTool]:
+def get_ingestion_tools() -> list[BaseTool]:
     """
     Get all ingestion tools.
     

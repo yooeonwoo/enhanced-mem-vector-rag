@@ -1,9 +1,10 @@
 import time
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, TypeVar
 
 from fastapi import FastAPI
-from prometheus_client import Counter, Gauge, Histogram, Summary
+from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client.openmetrics.exposition import generate_latest
 
 # Type variables
@@ -67,23 +68,23 @@ ACTIVE_SESSIONS = Gauge(
 
 def setup_metrics(app: FastAPI) -> None:
     """Setup metrics endpoint and middleware for the FastAPI app"""
-    
+
     @app.get('/metrics')
     async def metrics():
         return generate_latest()
-    
+
     @app.middleware("http")
     async def metrics_middleware(request, call_next):
         method = request.method
         path = request.url.path
-        
+
         # Skip metrics endpoint itself
         if path == "/metrics":
             return await call_next(request)
-        
+
         start_time = time.time()
         REQUESTS_IN_PROGRESS.labels(method=method, endpoint=path).inc()
-        
+
         try:
             response = await call_next(request)
             status_code = response.status_code
@@ -130,11 +131,11 @@ def update_vector_count(collection: str, count: int) -> None:
     """Update the vector count metric for a collection"""
     VECTOR_COUNT.labels(collection=collection).set(count)
 
-def update_graph_counts(node_counts: Dict[str, int], relation_counts: Dict[str, int]) -> None:
+def update_graph_counts(node_counts: dict[str, int], relation_counts: dict[str, int]) -> None:
     """Update Neo4j graph count metrics"""
     for label, count in node_counts.items():
         GRAPH_NODE_COUNT.labels(label=label).set(count)
-    
+
     for rel_type, count in relation_counts.items():
         GRAPH_RELATION_COUNT.labels(type=rel_type).set(count)
 

@@ -1,27 +1,27 @@
 """Base classes for retrieval."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel
 
 
 class RetrievalResult(BaseModel):
     """Result of a retrieval operation."""
-    
+
     id: str
     text: str
-    score: Optional[float] = None
-    metadata: Dict[str, Any]
+    score: float | None = None
+    metadata: dict[str, Any]
 
 
 class BaseRetriever(ABC):
     """Base class for retrievers."""
-    
+
     @abstractmethod
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None
-    ) -> List[RetrievalResult]:
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+    ) -> list[RetrievalResult]:
         """Retrieve documents based on a query.
         
         Args:

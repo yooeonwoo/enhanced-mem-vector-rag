@@ -13,34 +13,52 @@ This implementation creates a sophisticated knowledge retrieval system by integr
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Quick Start](#quick-start)
-- [Components](#components)
-  - [Memory System (mem0)](#memory-system-mem0)
-  - [Graph Knowledge Base (Graphiti/Neo4j)](#graph-knowledge-base-graphitineo4j)
-  - [Vector Storage (Qdrant)](#vector-storage-qdrant)
-  - [Framework Integration (LlamaIndex & LangChain)](#framework-integration-llamaindex--langchain)
-- [Usage Examples](#usage-examples)
-- [Configuration](#configuration)
-- [Benchmarks](#benchmarks)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [How to Cite](#how-to-cite)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
-- [Claude Code Development](#claude-code-development)
-- [Deployment](#deployment)
+- [Enhanced Memory Vector RAG](#enhanced-memory-vector-rag)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Architecture](#architecture)
+    - [Layered Architecture](#layered-architecture)
+    - [Comprehensive System Architecture](#comprehensive-system-architecture)
+  - [Data Flow](#data-flow)
+    - [MCP Interaction Flow](#mcp-interaction-flow)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+      - [Local Development](#local-development)
+      - [Docker Deployment](#docker-deployment)
+    - [Quick Start](#quick-start)
+  - [Components](#components)
+    - [Memory System (mem0)](#memory-system-mem0)
+    - [Graph Knowledge Base (Graphiti/Neo4j)](#graph-knowledge-base-graphitineo4j)
+    - [Vector Storage (Qdrant)](#vector-storage-qdrant)
+    - [Framework Integration (LlamaIndex \& LangChain)](#framework-integration-llamaindex--langchain)
+  - [Usage Examples](#usage-examples)
+  - [Configuration](#configuration)
+  - [Benchmarks](#benchmarks)
+  - [Roadmap](#roadmap)
+  - [Contributing](#contributing)
+  - [How to Cite](#how-to-cite)
+  - [License](#license)
+  - [Acknowledgements](#acknowledgements)
+  - [Custom MCP Server Implementation](#custom-mcp-server-implementation)
+    - [Key MCP Endpoints](#key-mcp-endpoints)
+  - [Claude Code Development](#claude-code-development)
+  - [Deployment](#deployment)
+    - [Docker Components](#docker-components)
+    - [Deployment Options](#deployment-options)
+      - [Local Deployment](#local-deployment)
+      - [Using Makefile](#using-makefile)
+    - [Security](#security)
+    - [Monitoring \& Observability](#monitoring--observability)
+    - [Backup \& Restore](#backup--restore)
 
 ## Overview
 
 Enhanced Memory Vector RAG (EMVR) is a comprehensive framework that combines the strengths of multiple retrieval methodologies to create a more robust, accurate, and contextually aware knowledge system. By integrating graph-based Knowledge-Augmented Generation (KAG) with traditional vector-based Retrieval-Augmented Generation (RAG), EMVR provides superior performance in complex knowledge retrieval tasks.
 
 The system leverages:
+
 - **Graphiti/Neo4j** for structured knowledge representation and graph traversal
 - **Qdrant** for efficient vector similarity search
 - **mem0** for persistent memory and context management
@@ -99,7 +117,7 @@ graph TD
     AgentWorkflows --> GraphTraversal
     AgentWorkflows --> HybridManager
     MCP --> FastMCP
-    
+
     LangGraph --> LangChainComp
     HybridManager --> LlamaIndexConn
     HybridManager --> LangChainComp
@@ -107,7 +125,7 @@ graph TD
     ContextFusion --> LangChainComp
     GraphTraversal --> LlamaIndexConn
     FastMCP --> LlamaIndexConn
-    
+
     FastEmbed -.-> Qdrant
     LlamaIndexConn --> Qdrant
     LlamaIndexConn --> Neo4j
@@ -126,27 +144,27 @@ graph TB
     User([User]) <--> ClaudeCode["Claude Code & MCP Tools"]
     ClaudeCode <--> CustomMCP["Custom 'memory' MCP Server\n(FastMCP Framework)"]
     ClaudeCode <--> ExternalMCP["External MCP Servers\n(tavily, firecrawl, context7, etc.)"]
-    
+
     subgraph "Agent System"
         LangGraph["LangGraph\n(Agent Orchestration)"]
         LangChain["LangChain\n(Agent Tools & Planning)"]
         Agents["Specialized Agents\n(Supervisor-Worker Pattern)"]
-        
+
         LangGraph --> LangChain
         LangGraph --> Agents
     end
-    
+
     subgraph "RAG Framework"
         LlamaIndex["LlamaIndex\n(Core RAG Framework)"]
         QueryEngines["Query Engines\n(Vector, Graph, Hybrid)"]
         Retrievers["Specialized Retrievers"]
         DataLoaders["Data Loaders & Indexers"]
-        
+
         LlamaIndex --> QueryEngines
         LlamaIndex --> Retrievers
         LlamaIndex --> DataLoaders
     end
-    
+
     subgraph "Memory & Storage"
         Qdrant[(Qdrant\nVector Store)]
         Neo4j[(Neo4j\nGraph Database)]
@@ -154,37 +172,37 @@ graph TB
         Graphiti["Graphiti\n(Graph Interface)"]
         Supabase[(Supabase\nMetadata & Documents)]
         S3[(AWS S3\nOriginal Documents)]
-        
+
         Mem0 -.-> Qdrant
         Graphiti -.-> Neo4j
     end
-    
+
     subgraph "Embedding & Ingestion"
         FastEmbed["FastEmbed\nEmbedding Generation"]
         WebCrawlers["Web Crawlers\n(Crawl4AI, Firecrawl)"]
         ConnectorAPIs["Connector APIs\n(GitHub, Reddit, etc.)"]
-        
+
         FastEmbed --> Qdrant
         WebCrawlers --> DataLoaders
         ConnectorAPIs --> DataLoaders
     end
-    
+
     CustomMCP <--> LangGraph
     CustomMCP <--> LlamaIndex
-    
+
     LangGraph <--> LlamaIndex
-    
+
     LlamaIndex <--> Qdrant
     LlamaIndex <--> Neo4j
     LlamaIndex <--> Mem0
     LlamaIndex <--> Graphiti
     LlamaIndex <--> Supabase
-    
+
     DataLoaders --> S3
     DataLoaders --> Supabase
     DataLoaders --> Qdrant
     DataLoaders --> Neo4j
-    
+
     style CustomMCP fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
     style LlamaIndex fill:#d1fae5,stroke:#059669,stroke-width:2px
     style LangGraph fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
@@ -201,36 +219,36 @@ flowchart LR
     classDef processing fill:#d1fae5,stroke:#059669,stroke-width:2px
     classDef storage fill:#fee2e2,stroke:#ef4444,stroke-width:2px
     classDef fusion fill:#ffedd5,stroke:#f97316,stroke-width:2px
-    
+
     Input("User Query/Task") --> ClaudeCode("Claude Code\nMCP Interface")
     ClaudeCode --> MemoryMCP("Custom 'memory'\nMCP Server")
-    
+
     MemoryMCP --> Agent("Agent System\n(LangChain/LangGraph)")
-    
+
     Agent --> VR("Vector Retrieval\n(Qdrant via LlamaIndex)")
     Agent --> GR("Graph Retrieval\n(Neo4j/Graphiti via LlamaIndex)")
     Agent --> MR("Memory Retrieval\n(mem0)")
     Agent --> WS("Web Search\n(Tavily/Firecrawl)")
-    
+
     VR --> CF("Context Fusion\n(LlamaIndex Orchestration)")
     GR --> CF
     MR --> CF
     WS --> CF
-    
+
     CF --> QP("Query Planning\n(LangGraph)")
     QP --> RT("Response Templates")
-    
+
     CF --> LLM("Large Language Model")
     RT --> LLM
     LLM --> Response("Enhanced Response")
-    
+
     Response --> MemUpdate("Memory Update\n(mem0)")
     Response --> KGUpdate("Knowledge Graph Update\n(Neo4j)")
     Response --> MetaUpdate("Metadata Update\n(Supabase)")
-    
+
     Response --> ClaudeCode
     ClaudeCode --> User([User])
-    
+
     class Input,ClaudeCode,User userInteraction
     class VR,GR,MR,WS retrieval
     class QP,RT,LLM processing
@@ -248,7 +266,7 @@ sequenceDiagram
     participant External as External MCP Servers
     participant LlamaIdx as LlamaIndex
     participant Storage as Storage Systems
-    
+
     User->>Claude: Query or Task
     Claude->>Memory: memory.read_graph()
     Memory->>LlamaIdx: Query through LlamaIndex
@@ -256,22 +274,22 @@ sequenceDiagram
     Storage-->>LlamaIdx: Return relevant data
     LlamaIdx-->>Memory: Process & return results
     Memory-->>Claude: Return graph state
-    
+
     Claude->>External: context7.get_library_docs()
     External-->>Claude: Return documentation
-    
+
     Note over Claude,Memory: Agent Planning & Execution
-    
+
     Claude->>Memory: Execute retrieval/update
     Memory->>LlamaIdx: Orchestrate operations
     LlamaIdx->>Storage: Execute operations
     Storage-->>LlamaIdx: Return operation results
     LlamaIdx-->>Memory: Process & return results
     Memory-->>Claude: Return operation status/results
-    
+
     Claude->>Memory: memory.add_observations()
     Memory->>Storage: Update memory state
-    
+
     Claude-->>User: Deliver response/results
 ```
 
@@ -344,11 +362,11 @@ graph LR
     Memory --> Scoring("Relevance Scoring")
     Memory --> Personalization("Personalization Layer")
     Memory --> Context("Contextual History")
-    
+
     Scoring --> Retrieval("Enhanced Retrieval")
     Personalization --> Retrieval
     Context --> Retrieval
-    
+
     Retrieval --> LLM("Large Language Model")
     LLM --> Response("Enhanced Response")
     Response --> Memory
@@ -370,13 +388,13 @@ graph TD
         Entity2("Entity B")
         Entity3("Entity C")
         Entity4("Entity D")
-        
+
         Entity1 -- "relates_to" --> Entity2
         Entity2 -- "depends_on" --> Entity3
         Entity1 -- "creates" --> Entity4
         Entity3 -- "part_of" --> Entity4
     end
-    
+
     Query("Knowledge Query") --> GraphTraversal("Graph Traversal (Graphiti)")
     GraphTraversal --> Neo4j("Neo4j Database")
     Neo4j --> Results("Structured Results")
@@ -397,7 +415,7 @@ graph TD
     Documents["Input Documents"] --> TextChunker["Text Chunker"]
     TextChunker --> EmbeddingGen["Embedding Generation"]
     EmbeddingGen --> VectorDB["Qdrant Vector Database"]
-    
+
     Query["User Query"] --> QueryEmbed["Query Embedding"]
     QueryEmbed --> SearchVec["Vector Search"]
     SearchVec --> VectorDB
@@ -421,14 +439,14 @@ graph TD
         Indexing --> QueryEngines["Query Engines"]
         QueryEngines --> RetFramework["Retrieval Framework"]
     end
-    
+
     subgraph "LangChain Integration"
         Agents["Agent Framework"] --> Planning["Planning Modules"]
         Planning --> Tools["Tool Integration"]
         Tools --> Memory["Memory Components"]
         Memory --> Callbacks["Callback Handlers"]
     end
-    
+
     RetFramework <--> Tools
     QueryEngines <--> Agents
 ```
@@ -510,9 +528,9 @@ flowchart TD
     classDef mcp fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
     classDef frameworks fill:#d1fae5,stroke:#059669,stroke-width:2px
     classDef storage fill:#fee2e2,stroke:#ef4444,stroke-width:2px
-    
+
     Claude([Claude Code]) --> MCP["Custom 'memory' MCP Server\n(FastMCP Framework)"]
-    
+
     subgraph "MCP Endpoints"
         SearchHybrid["/search.hybrid"]
         GraphQuery["/graph.query"]
@@ -520,27 +538,27 @@ flowchart TD
         RulesValidate["/rules.validate"]
         IngestOps["/ingest.*"]
     end
-    
+
     MCP --> SearchHybrid
     MCP --> GraphQuery
     MCP --> MemoryOps
     MCP --> RulesValidate
     MCP --> IngestOps
-    
+
     SearchHybrid --> LlamaIndex["LlamaIndex\nRAG Orchestration"]
     GraphQuery --> LlamaIndex
     MemoryOps --> LlamaIndex
     RulesValidate --> APOC["Neo4j APOC\nRules Engine"]
     IngestOps --> LlamaIndex
-    
+
     LlamaIndex --> Qdrant[(Qdrant)]
     LlamaIndex --> Neo4j[(Neo4j)]
     LlamaIndex --> Supabase[(Supabase)]
     APOC --> Neo4j
-    
+
     Mem0["Mem0 SDK"] --> Qdrant
     Graphiti["Graphiti Client"] --> Neo4j
-    
+
     class MCP,SearchHybrid,GraphQuery,MemoryOps,RulesValidate,IngestOps mcp
     class LlamaIndex,APOC,Mem0,Graphiti frameworks
     class Qdrant,Neo4j,Supabase storage
@@ -548,13 +566,13 @@ flowchart TD
 
 ### Key MCP Endpoints
 
-| Endpoint | Description | Implementation |
-|----------|-------------|----------------|
-| `/search.hybrid` | Performs hybrid search across vector and graph stores | Uses LlamaIndex for orchestrating hybrid search across Qdrant and Neo4j |
-| `/graph.query` | Executes knowledge graph queries | Translates natural language to Cypher using LlamaIndex's `KnowledgeGraphQueryEngine` |
-| `/memory.*` | Operations for memory management | Includes CRUD operations for graph entities and observations |
-| `/rules.validate` | Validates operations against defined rules | Uses Neo4j APOC for rule enforcement |
-| `/ingest.*` | Handles data ingestion from various sources | Utilizes LlamaIndex data loaders and FastEmbed for embedding generation |
+| Endpoint          | Description                                           | Implementation                                                                       |
+| ----------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `/search.hybrid`  | Performs hybrid search across vector and graph stores | Uses LlamaIndex for orchestrating hybrid search across Qdrant and Neo4j              |
+| `/graph.query`    | Executes knowledge graph queries                      | Translates natural language to Cypher using LlamaIndex's `KnowledgeGraphQueryEngine` |
+| `/memory.*`       | Operations for memory management                      | Includes CRUD operations for graph entities and observations                         |
+| `/rules.validate` | Validates operations against defined rules            | Uses Neo4j APOC for rule enforcement                                                 |
+| `/ingest.*`       | Handles data ingestion from various sources           | Utilizes LlamaIndex data loaders and FastEmbed for embedding generation              |
 
 ## Claude Code Development
 

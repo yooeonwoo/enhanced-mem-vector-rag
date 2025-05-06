@@ -2,5 +2,10 @@
 
 from .base import AgentResult, BaseAgent
 from .memory_agent import MemoryAgent
-from .supervisor import SupervisorAgent, ResearchWorkerAgent, KnowledgeGraphWorkerAgent, MemoryManagementWorkerAgent
-from .workflows import AgentWorkflow, WorkflowOutput, AgentWorkflowFactory
+from .supervisor import (
+    KnowledgeGraphWorkerAgent,
+    MemoryManagementWorkerAgent,
+    ResearchWorkerAgent,
+    SupervisorAgent,
+)
+from .workflows import AgentWorkflow, AgentWorkflowFactory, WorkflowOutput

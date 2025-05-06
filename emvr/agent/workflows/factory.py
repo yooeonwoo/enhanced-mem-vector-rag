@@ -1,7 +1,6 @@
 """Factory for creating agent workflows."""
 
 import os
-from typing import Optional
 
 from dotenv import load_dotenv
 from langchain.schema import BaseLanguageModel
@@ -17,13 +16,13 @@ load_dotenv()
 
 class AgentWorkflowFactory:
     """Factory for creating agent workflows."""
-    
+
     @staticmethod
     def create_workflow(
-        supervisor_llm: Optional[BaseLanguageModel] = None,
-        worker_llm: Optional[BaseLanguageModel] = None,
-        memory_manager: Optional[MemoryManager] = None,
-        retrieval_pipeline: Optional[RetrievalPipeline] = None,
+        supervisor_llm: BaseLanguageModel | None = None,
+        worker_llm: BaseLanguageModel | None = None,
+        memory_manager: MemoryManager | None = None,
+        retrieval_pipeline: RetrievalPipeline | None = None,
     ) -> AgentWorkflow:
         """Create an agent workflow.
         
@@ -42,19 +41,19 @@ class AgentWorkflowFactory:
                 temperature=0.2,
                 model=os.environ.get("SUPERVISOR_LLM_MODEL", "gpt-4o"),
             )
-        
+
         if worker_llm is None:
             worker_llm = ChatOpenAI(
                 temperature=0.0,
                 model=os.environ.get("WORKER_LLM_MODEL", "gpt-3.5-turbo"),
             )
-        
+
         if memory_manager is None:
             memory_manager = MemoryManager()
-        
+
         if retrieval_pipeline is None:
             retrieval_pipeline = RetrievalPipeline()
-        
+
         # Create and return workflow
         return AgentWorkflow(
             supervisor_llm=supervisor_llm,

@@ -4,12 +4,9 @@ Hybrid Retriever implementation.
 This module implements a hybrid retrieval system that combines vector search with graph traversal.
 """
 
-from typing import Any, Dict, List, Optional, Union
 
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle
-from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.graph_stores.neo4j import Neo4jGraphStore
 
 
 class HybridRetriever(BaseRetriever):
@@ -19,12 +16,12 @@ class HybridRetriever(BaseRetriever):
     This retriever uses LlamaIndex to orchestrate retrieval from both Qdrant (vector)
     and Neo4j (graph) stores, combining the results for improved accuracy.
     """
-    
+
     def __init__(
         self,
         qdrant_collection: str,
         qdrant_url: str = "http://localhost:6333",
-        qdrant_api_key: Optional[str] = None,
+        qdrant_api_key: str | None = None,
         neo4j_uri: str = "bolt://localhost:7687",
         neo4j_user: str = "neo4j",
         neo4j_password: str = "password",
@@ -62,16 +59,16 @@ class HybridRetriever(BaseRetriever):
         self.graph_top_k = graph_top_k
         self.reranking_threshold = reranking_threshold
         self.use_hybrid_fusion = use_hybrid_fusion
-        
+
         # Initialize vector store
         # TODO: Initialize QdrantVectorStore
         self.vector_store = None
-        
+
         # Initialize graph store
         # TODO: Initialize Neo4jGraphStore
         self.graph_store = None
-    
-    def _retrieve(self, query_bundle: QueryBundle) -> List[NodeWithScore]:
+
+    def _retrieve(self, query_bundle: QueryBundle) -> list[NodeWithScore]:
         """
         Retrieve nodes given a query bundle.
         
@@ -86,6 +83,6 @@ class HybridRetriever(BaseRetriever):
         # 2. Retrieve from graph store
         # 3. Combine results
         # 4. Rerank if necessary
-        
+
         # Placeholder implementation
         return []
