@@ -1,7 +1,7 @@
 # Enhanced Memory Vector RAG
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/BjornMelin/enhanced-mem-vector-rag/graphs/commit-activity)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 [![Documentation Status](https://img.shields.io/badge/docs-in%20progress-orange)](https://github.com/BjornMelin/enhanced-mem-vector-rag/wiki)
@@ -58,7 +58,9 @@ The system leverages:
 
 ## Architecture
 
-EMVR implements a layered architecture:
+EMVR implements a comprehensive layered architecture integrating multiple components for advanced retrieval:
+
+### Layered Architecture
 
 ```mermaid
 graph TD
@@ -66,71 +68,218 @@ graph TD
         QueryInterface("Query Interfaces")
         ResponseGen("Response Generation")
         AgentWorkflows("Custom Agent Workflows")
+        MCP("Model Context Protocol (MCP)")
     end
 
     subgraph "Orchestration Layer"
         HybridManager("Hybrid Retrieval Manager")
         ContextFusion("Context Fusion Engine")
         GraphTraversal("Knowledge Graph Traversal")
+        LangGraph("LangGraph Orchestration")
     end
 
     subgraph "Integration Layer"
         LlamaIndexConn("LlamaIndex Connectors")
         LangChainComp("LangChain Components")
+        FastEmbed("FastEmbed Integration")
+        FastMCP("FastMCP Framework")
     end
 
     subgraph "Storage Layer"
         Qdrant("Vector Database (Qdrant)")
         Neo4j("Graph Database (Neo4j/Graphiti)")
         Mem0("Memory System (mem0)")
+        Supabase("Metadata Storage (Supabase)")
     end
 
     QueryInterface --> HybridManager
     ResponseGen --> ContextFusion
     AgentWorkflows --> GraphTraversal
     AgentWorkflows --> HybridManager
+    MCP --> FastMCP
     
+    LangGraph --> LangChainComp
     HybridManager --> LlamaIndexConn
     HybridManager --> LangChainComp
     ContextFusion --> LlamaIndexConn
     ContextFusion --> LangChainComp
     GraphTraversal --> LlamaIndexConn
+    FastMCP --> LlamaIndexConn
     
+    FastEmbed -.-> Qdrant
     LlamaIndexConn --> Qdrant
     LlamaIndexConn --> Neo4j
     LlamaIndexConn --> Mem0
+    LlamaIndexConn --> Supabase
     LangChainComp --> Qdrant
     LangChainComp --> Neo4j
     LangChainComp --> Mem0
+    LangChainComp --> Supabase
+```
+
+### Comprehensive System Architecture
+
+```mermaid
+graph TB
+    User([User]) <--> ClaudeCode["Claude Code & MCP Tools"]
+    ClaudeCode <--> CustomMCP["Custom 'memory' MCP Server\n(FastMCP Framework)"]
+    ClaudeCode <--> ExternalMCP["External MCP Servers\n(tavily, firecrawl, context7, etc.)"]
+    
+    subgraph "Agent System"
+        LangGraph["LangGraph\n(Agent Orchestration)"]
+        LangChain["LangChain\n(Agent Tools & Planning)"]
+        Agents["Specialized Agents\n(Supervisor-Worker Pattern)"]
+        
+        LangGraph --> LangChain
+        LangGraph --> Agents
+    end
+    
+    subgraph "RAG Framework"
+        LlamaIndex["LlamaIndex\n(Core RAG Framework)"]
+        QueryEngines["Query Engines\n(Vector, Graph, Hybrid)"]
+        Retrievers["Specialized Retrievers"]
+        DataLoaders["Data Loaders & Indexers"]
+        
+        LlamaIndex --> QueryEngines
+        LlamaIndex --> Retrievers
+        LlamaIndex --> DataLoaders
+    end
+    
+    subgraph "Memory & Storage"
+        Qdrant[(Qdrant\nVector Store)]
+        Neo4j[(Neo4j\nGraph Database)]
+        Mem0["Mem0\n(Memory Interface)"]
+        Graphiti["Graphiti\n(Graph Interface)"]
+        Supabase[(Supabase\nMetadata & Documents)]
+        S3[(AWS S3\nOriginal Documents)]
+        
+        Mem0 -.-> Qdrant
+        Graphiti -.-> Neo4j
+    end
+    
+    subgraph "Embedding & Ingestion"
+        FastEmbed["FastEmbed\nEmbedding Generation"]
+        WebCrawlers["Web Crawlers\n(Crawl4AI, Firecrawl)"]
+        ConnectorAPIs["Connector APIs\n(GitHub, Reddit, etc.)"]
+        
+        FastEmbed --> Qdrant
+        WebCrawlers --> DataLoaders
+        ConnectorAPIs --> DataLoaders
+    end
+    
+    CustomMCP <--> LangGraph
+    CustomMCP <--> LlamaIndex
+    
+    LangGraph <--> LlamaIndex
+    
+    LlamaIndex <--> Qdrant
+    LlamaIndex <--> Neo4j
+    LlamaIndex <--> Mem0
+    LlamaIndex <--> Graphiti
+    LlamaIndex <--> Supabase
+    
+    DataLoaders --> S3
+    DataLoaders --> Supabase
+    DataLoaders --> Qdrant
+    DataLoaders --> Neo4j
+    
+    style CustomMCP fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
+    style LlamaIndex fill:#d1fae5,stroke:#059669,stroke-width:2px
+    style LangGraph fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style Qdrant fill:#fee2e2,stroke:#ef4444,stroke-width:2px
+    style Neo4j fill:#ffedd5,stroke:#f97316,stroke-width:2px
 ```
 
 ## Data Flow
 
 ```mermaid
 flowchart LR
-    Input("User Query") --> Agent("Agent System\n(LangChain/LangGraph)")
+    classDef userInteraction fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
+    classDef retrieval fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef processing fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef storage fill:#fee2e2,stroke:#ef4444,stroke-width:2px
+    classDef fusion fill:#ffedd5,stroke:#f97316,stroke-width:2px
+    
+    Input("User Query/Task") --> ClaudeCode("Claude Code\nMCP Interface")
+    ClaudeCode --> MemoryMCP("Custom 'memory'\nMCP Server")
+    
+    MemoryMCP --> Agent("Agent System\n(LangChain/LangGraph)")
     
     Agent --> VR("Vector Retrieval\n(Qdrant via LlamaIndex)")
-    Agent --> GR("Graph Retrieval\n(Neo4j via Graphiti)")
+    Agent --> GR("Graph Retrieval\n(Neo4j/Graphiti via LlamaIndex)")
     Agent --> MR("Memory Retrieval\n(mem0)")
+    Agent --> WS("Web Search\n(Tavily/Firecrawl)")
     
-    VR --> CF("Context Fusion")
+    VR --> CF("Context Fusion\n(LlamaIndex Orchestration)")
     GR --> CF
     MR --> CF
+    WS --> CF
+    
+    CF --> QP("Query Planning\n(LangGraph)")
+    QP --> RT("Response Templates")
     
     CF --> LLM("Large Language Model")
+    RT --> LLM
     LLM --> Response("Enhanced Response")
     
-    Response --> Mem("Memory Update\n(mem0)")
-    Response --> KG("Knowledge Graph Update\n(Neo4j)")
+    Response --> MemUpdate("Memory Update\n(mem0)")
+    Response --> KGUpdate("Knowledge Graph Update\n(Neo4j)")
+    Response --> MetaUpdate("Metadata Update\n(Supabase)")
+    
+    Response --> ClaudeCode
+    ClaudeCode --> User([User])
+    
+    class Input,ClaudeCode,User userInteraction
+    class VR,GR,MR,WS retrieval
+    class QP,RT,LLM processing
+    class MemUpdate,KGUpdate,MetaUpdate storage
+    class CF fusion
+```
+
+### MCP Interaction Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Claude as Claude Code
+    participant Memory as custom 'memory' MCP
+    participant External as External MCP Servers
+    participant LlamaIdx as LlamaIndex
+    participant Storage as Storage Systems
+    
+    User->>Claude: Query or Task
+    Claude->>Memory: memory.read_graph()
+    Memory->>LlamaIdx: Query through LlamaIndex
+    LlamaIdx->>Storage: Fetch from Qdrant/Neo4j/Supabase
+    Storage-->>LlamaIdx: Return relevant data
+    LlamaIdx-->>Memory: Process & return results
+    Memory-->>Claude: Return graph state
+    
+    Claude->>External: context7.get_library_docs()
+    External-->>Claude: Return documentation
+    
+    Note over Claude,Memory: Agent Planning & Execution
+    
+    Claude->>Memory: Execute retrieval/update
+    Memory->>LlamaIdx: Orchestrate operations
+    LlamaIdx->>Storage: Execute operations
+    Storage-->>LlamaIdx: Return operation results
+    LlamaIdx-->>Memory: Process & return results
+    Memory-->>Claude: Return operation status/results
+    
+    Claude->>Memory: memory.add_observations()
+    Memory->>Storage: Update memory state
+    
+    Claude-->>User: Deliver response/results
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.9+
-- Docker (recommended for Neo4j and Qdrant)
+- Python 3.11+
+- Docker (recommended for Neo4j, Qdrant, and Supabase)
+- `uv` for Python package management
 - Basic understanding of RAG systems
 
 ### Installation
@@ -140,7 +289,10 @@ flowchart LR
 git clone https://github.com/BjornMelin/enhanced-mem-vector-rag.git
 cd enhanced-mem-vector-rag
 
-# Install dependencies
+# Install dependencies using uv
+uv pip install -e .
+
+# Or using traditional pip
 pip install -e .
 ```
 
@@ -330,6 +482,61 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [mem0](https://github.com/mem0ai/mem0) for memory systems
 - [LlamaIndex](https://github.com/run-llama/llama_index) for indexing frameworks
 - [LangChain](https://github.com/langchain-ai/langchain) for agent orchestration
+
+## Custom MCP Server Implementation
+
+This project implements a custom `memory` MCP server using the FastMCP framework that serves as the central interface between Claude Code and the system's backend components:
+
+```mermaid
+flowchart TD
+    classDef mcp fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
+    classDef frameworks fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef storage fill:#fee2e2,stroke:#ef4444,stroke-width:2px
+    
+    Claude([Claude Code]) --> MCP["Custom 'memory' MCP Server\n(FastMCP Framework)"]
+    
+    subgraph "MCP Endpoints"
+        SearchHybrid["/search.hybrid"]
+        GraphQuery["/graph.query"]
+        MemoryOps["/memory.*"]
+        RulesValidate["/rules.validate"]
+        IngestOps["/ingest.*"]
+    end
+    
+    MCP --> SearchHybrid
+    MCP --> GraphQuery
+    MCP --> MemoryOps
+    MCP --> RulesValidate
+    MCP --> IngestOps
+    
+    SearchHybrid --> LlamaIndex["LlamaIndex\nRAG Orchestration"]
+    GraphQuery --> LlamaIndex
+    MemoryOps --> LlamaIndex
+    RulesValidate --> APOC["Neo4j APOC\nRules Engine"]
+    IngestOps --> LlamaIndex
+    
+    LlamaIndex --> Qdrant[(Qdrant)]
+    LlamaIndex --> Neo4j[(Neo4j)]
+    LlamaIndex --> Supabase[(Supabase)]
+    APOC --> Neo4j
+    
+    Mem0["Mem0 SDK"] --> Qdrant
+    Graphiti["Graphiti Client"] --> Neo4j
+    
+    class MCP,SearchHybrid,GraphQuery,MemoryOps,RulesValidate,IngestOps mcp
+    class LlamaIndex,APOC,Mem0,Graphiti frameworks
+    class Qdrant,Neo4j,Supabase storage
+```
+
+### Key MCP Endpoints
+
+| Endpoint | Description | Implementation |
+|----------|-------------|----------------|
+| `/search.hybrid` | Performs hybrid search across vector and graph stores | Uses LlamaIndex for orchestrating hybrid search across Qdrant and Neo4j |
+| `/graph.query` | Executes knowledge graph queries | Translates natural language to Cypher using LlamaIndex's `KnowledgeGraphQueryEngine` |
+| `/memory.*` | Operations for memory management | Includes CRUD operations for graph entities and observations |
+| `/rules.validate` | Validates operations against defined rules | Uses Neo4j APOC for rule enforcement |
+| `/ingest.*` | Handles data ingestion from various sources | Utilizes LlamaIndex data loaders and FastEmbed for embedding generation |
 
 ## Claude Code Development
 
