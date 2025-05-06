@@ -5,6 +5,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/BjornMelin/enhanced-mem-vector-rag/graphs/commit-activity)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 [![Documentation Status](https://img.shields.io/badge/docs-in%20progress-orange)](https://github.com/BjornMelin/enhanced-mem-vector-rag/wiki)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Ready-purple.svg)](https://github.com/BjornMelin/enhanced-mem-vector-rag/blob/main/CLAUDE.md)
 
 ⚡ Developer-friendly hybrid-RAG toolkit merging Graphiti, Qdrant, mem0, LlamaIndex, and LangChain into one powerful engine.
 
@@ -32,6 +33,7 @@ This implementation creates a sophisticated knowledge retrieval system by integr
 - [How to Cite](#how-to-cite)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
+- [Claude Code Development](#claude-code-development)
 
 ## Overview
 
@@ -58,24 +60,70 @@ The system leverages:
 
 EMVR implements a layered architecture:
 
-1. **Storage Layer**
-   - Vector Database (Qdrant)
-   - Graph Database (Neo4j via Graphiti)
-   - Memory System (mem0)
+```mermaid
+graph TD
+    subgraph "Application Layer"
+        QueryInterface("Query Interfaces")
+        ResponseGen("Response Generation")
+        AgentWorkflows("Custom Agent Workflows")
+    end
 
-2. **Integration Layer**
-   - LlamaIndex Connectors
-   - LangChain Components
+    subgraph "Orchestration Layer"
+        HybridManager("Hybrid Retrieval Manager")
+        ContextFusion("Context Fusion Engine")
+        GraphTraversal("Knowledge Graph Traversal")
+    end
 
-3. **Orchestration Layer**
-   - Hybrid Retrieval Manager
-   - Context Fusion Engine
-   - Knowledge Graph Traversal
+    subgraph "Integration Layer"
+        LlamaIndexConn("LlamaIndex Connectors")
+        LangChainComp("LangChain Components")
+    end
 
-4. **Application Layer**
-   - Query Interfaces
-   - Response Generation
-   - Custom Agent Workflows
+    subgraph "Storage Layer"
+        Qdrant("Vector Database (Qdrant)")
+        Neo4j("Graph Database (Neo4j/Graphiti)")
+        Mem0("Memory System (mem0)")
+    end
+
+    QueryInterface --> HybridManager
+    ResponseGen --> ContextFusion
+    AgentWorkflows --> GraphTraversal
+    AgentWorkflows --> HybridManager
+    
+    HybridManager --> LlamaIndexConn
+    HybridManager --> LangChainComp
+    ContextFusion --> LlamaIndexConn
+    ContextFusion --> LangChainComp
+    GraphTraversal --> LlamaIndexConn
+    
+    LlamaIndexConn --> Qdrant
+    LlamaIndexConn --> Neo4j
+    LlamaIndexConn --> Mem0
+    LangChainComp --> Qdrant
+    LangChainComp --> Neo4j
+    LangChainComp --> Mem0
+```
+
+## Data Flow
+
+```mermaid
+flowchart LR
+    Input("User Query") --> Agent("Agent System\n(LangChain/LangGraph)")
+    
+    Agent --> VR("Vector Retrieval\n(Qdrant via LlamaIndex)")
+    Agent --> GR("Graph Retrieval\n(Neo4j via Graphiti)")
+    Agent --> MR("Memory Retrieval\n(mem0)")
+    
+    VR --> CF("Context Fusion")
+    GR --> CF
+    MR --> CF
+    
+    CF --> LLM("Large Language Model")
+    LLM --> Response("Enhanced Response")
+    
+    Response --> Mem("Memory Update\n(mem0)")
+    Response --> KG("Knowledge Graph Update\n(Neo4j)")
+```
 
 ## Getting Started
 
@@ -124,6 +172,22 @@ The memory component leverages mem0 to maintain persistent context across querie
 - Maintain entity relationships
 - Support temporal reasoning
 
+```mermaid
+graph LR
+    Query("User Query") --> Memory("mem0 Memory System")
+    Memory --> Scoring("Relevance Scoring")
+    Memory --> Personalization("Personalization Layer")
+    Memory --> Context("Contextual History")
+    
+    Scoring --> Retrieval("Enhanced Retrieval")
+    Personalization --> Retrieval
+    Context --> Retrieval
+    
+    Retrieval --> LLM("Large Language Model")
+    LLM --> Response("Enhanced Response")
+    Response --> Memory
+```
+
 ### Graph Knowledge Base (Graphiti/Neo4j)
 
 The graph component uses Graphiti with Neo4j to:
@@ -132,6 +196,26 @@ The graph component uses Graphiti with Neo4j to:
 - Enable complex traversal queries
 - Support reasoning about interconnected concepts
 - Provide explicit knowledge paths
+
+```mermaid
+graph TD
+    subgraph "Knowledge Graph (Neo4j/Graphiti)"
+        Entity1("Entity A")
+        Entity2("Entity B")
+        Entity3("Entity C")
+        Entity4("Entity D")
+        
+        Entity1 -- "relates_to" --> Entity2
+        Entity2 -- "depends_on" --> Entity3
+        Entity1 -- "creates" --> Entity4
+        Entity3 -- "part_of" --> Entity4
+    end
+    
+    Query("Knowledge Query") --> GraphTraversal("Graph Traversal (Graphiti)")
+    GraphTraversal --> Neo4j("Neo4j Database")
+    Neo4j --> Results("Structured Results")
+    Results --> LLM("LLM for Reasoning")
+```
 
 ### Vector Storage (Qdrant)
 
@@ -142,12 +226,46 @@ The vector component uses Qdrant to:
 - Support semantic matching
 - Handle large-scale vector operations
 
+```mermaid
+graph TD
+    Documents["Input Documents"] --> TextChunker["Text Chunker"]
+    TextChunker --> EmbeddingGen["Embedding Generation"]
+    EmbeddingGen --> VectorDB["Qdrant Vector Database"]
+    
+    Query["User Query"] --> QueryEmbed["Query Embedding"]
+    QueryEmbed --> SearchVec["Vector Search"]
+    SearchVec --> VectorDB
+    VectorDB --> TopMatches["Top K Matches"]
+    TopMatches --> Reranker["Reranker"]
+    Reranker --> ContextGen["Context Generation"]
+```
+
 ### Framework Integration (LlamaIndex & LangChain)
 
 EMVR integrates with both major RAG frameworks:
 
 - **LlamaIndex** - For advanced indexing and retrieval operations
 - **LangChain** - For agent-based workflows and tool integration
+
+```mermaid
+graph TD
+    subgraph "LlamaIndex Integration"
+        Docs[("Documents")] --> Loaders["Data Loaders"]
+        Loaders --> Indexing["Indexing Pipelines"]
+        Indexing --> QueryEngines["Query Engines"]
+        QueryEngines --> RetFramework["Retrieval Framework"]
+    end
+    
+    subgraph "LangChain Integration"
+        Agents["Agent Framework"] --> Planning["Planning Modules"]
+        Planning --> Tools["Tool Integration"]
+        Tools --> Memory["Memory Components"]
+        Memory --> Callbacks["Callback Handlers"]
+    end
+    
+    RetFramework <--> Tools
+    QueryEngines <--> Agents
+```
 
 ## Usage Examples
 
@@ -212,3 +330,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [mem0](https://github.com/mem0ai/mem0) for memory systems
 - [LlamaIndex](https://github.com/run-llama/llama_index) for indexing frameworks
 - [LangChain](https://github.com/langchain-ai/langchain) for agent orchestration
+
+## Claude Code Development
+
+This project provides a detailed development guide for Claude Code users. The guide includes:
+
+- Project overview and technical architecture
+- Development workflow and memory protocol
+- Coding standards and practices
+- Git workflow
+- MCP server documentation and usage
+- Key architectural components and their roles
+
+For Claude Code development, please refer to [CLAUDE.md](CLAUDE.md) for comprehensive guidelines.
