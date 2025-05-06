@@ -12,12 +12,16 @@ import asyncio
 from typing import Optional, Dict, Any
 
 from fastmcp import MCPServer
+from langchain_openai import ChatOpenAI
 
 from emvr.config import get_settings
 from emvr.core.db_connections import initialize_connections, close_connections
 from emvr.memory.memory_manager import memory_manager
 from emvr.ingestion.pipeline import ingestion_pipeline
+from emvr.retrievers.retrieval_pipeline import retrieval_pipeline
+from emvr.agents.orchestration import initialize_orchestration, get_orchestrator
 from emvr.mcp_server.endpoints import register_endpoints, register_resources
+from emvr.mcp_server.endpoints.agent_endpoints import register_agent_endpoints, register_agent_resources
 
 # Configure logging
 logging.basicConfig(
@@ -32,7 +36,7 @@ class MemoryMCPServer:
     """
     MCP server for the EMVR system.
     
-    Provides memory operations, search, and ingestion capabilities.
+    Provides memory operations, search, ingestion capabilities, and agent orchestration.
     """
     
     def __init__(self):
@@ -62,9 +66,25 @@ class MemoryMCPServer:
             # Initialize ingestion pipeline
             await ingestion_pipeline.initialize()
             
+            # Initialize retrieval pipeline
+            await retrieval_pipeline.initialize()
+            
+            # Initialize language model for agents
+            llm = ChatOpenAI(
+                temperature=0.0,
+                model=self._settings.openai_model,
+            )
+            
+            # Initialize agent orchestration
+            await initialize_orchestration(llm=llm)
+            
             # Register endpoints and resources
             await register_endpoints(self._mcp_server)
             await register_resources(self._mcp_server)
+            
+            # Register agent endpoints and resources
+            await register_agent_endpoints(self._mcp_server)
+            await register_agent_resources(self._mcp_server)
             
             # Setup signal handlers for graceful shutdown
             self._setup_signal_handlers()
@@ -122,6 +142,11 @@ class MemoryMCPServer:
     def cleanup(self):
         """Clean up resources before shutdown."""
         logger.info("Cleaning up resources...")
+        
+        # Shutdown agent orchestration if initialized
+        orchestrator = get_orchestrator()
+        if orchestrator:
+            asyncio.run(orchestrator.shutdown())
         
         # Close memory manager connections
         memory_manager.close()
