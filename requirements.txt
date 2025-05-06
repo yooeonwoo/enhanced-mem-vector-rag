@@ -1,0 +1,35 @@
+# Core Frameworks
+llama-index==0.12.34
+langchain==0.3.25
+langgraph==0.4.1
+
+# FastMCP Server
+fastapi==0.115.12
+fastmcp==2.2.8
+uvicorn==0.34.2
+
+# Database Connectors
+qdrant-client==1.14.2
+neo4j==5.28.1
+
+# UI
+chainlit==2.5.5
+
+# Embedding
+fastembed==0.6.1
+
+# Memory Interfaces
+# mem0 - Install from GitHub repository
+# graphiti-python - Install from GitHub repository
+
+# Authentication & Security
+pyjwt==2.10.1
+python-dotenv==1.1.0
+
+# Monitoring
+prometheus-client==0.20.0
+
+# Utilities
+pydantic==2.11.4
+python-multipart==0.0.18
+tqdm==4.67.1
