@@ -1,247 +1,150 @@
 """
-MCP Server main implementation.
+MCP server implementation for the EMVR system.
 
-This module implements the custom 'memory' MCP server using FastMCP framework.
+This module implements the main FastMCP server for the EMVR system.
 """
 
 import logging
-from typing import Dict, List, Optional, Union
+import sys
+import os
+import signal
+import asyncio
+from typing import Optional, Dict, Any
 
-from fastapi import FastAPI, Depends, HTTPException, status
 from fastmcp import MCPServer
-from pydantic import BaseModel
 
 from emvr.config import get_settings
+from emvr.core.db_connections import initialize_connections, close_connections
+from emvr.memory.memory_manager import memory_manager
+from emvr.ingestion.pipeline import ingestion_pipeline
+from emvr.mcp_server.endpoints import register_endpoints, register_resources
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
-app = FastAPI(title="EMVR Memory MCP Server")
 
-# Create MCP Server
-mcp_server = MCPServer(app=app)
-
-
-# Model schemas
-class Entity(BaseModel):
-    """Entity schema for memory operations."""
-    
-    name: str
-    entityType: str
-    observations: List[str]
-
-
-class CreateEntitiesRequest(BaseModel):
-    """Request schema for creating entities."""
-    
-    entities: List[Entity]
-
-
-class Relation(BaseModel):
-    """Relation schema for memory operations."""
-    
-    from_: str
-    to: str
-    relationType: str
-
-
-class CreateRelationsRequest(BaseModel):
-    """Request schema for creating relations."""
-    
-    relations: List[Relation]
-
-
-class Observation(BaseModel):
-    """Observation schema for memory operations."""
-    
-    entityName: str
-    contents: List[str]
-
-
-class AddObservationsRequest(BaseModel):
-    """Request schema for adding observations."""
-    
-    observations: List[Observation]
-
-
-class SearchRequest(BaseModel):
-    """Request schema for search operations."""
-    
-    query: str
-    limit: Optional[int] = 10
-
-
-class GraphQueryRequest(BaseModel):
-    """Request schema for graph query operations."""
-    
-    query: str
-
-
-# MCP Endpoints
-@mcp_server.endpoint("/memory.create_entities")
-async def create_entities(request: CreateEntitiesRequest) -> Dict[str, str]:
+class MemoryMCPServer:
     """
-    Create multiple new entities in the knowledge graph.
+    MCP server for the EMVR system.
     
-    Args:
-        request: CreateEntitiesRequest with list of entities
+    Provides memory operations, search, and ingestion capabilities.
+    """
+    
+    def __init__(self):
+        """Initialize the MCP server."""
+        self._settings = get_settings()
+        self._mcp_server = MCPServer(
+            name="memory",
+            description="EMVR Memory MCP Server",
+            version="0.1.0"
+        )
+        self._initialized = False
+    
+    async def initialize(self):
+        """Initialize the server and all dependencies."""
+        if self._initialized:
+            return
         
-    Returns:
-        Dict with status message
-    """
-    logger.info(f"Creating {len(request.entities)} entities")
-    # TODO: Implement actual entity creation via LlamaIndex
+        try:
+            logger.info("Initializing MCP server")
+            
+            # Initialize database connections
+            initialize_connections()
+            
+            # Initialize memory manager
+            await memory_manager.initialize()
+            
+            # Initialize ingestion pipeline
+            await ingestion_pipeline.initialize()
+            
+            # Register endpoints and resources
+            await register_endpoints(self._mcp_server)
+            await register_resources(self._mcp_server)
+            
+            # Setup signal handlers for graceful shutdown
+            self._setup_signal_handlers()
+            
+            self._initialized = True
+            logger.info("MCP server initialized")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize MCP server: {e}")
+            raise
     
-    return {"status": "success", "message": f"Created {len(request.entities)} entities"}
-
-
-@mcp_server.endpoint("/memory.create_relations")
-async def create_relations(request: CreateRelationsRequest) -> Dict[str, str]:
-    """
-    Create multiple new relations between entities in the knowledge graph.
-    
-    Args:
-        request: CreateRelationsRequest with list of relations
+    def _setup_signal_handlers(self):
+        """Setup signal handlers for graceful shutdown."""
+        def handle_exit_signal(sig, frame):
+            logger.info(f"Received signal {sig}, shutting down...")
+            self.cleanup()
+            sys.exit(0)
         
-    Returns:
-        Dict with status message
-    """
-    logger.info(f"Creating {len(request.relations)} relations")
-    # TODO: Implement actual relation creation via LlamaIndex
+        # Register signal handlers
+        signal.signal(signal.SIGINT, handle_exit_signal)
+        signal.signal(signal.SIGTERM, handle_exit_signal)
     
-    return {"status": "success", "message": f"Created {len(request.relations)} relations"}
-
-
-@mcp_server.endpoint("/memory.add_observations")
-async def add_observations(request: AddObservationsRequest) -> Dict[str, str]:
-    """
-    Add new observations to existing entities in the knowledge graph.
+    async def run_stdio(self):
+        """Run the server in stdio mode."""
+        try:
+            await self.initialize()
+            logger.info("Starting MCP server in stdio mode")
+            await self._mcp_server.start_stdio()
+        except Exception as e:
+            logger.error(f"Error running MCP server in stdio mode: {e}")
+            self.cleanup()
+            raise
     
-    Args:
-        request: AddObservationsRequest with list of observations
+    async def run_http(self, host: Optional[str] = None, port: Optional[int] = None):
+        """
+        Run the server in HTTP mode.
         
-    Returns:
-        Dict with status message
-    """
-    logger.info(f"Adding observations to {len(request.observations)} entities")
-    # TODO: Implement actual observation addition via LlamaIndex
+        Args:
+            host: Host to bind to (defaults to settings)
+            port: Port to bind to (defaults to settings)
+        """
+        try:
+            await self.initialize()
+            
+            host = host or self._settings.mcp_host
+            port = port or self._settings.mcp_port
+            
+            logger.info(f"Starting MCP server on {host}:{port}")
+            await self._mcp_server.start_http(host=host, port=port)
+        except Exception as e:
+            logger.error(f"Error running MCP server in HTTP mode: {e}")
+            self.cleanup()
+            raise
     
-    return {"status": "success", "message": f"Added observations to {len(request.observations)} entities"}
-
-
-@mcp_server.endpoint("/memory.read_graph")
-async def read_graph() -> Dict[str, Union[str, Dict]]:
-    """
-    Read the entire knowledge graph.
-    
-    Returns:
-        Dict with graph data
-    """
-    logger.info("Reading entire graph")
-    # TODO: Implement actual graph reading via LlamaIndex
-    
-    # Placeholder response
-    return {
-        "status": "success",
-        "graph": {
-            "entities": [],
-            "relations": [],
-        }
-    }
-
-
-@mcp_server.endpoint("/memory.search_nodes")
-async def search_nodes(request: SearchRequest) -> Dict[str, Union[str, List]]:
-    """
-    Search for nodes in the knowledge graph based on a query.
-    
-    Args:
-        request: SearchRequest with search query
+    def cleanup(self):
+        """Clean up resources before shutdown."""
+        logger.info("Cleaning up resources...")
         
-    Returns:
-        Dict with search results
-    """
-    logger.info(f"Searching nodes with query: {request.query}")
-    # TODO: Implement actual node search via LlamaIndex
-    
-    # Placeholder response
-    return {
-        "status": "success",
-        "results": []
-    }
-
-
-@mcp_server.endpoint("/search.hybrid")
-async def hybrid_search(request: SearchRequest) -> Dict[str, Union[str, List]]:
-    """
-    Perform hybrid search across vector and graph stores.
-    
-    Args:
-        request: SearchRequest with search query
+        # Close memory manager connections
+        memory_manager.close()
         
-    Returns:
-        Dict with search results
-    """
-    logger.info(f"Performing hybrid search with query: {request.query}")
-    # TODO: Implement hybrid search via LlamaIndex
-    
-    # Placeholder response
-    return {
-        "status": "success",
-        "results": []
-    }
-
-
-@mcp_server.endpoint("/graph.query")
-async def graph_query(request: GraphQueryRequest) -> Dict[str, Union[str, Dict]]:
-    """
-    Execute knowledge graph query.
-    
-    Args:
-        request: GraphQueryRequest with query
+        # Close database connections
+        close_connections()
         
-    Returns:
-        Dict with query results
-    """
-    logger.info(f"Executing graph query: {request.query}")
-    # TODO: Implement graph query via LlamaIndex's KnowledgeGraphQueryEngine
+        logger.info("Cleanup complete")
+
+
+# Main entry point
+async def main():
+    """Main entry point for the MCP server."""
+    server = MemoryMCPServer()
     
-    # Placeholder response
-    return {
-        "status": "success",
-        "results": {}
-    }
+    # Determine server mode based on environment variable
+    server_mode = os.environ.get("MCP_SERVER_MODE", "stdio")
+    
+    if server_mode.lower() == "http":
+        await server.run_http()
+    else:
+        await server.run_stdio()
 
 
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup."""
-    logger.info("Starting EMVR Memory MCP Server")
-    # TODO: Initialize connections to Qdrant, Neo4j, Mem0, etc.
-
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up resources on shutdown."""
-    logger.info("Shutting down EMVR Memory MCP Server")
-    # TODO: Clean up connections
-
-
-# Main entry point for local development
 if __name__ == "__main__":
-    import uvicorn
-    
-    settings = get_settings()
-    uvicorn.run(
-        "emvr.mcp_server.server:app",
-        host=settings.mcp_host,
-        port=settings.mcp_port,
-        reload=settings.app_env == "development",
-    )
+    asyncio.run(main())

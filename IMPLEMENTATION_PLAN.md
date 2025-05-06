@@ -30,27 +30,27 @@ graph TB
     User([User]) <--> ClaudeCode["Claude Code & MCP Tools"]
     ClaudeCode <--> CustomMCP["Custom 'memory' MCP Server\n(FastMCP Framework)"]
     ClaudeCode <--> ExternalMCP["External MCP Servers\n(tavily, firecrawl, context7, etc.)"]
-    
+
     subgraph "Agent System"
         LangGraph["LangGraph\n(Agent Orchestration)"]
         LangChain["LangChain\n(Agent Tools & Planning)"]
         Agents["Specialized Agents\n(Supervisor-Worker Pattern)"]
-        
+
         LangGraph --> LangChain
         LangGraph --> Agents
     end
-    
+
     subgraph "RAG Framework"
         LlamaIndex["LlamaIndex\n(Core RAG Framework)"]
         QueryEngines["Query Engines\n(Vector, Graph, Hybrid)"]
         Retrievers["Specialized Retrievers"]
         DataLoaders["Data Loaders & Indexers"]
-        
+
         LlamaIndex --> QueryEngines
         LlamaIndex --> Retrievers
         LlamaIndex --> DataLoaders
     end
-    
+
     subgraph "Memory & Storage"
         Qdrant[(Qdrant\nVector Store)]
         Neo4j[(Neo4j\nGraph Database)]
@@ -58,37 +58,37 @@ graph TB
         Graphiti["Graphiti\n(Graph Interface)"]
         Supabase[(Supabase\nMetadata & Documents)]
         S3[(AWS S3\nOriginal Documents)]
-        
+
         Mem0 -.-> Qdrant
         Graphiti -.-> Neo4j
     end
-    
+
     subgraph "Embedding & Ingestion"
         FastEmbed["FastEmbed\nEmbedding Generation"]
         WebCrawlers["Web Crawlers\n(Crawl4AI, Firecrawl)"]
         ConnectorAPIs["Connector APIs\n(GitHub, Reddit, etc.)"]
-        
+
         FastEmbed --> Qdrant
         WebCrawlers --> DataLoaders
         ConnectorAPIs --> DataLoaders
     end
-    
+
     CustomMCP <--> LangGraph
     CustomMCP <--> LlamaIndex
-    
+
     LangGraph <--> LlamaIndex
-    
+
     LlamaIndex <--> Qdrant
     LlamaIndex <--> Neo4j
     LlamaIndex <--> Mem0
     LlamaIndex <--> Graphiti
     LlamaIndex <--> Supabase
-    
+
     DataLoaders --> S3
     DataLoaders --> Supabase
     DataLoaders --> Qdrant
     DataLoaders --> Neo4j
-    
+
     style CustomMCP fill:#f9d6ff,stroke:#9333ea,stroke-width:2px
     style LlamaIndex fill:#d1fae5,stroke:#059669,stroke-width:2px
     style LangGraph fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
@@ -116,9 +116,9 @@ graph TB
 - **Orchestration Framework:** LangGraph
   - Manages complex, potentially cyclic workflows.
   - Implements Supervisor-Worker pattern:
-    - *Supervisor:* Decomposes tasks, routes to specialists, manages state.
-    - *Specialists:* Domain-specific agents (e.g., `ResearchAgent`, `CodeAgent`, `IngestionAgent`) built using LangChain.
-    - *Critic/Reflection Agent:* Evaluates outputs, triggers self-correction loops (Reflection-reinforced learning).
+    - _Supervisor:_ Decomposes tasks, routes to specialists, manages state.
+    - _Specialists:_ Domain-specific agents (e.g., `ResearchAgent`, `CodeAgent`, `IngestionAgent`) built using LangChain.
+    - _Critic/Reflection Agent:_ Evaluates outputs, triggers self-correction loops (Reflection-reinforced learning).
   - Manages short-term memory (STM) via built-in state.
 - **Agent Framework:** LangChain
   - Provides building blocks for Specialist agents (LLM wrappers, prompt templates, output parsers, tool abstractions).
@@ -149,36 +149,36 @@ graph TB
   - Handles data transformation and chunking.
   - Manages indexing into Qdrant (vectors) and Neo4j (`Neo4jGraphStore` for graph data).
   - Provides query engines and retrievers for:
-    - *Vector Search:* Querying Qdrant (likely via Mem0 interface).
-    - *Keyword Search:* BM25 or similar (potentially via Qdrant sparse vectors or separate index).
-    - *Graph Search:* Querying Neo4j/Graphiti using natural language (`text2cypher`) or structured Cypher queries via `KnowledgeGraphQueryEngine` or custom retrievers.
-    - *Hybrid Retrieval:* Combining vector, keyword, and potentially graph results.
+    - _Vector Search:_ Querying Qdrant (likely via Mem0 interface).
+    - _Keyword Search:_ BM25 or similar (potentially via Qdrant sparse vectors or separate index).
+    - _Graph Search:_ Querying Neo4j/Graphiti using natural language (`text2cypher`) or structured Cypher queries via `KnowledgeGraphQueryEngine` or custom retrievers.
+    - _Hybrid Retrieval:_ Combining vector, keyword, and potentially graph results.
   - Integrates with LangChain agents and the FastMCP server for retrieval requests.
 - **Embedding Generation:**
   - **Models:** OpenAI `text-embedding-3-small` / Cohere `embed-english-v3` (or similar SOTA).
   - **Tooling:** FastEmbed library used within the ingestion pipeline for efficient, local embedding generation.
 - **Retrieval Strategy:**
-  - *Hybrid RAG:* Combine Qdrant vector search (via Mem0/LlamaIndex) + BM25 keyword search.
-  - *KAG (Knowledge-Augmented Generation):* Inject relevant subgraphs from Neo4j/Graphiti (retrieved via LlamaIndex) into the LLM context.
-  - *Web Search Fusion:* Integrate Tavily API results (via LlamaIndex tool or direct call) into the final context provided to the LLM.
+  - _Hybrid RAG:_ Combine Qdrant vector search (via Mem0/LlamaIndex) + BM25 keyword search.
+  - _KAG (Knowledge-Augmented Generation):_ Inject relevant subgraphs from Neo4j/Graphiti (retrieved via LlamaIndex) into the LLM context.
+  - _Web Search Fusion:_ Integrate Tavily API results (via LlamaIndex tool or direct call) into the final context provided to the LLM.
 
 ### 2.5. Ingestion & Data Processing Layer
 
 - **Goal:** Populate the memory/knowledge layers from diverse sources, both automatically and manually.
 - **Sources:** Websites, blogs, social media (Reddit, X), research papers (arXiv), code repositories (GitHub), email (IMAP), local files/text.
 - **Tools:**
-  - *Data Loading:* LlamaIndex Readers/Loaders (primary mechanism).
-  - *Web Scraping:* Crawl4AI (LLM-focused), Firecrawl (structured output), Scrapy (complex sites).
-  - *Browser Automation:* Playwright (via MCP server).
-  - *APIs:* Official platform APIs (Reddit, X, GitHub, arXiv via MCP).
-  - *Email:* Python `imaplib`.
-  - *Code:* GitHub Webhooks triggering local processing (using `repomix` MCP potentially).
+  - _Data Loading:_ LlamaIndex Readers/Loaders (primary mechanism).
+  - _Web Scraping:_ Crawl4AI (LLM-focused), Firecrawl (structured output), Scrapy (complex sites).
+  - _Browser Automation:_ Playwright (via MCP server).
+  - _APIs:_ Official platform APIs (Reddit, X, GitHub, arXiv via MCP).
+  - _Email:_ Python `imaplib`.
+  - _Code:_ GitHub Webhooks triggering local processing (using `repomix` MCP potentially).
 - **Workflow:**
-  1. *Discover/Fetch:* Get raw content (HTML, PDF, JSON, text, code).
-  2. *Transform:* Clean, parse, chunk data (e.g., Firecrawl to Markdown, LlamaIndex transformations).
-  3. *Enrich:* Add metadata (source URL, timestamp via `time` MCP), extract entities/relationships (potentially using LLM calls via LangChain).
-  4. *Embed:* Generate vector embeddings using FastEmbed.
-  5. *Store:*
+  1. _Discover/Fetch:_ Get raw content (HTML, PDF, JSON, text, code).
+  2. _Transform:_ Clean, parse, chunk data (e.g., Firecrawl to Markdown, LlamaIndex transformations).
+  3. _Enrich:_ Add metadata (source URL, timestamp via `time` MCP), extract entities/relationships (potentially using LLM calls via LangChain).
+  4. _Embed:_ Generate vector embeddings using FastEmbed.
+  5. _Store:_
      - Embeddings -> Qdrant (via Mem0/LlamaIndex indexer).
      - Structured Data/Relationships -> Neo4j (via Graphiti/LlamaIndex indexer/`n10s`).
      - Metadata/Links -> Supabase.
@@ -220,6 +220,7 @@ graph TB
 ## 5. Implementation Plan (Phased Approach)
 
 ### Phase 0: Setup & Core Infrastructure (Foundation)
+
 - Initialize Git repository (`enhanced-mem-vector-rag`).
 - Setup `uv` environment and `pyproject.toml` with initial dependencies (FastMCP, Python basics).
 - Create core directory structure (`agents`, `ingestion`, `memory_interfaces`, `mcp_server`, `core`, `tests`, `config`, `scripts`, `docs`).
@@ -231,9 +232,10 @@ graph TB
 - Implement basic configuration loading (`.env` via `python-dotenv`).
 - Setup pre-commit hooks (Black, isort, Ruff).
 - Write initial `README.md` and copy `CLAUDE.md` (v4).
-- *Goal: Runnable Docker stack, basic Python project structure.*
+- _Goal: Runnable Docker stack, basic Python project structure._
 
 ### Phase 1: Core Memory Backend & MCP Server Foundation
+
 - Implement basic FastMCP server structure (`mcp_server/main.py`).
 - Establish connections to Qdrant, Neo4j, Supabase from the Python backend (e.g., in `core/db_connections.py`).
 - Implement basic Mem0 interface (`memory_interfaces/mem0_interface.py`) wrapping Qdrant client for simple upsert/retrieve.
@@ -245,9 +247,10 @@ graph TB
   - `/graph.query_cypher` (basic direct Cypher execution)
 - Implement basic `stdio` binding for FastMCP server.
 - Write basic unit tests for connections and interfaces.
-- *Goal: MCP server can connect to DBs and perform basic read/write operations.*
+- _Goal: MCP server can connect to DBs and perform basic read/write operations._
 
 ### Phase 2: Basic Ingestion, Embedding & Storage
+
 - Implement basic ingestion pipeline structure (`ingestion/pipeline.py`).
 - Integrate FastEmbed (`core/embedding.py`).
 - Implement LlamaIndex basic file loader (e.g., TextLoader).
@@ -255,24 +258,27 @@ graph TB
   - Endpoint receives text -> calls ingestion pipeline -> uses LlamaIndex loader -> uses FastEmbed -> stores embedding via `/memory.upsert_vector` -> stores metadata in Supabase -> potentially creates basic node via `/graph.create_node`.
 - Setup RabbitMQ producer (in MCP endpoint) and consumer (in a separate ingestion worker script `ingestion/worker.py`).
 - Write tests for embedding and basic ingestion flow.
-- *Goal: Manually ingest text, embed it, and store vector + metadata.*
+- _Goal: Manually ingest text, embed it, and store vector + metadata._
 
 ### Phase 3: Basic RAG & Search Endpoint
+
 - Implement basic LlamaIndex vector retriever (`retrievers/vector_retriever.py`) using the Mem0 interface/Qdrant.
 - Implement basic LlamaIndex query engine using the vector retriever.
 - Implement FastMCP `/search.hybrid` endpoint (initially just vector search) using the LlamaIndex query engine.
 - Write tests for the retriever and search endpoint.
-- *Goal: Search ingested text vectors via MCP.*
+- _Goal: Search ingested text vectors via MCP._
 
 ### Phase 4: Basic Agent Structure
+
 - Setup basic LangGraph state definition.
 - Implement LangGraph Supervisor node (basic task routing logic).
 - Implement one simple LangChain Specialist agent (e.g., `BasicResearcherAgent`) that uses the `/search.hybrid` MCP endpoint via a LangChain tool.
 - Wire the Supervisor and Specialist in a simple LangGraph graph.
 - Create a script (`scripts/run_agent.py`) to interact with the LangGraph agent.
-- *Goal: A simple agent can perform a vector search.*
+- _Goal: A simple agent can perform a vector search._
 
 ### Phase 5: Enhance RAG & Graph Integration
+
 - Integrate BM25/keyword search into Qdrant (sparse vectors) or setup separate sparse index.
 - Update LlamaIndex retriever and `/search.hybrid` endpoint to perform true hybrid (vector + keyword) search.
 - Integrate Tavily web search into `/search.hybrid` fusion logic (via LlamaIndex tool or direct API call).
@@ -280,9 +286,10 @@ graph TB
 - Implement KAG: Modify agents/retrievers to query Neo4j via LlamaIndex (`KnowledgeGraphQueryEngine` or custom Cypher) using `/graph.query_cypher` or a new `/graph.query_llama` endpoint. Inject graph context.
 - Implement `/rules.validate` endpoint calling Neo4j APOC procedures.
 - Define initial OWL/RDF schema and import using `n10s`.
-- *Goal: Full Hybrid RAG + KAG retrieval available via MCP and usable by agents.*
+- _Goal: Full Hybrid RAG + KAG retrieval available via MCP and usable by agents._
 
 ### Phase 6: Expand Ingestion Sources
+
 - Implement ingestion connectors using LlamaIndex/Crawl4AI/Firecrawl/APIs/IMAP for:
   - Web URLs (via `/ingest.url`)
   - Code Repositories (via `/ingest.repo` and Git hooks)
@@ -291,30 +298,33 @@ graph TB
   - Reddit/X (via APIs)
 - Refine ingestion pipeline to handle different data types, extract relationships for Neo4j, and store originals in S3/Supabase Storage.
 - Implement scheduled ingestion triggers (e.g., GitHub Action calling MCP endpoint).
-- *Goal: System can ingest data from multiple key sources.*
+- _Goal: System can ingest data from multiple key sources._
 
 ### Phase 7: Advanced Agents & Planning
+
 - Implement Critic/Reflection agent and loop in LangGraph.
 - Develop more specialized agents (`CodeAgent`, `ReportAgent`).
 - Integrate advanced planning (Plan-and-Execute, Graphiti procedural planning) into Supervisor/Specialists.
 - Refine agent tool usage (leveraging more MCP capabilities).
-- *Goal: More capable, self-improving multi-agent system.*
+- _Goal: More capable, self-improving multi-agent system._
 
 ### Phase 8: Refinement, Observability & Optimization
+
 - Implement comprehensive Grafana dashboards monitoring Qdrant, Neo4j, Supabase, FastMCP server metrics, RabbitMQ queue lengths.
 - Implement APOC rules for data validation triggered by graph writes.
 - Implement memory optimization strategies (tiered storage in Qdrant, consolidation jobs).
 - Refine error handling and logging across the system.
 - Add comprehensive integration tests.
-- *Goal: A robust, observable, and optimized system.*
+- _Goal: A robust, observable, and optimized system._
 
 ### Phase 9: UI & Cloud Deployment (Future)
+
 - Develop Chainlit UI for direct interaction.
 - Implement HTTP/SSE binding for FastMCP server.
 - Deploy FastMCP server to Cloudflare Workers.
 - Deploy backend services (Qdrant, Neo4j, Supabase, RabbitMQ, Agent Workers) to AWS (or chosen cloud).
 - Configure cloud monitoring and security.
-- *Goal: A cloud-hosted, remotely accessible system.*
+- _Goal: A cloud-hosted, remotely accessible system._
 
 ## 6. Development Environment & Tooling
 
@@ -342,7 +352,7 @@ sequenceDiagram
     participant External as External MCP Servers
     participant LlamaIdx as LlamaIndex
     participant Storage as Storage Systems
-    
+
     User->>Claude: Query or Task
     Claude->>Memory: memory.read_graph()
     Memory->>LlamaIdx: Query through LlamaIndex
@@ -350,21 +360,21 @@ sequenceDiagram
     Storage-->>LlamaIdx: Return relevant data
     LlamaIdx-->>Memory: Process & return results
     Memory-->>Claude: Return graph state
-    
+
     Claude->>External: context7.get_library_docs()
     External-->>Claude: Return documentation
-    
+
     Note over Claude,Memory: Agent Planning & Execution
-    
+
     Claude->>Memory: Execute retrieval/update
     Memory->>LlamaIdx: Orchestrate operations
     LlamaIdx->>Storage: Execute operations
     Storage-->>LlamaIdx: Return operation results
     LlamaIdx-->>Memory: Process & return results
     Memory-->>Claude: Return operation status/results
-    
+
     Claude->>Memory: memory.add_observations()
     Memory->>Storage: Update memory state
-    
+
     Claude-->>User: Deliver response/results
 ```
