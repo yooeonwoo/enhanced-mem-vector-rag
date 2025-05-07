@@ -90,7 +90,7 @@ _ALWAYS_ start every development session by refreshing your understanding of the
 
 - **Language:** Python 3.11+
 - **Package Manager:** `uv` (`uv pip install ...`, `uv run ...`).
-- **Formatting/Linting:** Black, isort, Ruff (configure in `pyproject.toml`). Enforce via pre-commit hooks.
+- **Formatting/Linting:** Black, Ruff (configure in `pyproject.toml`). Enforce via pre-commit hooks.
 - **Type Hinting:** Mandatory (`typing` module).
 - **Docstrings:** Google-style (for all modules, classes, functions).
 - **Error Handling:** Robust `try/except`, custom exceptions, structured logging.
