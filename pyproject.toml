@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -13,45 +13,95 @@ authors = [
     {name = "EMVR Team"}
 ]
 dependencies = [
-    "fastmcp>=0.1.0",
-    "langchain>=0.1.0",
-    "langchain-openai>=0.1.0",
-    "langgraph>=0.1.0",
-    "llama-index>=0.9.0",
-    "chainlit>=1.0.0",
-    "qdrant-client>=1.6.0",
-    "neo4j>=5.14.0",
-    "supabase>=2.0.0",
-    "fastembed>=0.1.0",
-    "python-dotenv>=1.0.0",
+    # Core Frameworks
+    "langchain~=0.1.0",
+    "langchain-core~=0.1.0",
+    "langgraph~=0.0.20",
+    "llama-index~=0.9.25",
+    "llama-index-core~=0.10.0",
+    "llama-index-agent-openai~=0.1.4",
+    "llama-index-vector-stores-qdrant~=0.1.2",
+    "llama-index-graph-stores-neo4j~=0.1.2",
+    "llama-index-embeddings-openai~=0.1.5",
+    "llama-index-embeddings-cohere~=0.1.2",
+    "llama-index-readers-web~=0.1.3",
+    "llama-index-cli~=0.1.2",
+    
+    # LLM Clients
+    "openai~=1.13.0",
+    "anthropic~=0.7.0",
+    "cohere~=4.46",
+    
+    # Database & Storage
+    "qdrant-client~=1.7.0",
+    "neo4j~=5.14.0",
+    "supabase~=2.3.0",
+    "postgrest~=0.13.0",
+    "psycopg2-binary~=2.9.9",
+    
+    # Knowledge Representation
+    "rdflib~=7.0.0",
+    "owlready2~=0.45",
+    "fastembed~=0.2.0",
+    
+    # Backend & API
+    "fastmcp~=0.1.0",
+    "fastapi~=0.104.1",
+    "uvicorn~=0.23.2",
+    "pydantic~=2.5.0",
+    "chainlit~=1.0.0",
+    
+    # Web & Data Ingestion
+    "crawler4ai~=0.0.5",
+    "firecrawl~=0.1.0",
+    "scrapy~=2.11.0",
+    "playwright~=1.40.0",
+    "beautifulsoup4~=4.12.3",
+    "requests~=2.31.0",
+    "aiohttp~=3.9.0",
+    "feedparser~=6.0.10",
+    "python-imap~=0.0.2",
+    
+    # AWS 
+    "boto3~=1.34.0",
+    "s3fs~=2023.10.0",
+    
+    # Monitoring
+    "prometheus-client~=0.17.0",
+    "grafana-api~=1.0.3",
+    
+    # Utilities
+    "python-dotenv~=1.0.0",
+    "pyjwt~=2.8.0",
+    "cryptography~=42.0.0",
+    "tenacity>=8.2.3,<8.4",  # Skip 8.4+ due to reported issues
+    "aiofiles~=23.2.1",
+    "pyyaml~=6.0.1",
+    "tqdm~=4.66.1",
+    "python-dateutil~=2.8.2",
 ]
 
-[tool.black]
-line-length = 88
-target-version = ["py311"]
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest~=7.4.3",
+    "pytest-asyncio~=0.21.1",
+    
+    # Code Quality
+    "ruff~=0.1.5",  # Handles linting, formatting, and import sorting
+    "mypy~=1.7.0",
+    "pre-commit~=3.5.0",
+    "uv~=0.1.11",
+]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
+[project.urls]
+"Homepage" = "https://github.com/bjorn/enhanced-mem-vector-rag"
+"Bug Tracker" = "https://github.com/bjorn/enhanced-mem-vector-rag/issues"
 
+# Use Ruff for formatting (replacing Black)
 [tool.ruff]
-line-length = 88
+# Common settings
+line-length = 100
 target-version = "py311"
 select = ["E", "F", "I", "W", "N", "B", "C4", "UP", "ANN", "PYI"]
 ignore = ["ANN101", "ANN102", "ANN401"]
@@ -66,14 +116,49 @@ exclude = [
   "dist",
 ]
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401", "E402"]
-"tests/*" = ["ANN"]
+# Formatter settings
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
+# Linter settings
+[tool.ruff.lint]
+# Simplified rule selection by categories
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "C",   # flake8-comprehensions and mccabe
+    "N",   # pep8-naming
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations
+    "S",   # flake8-bandit
+    "BLE", # flake8-blind-except
+    "A",   # flake8-builtins
+    "ERA", # eradicate
+    "PD",  # pandas-vet
+    "PL",  # pylint
+    "RUF", # Ruff-specific
+]
+ignore = ["D203", "D212", "ANN401", "PGH003"]
+
+# Import sorting configuration
+[tool.ruff.lint.isort]
+known-first-party = ["emvr"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"tests/*" = ["S101", "ANN201", "PLR2004"]
+
+# Simplified mypy configuration
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
-warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
@@ -82,6 +167,21 @@ no_implicit_optional = true
 strict_optional = true
 
 [[tool.mypy.overrides]]
-module = "tests.*"
+module = ["tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+
+# Test configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+asyncio_mode = "auto"
+
+# Setuptools configuration for development
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"emvr" = ["py.typed"]
