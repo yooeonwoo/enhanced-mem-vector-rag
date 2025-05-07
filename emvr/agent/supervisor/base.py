@@ -3,7 +3,7 @@
 import os
 import uuid
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Dict
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor
@@ -112,21 +112,23 @@ class SupervisorAgent(BaseAgent):
 
         """
         # Create handoff tools for each worker agent
-        handoff_tools = []
-        for agent_name in self.worker_agents:
-            handoff_tools.append(self._create_handoff_tool(agent_name))
+        handoff_tools = [
+            self._create_handoff_tool(agent_name) for agent_name in self.worker_agents
+        ]
 
         # Create the supervisor agent
         supervisor_agent = create_react_agent(
             self.llm,
             handoff_tools,
             system_message=(
-                "You are a supervisor managing multiple specialist agents for the Enhanced Memory-Vector RAG system. "
+                "You are a supervisor managing multiple specialist agents "
+                "for the Enhanced Memory-Vector RAG system. "
                 "Based on the user request, decide which specialist agent to route the task to. "
                 "Available agents:\n"
                 + "\n".join(
                     [
-                        f"- {agent_name}: {agent.description if hasattr(agent, 'description') else 'Specialist agent'}"
+                        f"- {agent_name}: "
+                        f"{agent.description if hasattr(agent, 'description') else 'Specialist agent'}"
                         for agent_name, agent in self.worker_agents.items()
                     ],
                 )
@@ -217,9 +219,17 @@ class SupervisorAgent(BaseAgent):
                 messages = [{"role": "assistant", "content": result.output}]
 
                 return add_messages(state, messages)
-            except Exception as e:
-                # Handle errors
+            except (RuntimeError, asyncio.TimeoutError) as e:
+                # Handle specific runtime errors
                 error_message = f"Error in {agent_name}: {e!s}"
+                state["error"] = error_message
+
+                return add_messages(
+                    state, [{"role": "system", "content": error_message}],
+                )
+            except ValueError as e:
+                # Handle value errors
+                error_message = f"Value error in {agent_name}: {e!s}"
                 state["error"] = error_message
 
                 return add_messages(
@@ -265,7 +275,7 @@ class SupervisorAgent(BaseAgent):
         msg = "Supervisor agent doesn't use AgentExecutor"
         raise NotImplementedError(msg)
 
-    async def run(self, query: str, **kwargs) -> AgentResult:
+    async def run(self, query: str, **kwargs: Dict[str, Any]) -> AgentResult:
         """
         Run the agent with a query.
 
@@ -324,7 +334,7 @@ class SupervisorAgent(BaseAgent):
                 intermediate_steps=intermediate_steps,
                 error=final_state.get("error"),
             )
-        except Exception as e:
+        except (ValueError, KeyError) as e:
             return AgentResult(
                 success=False,
                 output="",

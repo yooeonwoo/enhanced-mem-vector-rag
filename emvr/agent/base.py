@@ -1,7 +1,7 @@
 """Base classes for agents."""
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict
 
 from langchain.agents import AgentExecutor
 from pydantic import BaseModel
@@ -30,7 +30,7 @@ class BaseAgent(ABC):
         """
 
     @abstractmethod
-    async def run(self, query: str, **kwargs) -> AgentResult:
+    async def run(self, query: str, **kwargs: Dict[str, Any]) -> AgentResult:
         """
         Run the agent with a query.
 

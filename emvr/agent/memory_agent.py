@@ -1,6 +1,7 @@
 """Memory-augmented agent implementation."""
 
 import os
+from typing import Any, Dict
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
@@ -123,7 +124,8 @@ class MemoryAgent(BaseAgent):
                     observations = entity.get("observations", [])
                     observation_text = ", ".join(observations[:MAX_OBSERVATIONS_PREVIEW])
                     if len(observations) > MAX_OBSERVATIONS_PREVIEW:
-                        observation_text += f" (and {len(observations)-MAX_OBSERVATIONS_PREVIEW} more)"
+                        remaining = len(observations) - MAX_OBSERVATIONS_PREVIEW
+                        observation_text += f" (and {remaining} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
@@ -159,7 +161,8 @@ class MemoryAgent(BaseAgent):
                     observations = entity.get("observations", [])
                     observation_text = ", ".join(observations[:MAX_OBSERVATIONS_PREVIEW])
                     if len(observations) > MAX_OBSERVATIONS_PREVIEW:
-                        observation_text += f" (and {len(observations)-MAX_OBSERVATIONS_PREVIEW} more)"
+                        remaining = len(observations) - MAX_OBSERVATIONS_PREVIEW
+                        observation_text += f" (and {remaining} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
@@ -208,7 +211,7 @@ class MemoryAgent(BaseAgent):
         """
         return self.agent_executor
 
-    async def run(self, query: str, **kwargs) -> AgentResult:
+    async def run(self, query: str, **kwargs: Dict[str, Any]) -> AgentResult:
         """
         Run the agent with a query.
 
@@ -235,9 +238,17 @@ class MemoryAgent(BaseAgent):
                 output=agent_output["output"],
                 intermediate_steps=agent_output.get("intermediate_steps"),
             )
-        except Exception as e:
+        except (KeyError, ValueError) as e:
+            # Handle specific exceptions we can identify
             return AgentResult(
                 success=False,
                 output="",
-                error=str(e),
+                error=f"Agent execution error: {str(e)}",
+            )
+        except RuntimeError as e:
+            # Handle runtime errors
+            return AgentResult(
+                success=False,
+                output="",
+                error=f"Runtime error: {str(e)}",
             )
