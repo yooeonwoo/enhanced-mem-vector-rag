@@ -25,6 +25,33 @@ class MemoryManager(MemoryInterface):
         """
         self.vector_store = vector_store or QdrantMemoryStore()
         self.graph_store = graph_store or Neo4jMemoryStore()
+        self._initialized = False
+        
+    async def initialize(self) -> None:
+        """Initialize vector and graph stores."""
+        if self._initialized:
+            return
+            
+        # Initialize vector store
+        # In a real implementation, this would properly initialize the vector store
+        
+        # Initialize graph store
+        # In a real implementation, this would properly initialize the graph store
+        
+        self._initialized = True
+        
+    def close(self) -> None:
+        """Close connections and clean up resources."""
+        if not self._initialized:
+            return
+            
+        # Close vector store connections
+        # In a real implementation, this would properly close vector store connections
+        
+        # Close graph store connections
+        # In a real implementation, this would properly close graph store connections
+        
+        self._initialized = False
 
     async def create_entities(self, entities: list[Entity]) -> dict[str, Any]:
         """
@@ -51,7 +78,6 @@ class MemoryManager(MemoryInterface):
         # Also index entities in vector store for semantic search
         # This would be implemented based on specific requirements
 
-
     async def create_relations(self, relations: list[Relation]) -> dict[str, Any]:
         """
         Create multiple new relations between entities in the knowledge graph.
@@ -75,7 +101,9 @@ class MemoryManager(MemoryInterface):
         return await self.graph_store.create_relations(relations_data)
 
     async def add_observations(
-        self, entity_name: str, observations: list[str],
+        self,
+        entity_name: str,
+        observations: list[str],
     ) -> dict[str, Any]:
         """
         Add new observations to an existing entity in the knowledge graph.
@@ -104,7 +132,9 @@ class MemoryManager(MemoryInterface):
         return await self.graph_store.delete_entities(entity_names)
 
     async def delete_observations(
-        self, entity_name: str, observations: list[str],
+        self,
+        entity_name: str,
+        observations: list[str],
     ) -> dict[str, Any]:
         """
         Delete specific observations from an entity in the knowledge graph.
@@ -178,7 +208,10 @@ class MemoryManager(MemoryInterface):
         return await self.graph_store.open_nodes(names)
 
     async def hybrid_search(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
+        self,
+        query: str,
+        top_k: int = 5,
+        filters: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Perform hybrid search across vector and graph stores.
@@ -194,7 +227,9 @@ class MemoryManager(MemoryInterface):
         """
         # Perform vector search
         vector_results = await self.vector_store.hybrid_search(
-            query, top_k=top_k, filters=filters,
+            query,
+            top_k=top_k,
+            filters=filters,
         )
 
         # Perform graph search (simplified here)
@@ -207,3 +242,6 @@ class MemoryManager(MemoryInterface):
             "graph_results": graph_results.get("entities", []),
         }
 
+
+# Singleton instance
+memory_manager = MemoryManager()

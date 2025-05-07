@@ -4,7 +4,8 @@ import os
 from typing import Any
 
 from dotenv import load_dotenv
-from llama_index.core.graph_stores import Neo4jGraphStore
+# Temporarily comment out LlamaIndex import
+# from llama_index.core.graph_stores import Neo4jGraphStore
 from neo4j import AsyncGraphDatabase
 
 from emvr.memory.base import Entity, Relation
@@ -44,13 +45,13 @@ class Neo4jMemoryStore:
             auth=(self.username, self.password),
         )
 
-        # Initialize LlamaIndex graph store
-        self.graph_store = Neo4jGraphStore(
-            username=self.username,
-            password=self.password,
-            url=self.uri,
-            database=self.database,
-        )
+        # Temporarily comment out LlamaIndex graph store
+        # self.graph_store = Neo4jGraphStore(
+        #     username=self.username,
+        #     password=self.password,
+        #     url=self.uri,
+        #     database=self.database,
+        # )
 
     async def create_entity(self, entity: Entity) -> dict[str, Any]:
         """
@@ -179,7 +180,9 @@ class Neo4jMemoryStore:
             )
 
     async def add_observations(
-        self, entity_name: str, observations: list[str],
+        self,
+        entity_name: str,
+        observations: list[str],
     ) -> dict[str, Any]:
         """
         Add new observations to an existing entity in the knowledge graph.
@@ -229,7 +232,9 @@ class Neo4jMemoryStore:
         }
 
     async def delete_observations(
-        self, entity_name: str, observations: list[str],
+        self,
+        entity_name: str,
+        observations: list[str],
     ) -> dict[str, Any]:
         """
         Delete specific observations from an entity in the knowledge graph.
@@ -326,20 +331,24 @@ class Neo4jMemoryStore:
             # Get entities
             result = await session.run(entities_query)
             async for record in result:
-                entities.append({
-                    "name": record["name"],
-                    "entity_type": record["entity_type"],
-                    "observations": record["observations"],
-                })
+                entities.append(
+                    {
+                        "name": record["name"],
+                        "entity_type": record["entity_type"],
+                        "observations": record["observations"],
+                    }
+                )
 
             # Get relations
             result = await session.run(relations_query)
             async for record in result:
-                relations.append({
-                    "from": record["from_entity"],
-                    "relation": record["relation_type"],
-                    "to": record["to_entity"],
-                })
+                relations.append(
+                    {
+                        "from": record["from_entity"],
+                        "relation": record["relation_type"],
+                        "to": record["to_entity"],
+                    }
+                )
 
         return {
             "entities": entities,
@@ -377,12 +386,14 @@ class Neo4jMemoryStore:
                 query=query,
             )
             async for record in result:
-                entities.append({
-                    "name": record["name"],
-                    "entity_type": record["entity_type"],
-                    "matching_observations": record["matching_observations"],
-                    "all_observations": record["all_observations"],
-                })
+                entities.append(
+                    {
+                        "name": record["name"],
+                        "entity_type": record["entity_type"],
+                        "matching_observations": record["matching_observations"],
+                        "all_observations": record["all_observations"],
+                    }
+                )
 
         return {
             "query": query,
@@ -416,11 +427,13 @@ class Neo4jMemoryStore:
                 names=names,
             )
             async for record in result:
-                entities.append({
-                    "name": record["name"],
-                    "entity_type": record["entity_type"],
-                    "observations": record["observations"],
-                })
+                entities.append(
+                    {
+                        "name": record["name"],
+                        "entity_type": record["entity_type"],
+                        "observations": record["observations"],
+                    }
+                )
 
         return {
             "entities": entities,

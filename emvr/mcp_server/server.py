@@ -10,8 +10,8 @@ import os
 import signal
 import sys
 
-from fastmcp import MCPServer
-from langchain_openai import ChatOpenAI
+from fastmcp.server import MCPServer
+from langchain_community.chat_models import ChatOpenAI
 
 from emvr.agents.orchestration import get_orchestrator, initialize_orchestration
 from emvr.config import get_settings
@@ -100,6 +100,7 @@ class MemoryMCPServer:
 
     def _setup_signal_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown."""
+
         def handle_exit_signal(sig, frame) -> None:
             logger.info(f"Received signal {sig}, shutting down...")
             self.cleanup()
