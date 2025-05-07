@@ -41,19 +41,46 @@ def run_chainlit(
         env["CHAINLIT_HOST"] = host
         env["CHAINLIT_PORT"] = str(port)
 
+        # Set development mode for testing
+        env["EMVR_DEVELOPMENT"] = "true"
+        
         if debug:
             env["CHAINLIT_DEBUG"] = "true"
+            # Enable more verbose logging in debug mode
+            env["EMVR_LOG_LEVEL"] = "DEBUG"
+        else:
+            env["EMVR_LOG_LEVEL"] = "INFO"
 
         # Determine app path
         app_path = os.path.join(
-            project_root, "emvr", "ui", "app.py",
+            project_root,
+            "emvr",
+            "ui",
+            "app.py",
         )
+        
+        # Verify app path exists
+        if not os.path.exists(app_path):
+            logger.error(f"Chainlit app not found at {app_path}")
+            raise FileNotFoundError(f"App file not found: {app_path}")
+
+        # Verify chainlit is installed
+        try:
+            import chainlit
+            logger.info(f"Using Chainlit version: {chainlit.__version__}")
+        except ImportError:
+            logger.error("Chainlit not installed. Run: pip install chainlit==2.5.5")
+            raise ImportError("Chainlit not installed")
 
         # Build command
         cmd = [
-            "chainlit", "run", app_path,
-            "--host", host,
-            "--port", str(port),
+            "chainlit",
+            "run",
+            app_path,
+            "--host",
+            host,
+            "--port",
+            str(port),
         ]
 
         if debug:
@@ -61,10 +88,25 @@ def run_chainlit(
 
         # Run Chainlit
         logger.info("Starting Chainlit UI on %s:%s", host, port)
-        subprocess.run(cmd, env=env, cwd=str(project_root), check=False)
+        logger.info("Development mode enabled - using mock components where needed")
+        
+        result = subprocess.run(
+            cmd, 
+            env=env, 
+            cwd=str(project_root), 
+            check=False,
+            capture_output=debug  # Capture output in debug mode
+        )
+        
+        if result.returncode != 0:
+            logger.error(f"Chainlit exited with code {result.returncode}")
+            if debug and result.stderr:
+                logger.error(f"Error output: {result.stderr.decode('utf-8')}")
+            
+            raise RuntimeError(f"Chainlit failed with exit code {result.returncode}")
 
-    except Exception:
-        logger.exception("Error running Chainlit")
+    except Exception as e:
+        logger.exception(f"Error running Chainlit: {e}")
         raise
 
 
