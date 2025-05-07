@@ -11,6 +11,11 @@ from emvr.agent.base import AgentResult, BaseAgent
 from emvr.memory.memory_manager import MemoryManager
 from emvr.retrieval.hybrid_retriever import HybridRetriever
 
+# Constants
+MAX_ENTITIES_DISPLAY = 10
+MAX_RELATIONS_DISPLAY = 10
+MAX_OBSERVATIONS_PREVIEW = 3
+
 # Load environment variables
 load_dotenv()
 
@@ -23,10 +28,10 @@ class MemoryAgent(BaseAgent):
         llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
         retriever: HybridRetriever | None = None,
-    ):
+    ) -> None:
         """
         Initialize the memory agent.
-        
+
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
@@ -51,7 +56,7 @@ class MemoryAgent(BaseAgent):
     def _create_agent_executor(self) -> AgentExecutor:
         """
         Create an agent executor with memory tools.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -114,27 +119,27 @@ class MemoryAgent(BaseAgent):
                     return "Knowledge graph is empty."
 
                 entity_descriptions = []
-                for entity in entities[:10]:  # Limit to 10 entities for readability
+                for entity in entities[:MAX_ENTITIES_DISPLAY]:
                     observations = entity.get("observations", [])
-                    observation_text = ", ".join(observations[:3])
-                    if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                    observation_text = ", ".join(observations[:MAX_OBSERVATIONS_PREVIEW])
+                    if len(observations) > MAX_OBSERVATIONS_PREVIEW:
+                        observation_text += f" (and {len(observations)-MAX_OBSERVATIONS_PREVIEW} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
-                relation_descriptions = []
-                for relation in relations[:10]:  # Limit to 10 relations
-                    relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}",
-                    )
+                # Use list comprehension for better performance
+                relation_descriptions = [
+                    f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}"
+                    for relation in relations[:MAX_RELATIONS_DISPLAY]
+                ]
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
                 if relations:
                     output += "\n\nRelations:\n" + "\n".join(relation_descriptions)
 
-                if len(entities) > 10 or len(relations) > 10:
+                if len(entities) > MAX_ENTITIES_DISPLAY or len(relations) > MAX_RELATIONS_DISPLAY:
                     output += "\n\n(Showing partial results)"
 
                 return output
@@ -150,27 +155,27 @@ class MemoryAgent(BaseAgent):
                     return "Knowledge graph is empty."
 
                 entity_descriptions = []
-                for entity in entities[:10]:  # Limit to 10 entities for readability
+                for entity in entities[:MAX_ENTITIES_DISPLAY]:
                     observations = entity.get("observations", [])
-                    observation_text = ", ".join(observations[:3])
-                    if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                    observation_text = ", ".join(observations[:MAX_OBSERVATIONS_PREVIEW])
+                    if len(observations) > MAX_OBSERVATIONS_PREVIEW:
+                        observation_text += f" (and {len(observations)-MAX_OBSERVATIONS_PREVIEW} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
-                relation_descriptions = []
-                for relation in relations[:10]:  # Limit to 10 relations
-                    relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}",
-                    )
+                # Use list comprehension for better performance
+                relation_descriptions = [
+                    f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}"
+                    for relation in relations[:MAX_RELATIONS_DISPLAY]
+                ]
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
                 if relations:
                     output += "\n\nRelations:\n" + "\n".join(relation_descriptions)
 
-                if len(entities) > 10 or len(relations) > 10:
+                if len(entities) > MAX_ENTITIES_DISPLAY or len(relations) > MAX_RELATIONS_DISPLAY:
                     output += "\n\n(Showing partial results)"
 
                 return output
@@ -185,19 +190,18 @@ class MemoryAgent(BaseAgent):
         tools = [memory_search_tool, memory_read_tool]
 
         # Initialize agent
-        agent = initialize_agent(
+        return initialize_agent(
             tools,
             self.llm,
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
 
-        return agent
 
     def get_agent_executor(self) -> AgentExecutor:
         """
         Get the agent executor.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -207,11 +211,11 @@ class MemoryAgent(BaseAgent):
     async def run(self, query: str, **kwargs) -> AgentResult:
         """
         Run the agent with a query.
-        
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             Agent result
 
