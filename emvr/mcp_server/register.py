@@ -17,10 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 async def register_all_endpoints(mcp_server: MCPServer) -> None:
-    """Register all endpoints with the MCP server.
-    
+    """
+    Register all endpoints with the MCP server.
+
     Args:
         mcp_server: MCP server instance
+
     """
     try:
         logger.info("Registering all MCP endpoints")
@@ -40,14 +42,16 @@ async def register_all_endpoints(mcp_server: MCPServer) -> None:
         logger.info("All MCP endpoints registered successfully")
 
     except Exception as e:
-        logger.error(f"Failed to register all MCP endpoints: {str(e)}")
+        logger.exception(f"Failed to register all MCP endpoints: {e!s}")
         raise
 
 
 async def register_memory_endpoints(mcp_server: MCPServer) -> None:
-    """Register memory endpoints with the MCP server.
-    
+    """
+    Register memory endpoints with the MCP server.
+
     Args:
         mcp_server: MCP server instance
+
     """
     # Memory endpoints are registered directly in server.py

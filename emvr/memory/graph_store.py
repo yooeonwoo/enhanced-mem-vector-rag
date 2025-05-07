@@ -22,14 +22,16 @@ class Neo4jMemoryStore:
         username: str | None = None,
         password: str | None = None,
         database: str = "neo4j",
-    ):
-        """Initialize the Neo4j memory store.
-        
+    ) -> None:
+        """
+        Initialize the Neo4j memory store.
+
         Args:
             uri: URI of the Neo4j server (defaults to env var NEO4J_URI)
             username: Username for the Neo4j server (defaults to env var NEO4J_USERNAME)
             password: Password for the Neo4j server (defaults to env var NEO4J_PASSWORD)
             database: Neo4j database name
+
         """
         self.uri = uri or os.environ.get("NEO4J_URI", "neo4j://localhost:7687")
         self.username = username or os.environ.get("NEO4J_USERNAME", "neo4j")
@@ -51,13 +53,15 @@ class Neo4jMemoryStore:
         )
 
     async def create_entity(self, entity: Entity) -> dict[str, Any]:
-        """Create a new entity in the knowledge graph.
-        
+        """
+        Create a new entity in the knowledge graph.
+
         Args:
             entity: Entity to create
-            
+
         Returns:
             Created entity information
+
         """
         query = """
         CREATE (e:`Entity` {name: $name, entity_type: $entity_type})
@@ -84,13 +88,15 @@ class Neo4jMemoryStore:
             }
 
     async def create_entities(self, entities: list[Entity]) -> dict[str, Any]:
-        """Create multiple new entities in the knowledge graph.
-        
+        """
+        Create multiple new entities in the knowledge graph.
+
         Args:
             entities: List of entities to create
-            
+
         Returns:
             Dictionary with created entities information
+
         """
         created = []
         for entity in entities:
@@ -100,13 +106,15 @@ class Neo4jMemoryStore:
         return {"created": created}
 
     async def create_relation(self, relation: Relation) -> dict[str, Any]:
-        """Create a new relation between entities in the knowledge graph.
-        
+        """
+        Create a new relation between entities in the knowledge graph.
+
         Args:
             relation: Relation to create
-            
+
         Returns:
             Created relation information
+
         """
         query = """
         MATCH (from:`Entity` {name: $from_entity})
@@ -131,13 +139,15 @@ class Neo4jMemoryStore:
             }
 
     async def create_relations(self, relations: list[Relation]) -> dict[str, Any]:
-        """Create multiple new relations between entities in the knowledge graph.
-        
+        """
+        Create multiple new relations between entities in the knowledge graph.
+
         Args:
             relations: List of relations to create
-            
+
         Returns:
             Dictionary with created relations information
+
         """
         created = []
         for relation in relations:
@@ -147,11 +157,13 @@ class Neo4jMemoryStore:
         return {"created": created}
 
     async def _add_observation(self, entity_name: str, observation: str) -> None:
-        """Add an observation to an entity.
-        
+        """
+        Add an observation to an entity.
+
         Args:
             entity_name: Name of the entity
             observation: Observation text
+
         """
         query = """
         MATCH (e:`Entity` {name: $entity_name})
@@ -167,16 +179,18 @@ class Neo4jMemoryStore:
             )
 
     async def add_observations(
-        self, entity_name: str, observations: list[str]
+        self, entity_name: str, observations: list[str],
     ) -> dict[str, Any]:
-        """Add new observations to an existing entity in the knowledge graph.
-        
+        """
+        Add new observations to an existing entity in the knowledge graph.
+
         Args:
             entity_name: Name of the entity
             observations: List of observation texts
-            
+
         Returns:
             Dictionary with operation result
+
         """
         for observation in observations:
             await self._add_observation(entity_name, observation)
@@ -187,13 +201,15 @@ class Neo4jMemoryStore:
         }
 
     async def delete_entities(self, entity_names: list[str]) -> dict[str, Any]:
-        """Delete multiple entities and their associated relations from the knowledge graph.
-        
+        """
+        Delete multiple entities and their associated relations from the knowledge graph.
+
         Args:
             entity_names: List of entity names to delete
-            
+
         Returns:
             Dictionary with operation result
+
         """
         query = """
         UNWIND $entity_names AS entity_name
@@ -213,16 +229,18 @@ class Neo4jMemoryStore:
         }
 
     async def delete_observations(
-        self, entity_name: str, observations: list[str]
+        self, entity_name: str, observations: list[str],
     ) -> dict[str, Any]:
-        """Delete specific observations from an entity in the knowledge graph.
-        
+        """
+        Delete specific observations from an entity in the knowledge graph.
+
         Args:
             entity_name: Name of the entity
             observations: List of observation texts to delete
-            
+
         Returns:
             Dictionary with operation result
+
         """
         query = """
         MATCH (e:`Entity` {name: $entity_name})-[r:`HAS_OBSERVATION`]->(o:`Observation`)
@@ -243,13 +261,15 @@ class Neo4jMemoryStore:
         }
 
     async def delete_relations(self, relations: list[Relation]) -> dict[str, Any]:
-        """Delete multiple relations from the knowledge graph.
-        
+        """
+        Delete multiple relations from the knowledge graph.
+
         Args:
             relations: List of relations to delete
-            
+
         Returns:
             Dictionary with operation result
+
         """
         query = """
         UNWIND $relations AS relation
@@ -279,21 +299,23 @@ class Neo4jMemoryStore:
         }
 
     async def read_graph(self) -> dict[str, Any]:
-        """Read the entire knowledge graph.
-        
+        """
+        Read the entire knowledge graph.
+
         Returns:
             Dictionary with entities and relations
+
         """
         entities_query = """
         MATCH (e:`Entity`)
         OPTIONAL MATCH (e)-[r:`HAS_OBSERVATION`]->(o:`Observation`)
-        RETURN e.name AS name, e.entity_type AS entity_type, 
+        RETURN e.name AS name, e.entity_type AS entity_type,
                COLLECT(o.text) AS observations
         """
 
         relations_query = """
         MATCH (from:`Entity`)-[r:`RELATION`]->(to:`Entity`)
-        RETURN from.name AS from_entity, r.type AS relation_type, 
+        RETURN from.name AS from_entity, r.type AS relation_type,
                to.name AS to_entity
         """
 
@@ -325,13 +347,15 @@ class Neo4jMemoryStore:
         }
 
     async def search_nodes(self, query: str) -> dict[str, Any]:
-        """Search for nodes in the knowledge graph based on a query.
-        
+        """
+        Search for nodes in the knowledge graph based on a query.
+
         Args:
             query: Search query string
-            
+
         Returns:
             Dictionary with matching entities
+
         """
         search_query = """
         MATCH (e:`Entity`)
@@ -340,7 +364,7 @@ class Neo4jMemoryStore:
         WHERE o.text CONTAINS $query
         WITH e, COLLECT(DISTINCT o.text) AS matching_observations
         OPTIONAL MATCH (e)-[r2:`HAS_OBSERVATION`]->(o2:`Observation`)
-        RETURN e.name AS name, e.entity_type AS entity_type, 
+        RETURN e.name AS name, e.entity_type AS entity_type,
                matching_observations,
                COLLECT(DISTINCT o2.text) AS all_observations
         """
@@ -366,19 +390,21 @@ class Neo4jMemoryStore:
         }
 
     async def open_nodes(self, names: list[str]) -> dict[str, Any]:
-        """Open specific nodes in the knowledge graph by their names.
-        
+        """
+        Open specific nodes in the knowledge graph by their names.
+
         Args:
             names: List of entity names
-            
+
         Returns:
             Dictionary with matching entities
+
         """
         query = """
         UNWIND $names AS name
         MATCH (e:`Entity` {name: name})
         OPTIONAL MATCH (e)-[r:`HAS_OBSERVATION`]->(o:`Observation`)
-        RETURN e.name AS name, e.entity_type AS entity_type, 
+        RETURN e.name AS name, e.entity_type AS entity_type,
                COLLECT(o.text) AS observations
         """
 

@@ -22,20 +22,22 @@ class HybridRetriever(BaseRetriever):
         vector_store: QdrantMemoryStore | None = None,
         embedding_model: str | None = None,
         use_reranking: bool = True,
-    ):
-        """Initialize the hybrid retriever.
-        
+    ) -> None:
+        """
+        Initialize the hybrid retriever.
+
         Args:
             vector_store: Vector store for retrieval
             embedding_model: Embedding model to use for encoding queries
             use_reranking: Whether to use reranking on results
+
         """
         # Initialize vector store
         self.vector_store = vector_store or QdrantMemoryStore()
 
         # Initialize embedding model
         self.embedding_model_name = embedding_model or os.environ.get(
-            "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"
+            "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5",
         )
 
         # Will lazy-load the embedding model when needed
@@ -55,17 +57,19 @@ class HybridRetriever(BaseRetriever):
         return self._embedding_model
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
-        """Retrieve documents based on a query.
-        
+        """
+        Retrieve documents based on a query.
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             List of retrieval results
+
         """
         # Create retriever with filtering
         retriever = self.vector_store.index.as_retriever(
@@ -92,26 +96,28 @@ class HybridRetriever(BaseRetriever):
                     text=node.text,
                     score=node.score if hasattr(node, "score") else None,
                     metadata=node.metadata,
-                )
+                ),
             )
 
         return results
 
     def _rerank_nodes(
-        self, query: str, nodes: list[NodeWithScore], top_k: int
+        self, query: str, nodes: list[NodeWithScore], top_k: int,
     ) -> list[NodeWithScore]:
-        """Rerank nodes based on relevance to query.
-        
+        """
+        Rerank nodes based on relevance to query.
+
         Note: In a more complex implementation, this would use a dedicated
         reranker model. For simplicity, we're using a basic relevance score.
-        
+
         Args:
             query: Query string
             nodes: List of nodes with scores
             top_k: Number of results to return
-            
+
         Returns:
             Reranked list of nodes
+
         """
         # Simple term frequency based reranking
         for node in nodes:

@@ -29,7 +29,7 @@ from emvr.retrievers.retrieval_pipeline import retrieval_pipeline
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()]
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -37,21 +37,21 @@ logger = logging.getLogger(__name__)
 class MemoryMCPServer:
     """
     MCP server for the EMVR system.
-    
+
     Provides memory operations, search, ingestion capabilities, and agent orchestration.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the MCP server."""
         self._settings = get_settings()
         self._mcp_server = MCPServer(
             name="memory",
             description="EMVR Memory MCP Server",
-            version="0.1.0"
+            version="0.1.0",
         )
         self._initialized = False
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the server and all dependencies."""
         if self._initialized:
             return
@@ -95,12 +95,12 @@ class MemoryMCPServer:
             logger.info("MCP server initialized")
 
         except Exception as e:
-            logger.error(f"Failed to initialize MCP server: {e}")
+            logger.exception(f"Failed to initialize MCP server: {e}")
             raise
 
-    def _setup_signal_handlers(self):
+    def _setup_signal_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown."""
-        def handle_exit_signal(sig, frame):
+        def handle_exit_signal(sig, frame) -> None:
             logger.info(f"Received signal {sig}, shutting down...")
             self.cleanup()
             sys.exit(0)
@@ -109,24 +109,25 @@ class MemoryMCPServer:
         signal.signal(signal.SIGINT, handle_exit_signal)
         signal.signal(signal.SIGTERM, handle_exit_signal)
 
-    async def run_stdio(self):
+    async def run_stdio(self) -> None:
         """Run the server in stdio mode."""
         try:
             await self.initialize()
             logger.info("Starting MCP server in stdio mode")
             await self._mcp_server.start_stdio()
         except Exception as e:
-            logger.error(f"Error running MCP server in stdio mode: {e}")
+            logger.exception(f"Error running MCP server in stdio mode: {e}")
             self.cleanup()
             raise
 
-    async def run_http(self, host: str | None = None, port: int | None = None):
+    async def run_http(self, host: str | None = None, port: int | None = None) -> None:
         """
         Run the server in HTTP mode.
-        
+
         Args:
             host: Host to bind to (defaults to settings)
             port: Port to bind to (defaults to settings)
+
         """
         try:
             await self.initialize()
@@ -137,11 +138,11 @@ class MemoryMCPServer:
             logger.info(f"Starting MCP server on {host}:{port}")
             await self._mcp_server.start_http(host=host, port=port)
         except Exception as e:
-            logger.error(f"Error running MCP server in HTTP mode: {e}")
+            logger.exception(f"Error running MCP server in HTTP mode: {e}")
             self.cleanup()
             raise
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up resources before shutdown."""
         logger.info("Cleaning up resources...")
 
@@ -160,7 +161,7 @@ class MemoryMCPServer:
 
 
 # Main entry point
-async def main():
+async def main() -> None:
     """Main entry point for the MCP server."""
     server = MemoryMCPServer()
 

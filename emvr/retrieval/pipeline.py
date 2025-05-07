@@ -29,14 +29,16 @@ class RetrievalPipeline:
         graph_store: Neo4jMemoryStore | None = None,
         memory_manager: MemoryManager | None = None,
         retrieval_mode: str = "fusion",
-    ):
-        """Initialize the retrieval pipeline.
-        
+    ) -> None:
+        """
+        Initialize the retrieval pipeline.
+
         Args:
             vector_store: Vector store for semantic search
             graph_store: Graph store for knowledge graph queries
             memory_manager: Memory manager instance
             retrieval_mode: Retrieval mode ("vector", "graph", "hybrid", "fusion")
+
         """
         # Initialize stores
         self.vector_store = vector_store or QdrantMemoryStore()
@@ -107,29 +109,31 @@ class RetrievalPipeline:
         """Get the active retriever based on the current mode."""
         if self.retrieval_mode == "vector":
             return self.vector_retriever
-        elif self.retrieval_mode == "graph":
+        if self.retrieval_mode == "graph":
             return self.graph_retriever
-        elif self.retrieval_mode == "hybrid":
+        if self.retrieval_mode == "hybrid":
             return self.hybrid_retriever
-        elif self.retrieval_mode == "fusion":
+        if self.retrieval_mode == "fusion":
             return self.fusion_retriever
-        else:
-            # Default to fusion if unknown mode
-            return self.fusion_retriever
+        # Default to fusion if unknown mode
+        return self.fusion_retriever
 
     def set_retrieval_mode(self, mode: str) -> None:
-        """Set the retrieval mode.
-        
+        """
+        Set the retrieval mode.
+
         Args:
             mode: Retrieval mode ("vector", "graph", "hybrid", "fusion")
-            
+
         Raises:
             ValueError: If the mode is invalid
+
         """
         valid_modes = ["vector", "graph", "hybrid", "fusion"]
         if mode not in valid_modes:
+            msg = f"Invalid retrieval mode: {mode}. Must be one of {valid_modes}"
             raise ValueError(
-                f"Invalid retrieval mode: {mode}. Must be one of {valid_modes}"
+                msg,
             )
 
         self.retrieval_mode = mode
@@ -142,16 +146,18 @@ class RetrievalPipeline:
         filters: dict[str, Any] | None = None,
         mode: str | None = None,
     ) -> dict[str, Any]:
-        """Retrieve documents based on a query.
-        
+        """
+        Retrieve documents based on a query.
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
             mode: Override the retrieval mode for this query
-            
+
         Returns:
             Dictionary with retrieval results and metadata
+
         """
         try:
             # Set temporary mode if provided
@@ -164,7 +170,7 @@ class RetrievalPipeline:
 
             # Perform retrieval
             logger.info(
-                f"Retrieving documents for query: '{query}' using {self.retrieval_mode} mode"
+                f"Retrieving documents for query: '{query}' using {self.retrieval_mode} mode",
             )
 
             results = await retriever.retrieve(
@@ -186,7 +192,7 @@ class RetrievalPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Error in retrieval pipeline: {str(e)}")
+            logger.exception(f"Error in retrieval pipeline: {e!s}")
             return {
                 "query": query,
                 "mode": self.retrieval_mode,
@@ -201,17 +207,19 @@ class RetrievalPipeline:
         top_k: int = 5,
         filters: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Perform hybrid search using fusion retrieval.
-        
+        """
+        Perform hybrid search using fusion retrieval.
+
         This is a convenience method for the MCP server.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             Dictionary with search results
+
         """
         return await self.retrieve(
             query=query,
@@ -226,15 +234,17 @@ class RetrievalPipeline:
         context: str | None = None,
         top_k: int = 3,
     ) -> dict[str, Any]:
-        """Enrich context with retrieved information.
-        
+        """
+        Enrich context with retrieved information.
+
         Args:
             query: Query string
             context: Optional existing context to enrich
             top_k: Number of results to include
-            
+
         Returns:
             Dictionary with enriched context
+
         """
         try:
             # Get retrieval results
@@ -267,7 +277,7 @@ class RetrievalPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Error enriching context: {str(e)}")
+            logger.exception(f"Error enriching context: {e!s}")
             return {
                 "query": query,
                 "original_context": context,

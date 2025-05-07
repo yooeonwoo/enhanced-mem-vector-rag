@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 class FileLoader:
     """
     Base loader for file-based documents using LlamaIndex.
-    
+
     Provides methods for loading documents from files and directories.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the file loader."""
         self._settings = get_settings()
         self._initialized = False
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the loader."""
         if self._initialized:
             return
@@ -44,10 +44,10 @@ class FileLoader:
             logger.info("File loader initialized")
 
         except Exception as e:
-            logger.error(f"Failed to initialize file loader: {e}")
+            logger.exception(f"Failed to initialize file loader: {e}")
             raise
 
-    def ensure_initialized(self):
+    def ensure_initialized(self) -> None:
         """Ensure the loader is initialized."""
         if not self._initialized:
             self.initialize()
@@ -55,17 +55,18 @@ class FileLoader:
     def load_file(
         self,
         file_path: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load a single file.
-        
+
         Args:
             file_path: Path to the file
             metadata: Optional metadata for the document
-        
+
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 
@@ -81,7 +82,7 @@ class FileLoader:
                 return []
 
             # Basic file read as a placeholder
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Create a document dict
@@ -90,13 +91,13 @@ class FileLoader:
                 "source": file_path,
                 "file_name": os.path.basename(file_path),
                 "file_type": os.path.splitext(file_path)[1][1:],
-                "file_size": os.path.getsize(file_path)
+                "file_size": os.path.getsize(file_path),
             })
 
             # Return as a list of documents (single document in this case)
             return [{
                 "text": content,
-                "metadata": doc_metadata
+                "metadata": doc_metadata,
             }]
 
             # TODO: Implement with LlamaIndex SimpleDirectoryReader
@@ -116,7 +117,7 @@ class FileLoader:
             # ]
 
         except Exception as e:
-            logger.error(f"Failed to load file {file_path}: {e}")
+            logger.exception(f"Failed to load file {file_path}: {e}")
             return []
 
     def load_directory(
@@ -125,20 +126,21 @@ class FileLoader:
         recursive: bool = True,
         metadata: dict[str, Any] | None = None,
         exclude_hidden: bool = True,
-        file_extensions: list[str] | None = None
+        file_extensions: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load all files from a directory.
-        
+
         Args:
             directory_path: Path to the directory
             recursive: Whether to search subdirectories
             metadata: Optional metadata for all documents
             exclude_hidden: Whether to exclude hidden files/dirs
             file_extensions: List of file extensions to include
-        
+
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 
@@ -162,14 +164,14 @@ class FileLoader:
                     item_path = os.path.join(path, item)
 
                     # Skip hidden files/dirs if requested
-                    if exclude_hidden and item.startswith('.'):
+                    if exclude_hidden and item.startswith("."):
                         continue
 
                     if os.path.isfile(item_path):
                         # Check file extension if specified
                         if file_extensions:
                             ext = os.path.splitext(item)[1][1:].lower()
-                            if ext not in [e.lower().lstrip('.') for e in file_extensions]:
+                            if ext not in [e.lower().lstrip(".") for e in file_extensions]:
                                 continue
                         files.append(item_path)
                     elif os.path.isdir(item_path) and recursive:
@@ -185,7 +187,7 @@ class FileLoader:
                     file_docs = self.load_file(file_path, metadata)
                     documents.extend(file_docs)
                 except Exception as e:
-                    logger.error(f"Error loading file {file_path}: {e}")
+                    logger.exception(f"Error loading file {file_path}: {e}")
 
             logger.info(f"Loaded {len(documents)} documents from {directory_path}")
             return documents
@@ -209,7 +211,7 @@ class FileLoader:
             # ]
 
         except Exception as e:
-            logger.error(f"Failed to load directory {directory_path}: {e}")
+            logger.exception(f"Failed to load directory {directory_path}: {e}")
             return []
 
 

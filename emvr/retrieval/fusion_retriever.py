@@ -28,9 +28,10 @@ class FusionRetriever(BaseRetriever):
         web_weight: float = 0.2,
         top_k_multiplier: int = 3,
         reranking: bool = True,
-    ):
-        """Initialize the fusion retriever.
-        
+    ) -> None:
+        """
+        Initialize the fusion retriever.
+
         Args:
             vector_store: Vector store for semantic search
             graph_store: Graph store for knowledge graph queries
@@ -39,6 +40,7 @@ class FusionRetriever(BaseRetriever):
             web_weight: Weight for web search results (0.0-1.0)
             top_k_multiplier: Multiplier for initial retrieval (for reranking)
             reranking: Whether to apply reranking to combined results
+
         """
         # Initialize stores
         self.vector_store = vector_store or QdrantMemoryStore()
@@ -68,17 +70,19 @@ class FusionRetriever(BaseRetriever):
         self.reranking = reranking
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
-        """Retrieve documents using multiple retrieval methods.
-        
+        """
+        Retrieve documents using multiple retrieval methods.
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             List of retrieval results
+
         """
         try:
             logger.info(f"Performing fusion retrieval for query: {query}")
@@ -95,8 +99,8 @@ class FusionRetriever(BaseRetriever):
                     self.vector_retriever.retrieve(
                         query=query,
                         top_k=initial_top_k,
-                        filters=filters
-                    )
+                        filters=filters,
+                    ),
                 )
 
             # Graph retrieval task
@@ -105,18 +109,17 @@ class FusionRetriever(BaseRetriever):
                     self.graph_retriever.retrieve(
                         query=query,
                         top_k=initial_top_k,
-                        filters=filters
-                    )
+                        filters=filters,
+                    ),
                 )
 
             # Web retrieval task (placeholder for future)
-            web_results = []
             if self.web_weight > 0 and self.web_retriever is not None:
                 retrieval_tasks.append(
                     self.web_retriever.retrieve(
                         query=query,
-                        top_k=initial_top_k
-                    )
+                        top_k=initial_top_k,
+                    ),
                 )
 
             # Execute all retrieval tasks in parallel
@@ -149,21 +152,23 @@ class FusionRetriever(BaseRetriever):
             return combined_results
 
         except Exception as e:
-            logger.error(f"Error in fusion retrieval: {str(e)}")
+            logger.exception(f"Error in fusion retrieval: {e!s}")
             return []
 
     def _combine_results(
-        self, query: str, source_results: dict[str, list[RetrievalResult]], top_k: int
+        self, query: str, source_results: dict[str, list[RetrievalResult]], top_k: int,
     ) -> list[RetrievalResult]:
-        """Combine results from multiple sources with weights.
-        
+        """
+        Combine results from multiple sources with weights.
+
         Args:
             query: Original query string
             source_results: Dictionary mapping source names to result lists
             top_k: Number of final results to return
-            
+
         Returns:
             Combined and reranked list of retrieval results
+
         """
         # Create a dictionary to track results by ID (to avoid duplicates)
         combined_dict = {}
@@ -261,19 +266,21 @@ class FusionRetriever(BaseRetriever):
         return combined_list[:top_k]
 
     def _rerank_results(
-        self, query: str, results: list[RetrievalResult]
+        self, query: str, results: list[RetrievalResult],
     ) -> list[RetrievalResult]:
-        """Rerank results based on relevance to query and source diversity.
-        
+        """
+        Rerank results based on relevance to query and source diversity.
+
         Note: In a production system, this would use a more sophisticated reranker
         model (e.g., cross-encoder). This is a simplified version for demonstration.
-        
+
         Args:
             query: Original query string
             results: List of retrieval results to rerank
-            
+
         Returns:
             Reranked list of retrieval results
+
         """
         query_terms = set(query.lower().split())
 

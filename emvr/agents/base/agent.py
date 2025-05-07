@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class BaseAgent(ABC):
     """
     Base agent class that all agents will inherit from.
-    
+
     This class provides common functionality for all agents, including
     initialization, tool registration, and execution.
     """
@@ -36,10 +36,10 @@ class BaseAgent(ABC):
         tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the base agent.
-        
+
         Args:
             name: Agent name
             description: Agent description
@@ -47,6 +47,7 @@ class BaseAgent(ABC):
             tools: List of tools available to the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         self.name = name
         self.description = description
@@ -97,9 +98,10 @@ class BaseAgent(ABC):
     def add_tool(self, tool: BaseTool) -> None:
         """
         Add a tool to the agent.
-        
+
         Args:
             tool: Tool to add
+
         """
         self.tools.append(tool)
         self._initialize_agent()  # Reinitialize with the new tool
@@ -107,9 +109,10 @@ class BaseAgent(ABC):
     def add_tools(self, tools: list[BaseTool]) -> None:
         """
         Add multiple tools to the agent.
-        
+
         Args:
             tools: List of tools to add
+
         """
         self.tools.extend(tools)
         self._initialize_agent()  # Reinitialize with new tools
@@ -118,21 +121,21 @@ class BaseAgent(ABC):
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
+
         """
-        pass
 
 
 class SimpleAgent(BaseAgent):
     """
     Simple agent implementation that directly uses the agent executor.
-    
+
     This class provides a concrete implementation of the BaseAgent
     that can be used directly for simple use cases.
     """
@@ -140,13 +143,14 @@ class SimpleAgent(BaseAgent):
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Get chat history if provided
@@ -162,12 +166,12 @@ class SimpleAgent(BaseAgent):
             return {
                 "response": result["output"],
                 "intermediate_steps": result.get("intermediate_steps", []),
-                "status": "success"
+                "status": "success",
             }
         except Exception as e:
-            logger.error(f"Agent execution failed: {e}")
+            logger.exception(f"Agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }

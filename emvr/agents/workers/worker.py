@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class WorkerAgent(BaseAgent):
     """
     Worker agent that performs specialized tasks.
-    
+
     This agent is responsible for handling specific types of tasks
     delegated by the supervisor agent.
     """
@@ -33,10 +33,10 @@ class WorkerAgent(BaseAgent):
         tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the worker agent.
-        
+
         Args:
             name: Agent name
             description: Agent description
@@ -45,6 +45,7 @@ class WorkerAgent(BaseAgent):
             tools: List of tools available to the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         self.specialty = specialty
 
@@ -70,13 +71,14 @@ class WorkerAgent(BaseAgent):
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Get chat history if provided
@@ -107,12 +109,12 @@ class WorkerAgent(BaseAgent):
             return {
                 "response": result["output"],
                 "intermediate_steps": result.get("intermediate_steps", []),
-                "status": "success"
+                "status": "success",
             }
         except Exception as e:
-            logger.error(f"Worker agent execution failed: {e}")
+            logger.exception(f"Worker agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }

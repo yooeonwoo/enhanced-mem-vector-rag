@@ -40,14 +40,16 @@ class AgentWorkflow:
         worker_llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
         retrieval_pipeline: RetrievalPipeline | None = None,
-    ):
-        """Initialize the agent workflow.
-        
+    ) -> None:
+        """
+        Initialize the agent workflow.
+
         Args:
             supervisor_llm: Language model for the supervisor agent
             worker_llm: Language model for worker agents
             memory_manager: Memory manager instance
             retrieval_pipeline: Retrieval pipeline instance
+
         """
         # Initialize LLMs
         self.supervisor_llm = supervisor_llm or ChatOpenAI(
@@ -71,10 +73,12 @@ class AgentWorkflow:
         self.supervisor_agent = self._create_supervisor_agent()
 
     def _create_worker_agents(self) -> dict[str, Any]:
-        """Create worker agents.
-        
+        """
+        Create worker agents.
+
         Returns:
             Dictionary of worker agents
+
         """
         return {
             "research_agent": ResearchWorkerAgent(
@@ -92,10 +96,12 @@ class AgentWorkflow:
         }
 
     def _create_supervisor_agent(self) -> SupervisorAgent:
-        """Create supervisor agent.
-        
+        """
+        Create supervisor agent.
+
         Returns:
             SupervisorAgent instance
+
         """
         return SupervisorAgent(
             llm=self.supervisor_llm,
@@ -103,14 +109,16 @@ class AgentWorkflow:
         )
 
     async def run(self, query: str, **kwargs) -> WorkflowOutput:
-        """Run the agent workflow with a query.
-        
+        """
+        Run the agent workflow with a query.
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             WorkflowOutput instance
+
         """
         # Run memory-related operations to track the interaction
         try:
@@ -119,7 +127,7 @@ class AgentWorkflow:
                 {
                     "entity_name": f"Query - {uuid.uuid4()}",
                     "contents": [query],
-                }
+                },
             ])
 
             # Get thread ID if available
@@ -134,14 +142,14 @@ class AgentWorkflow:
                     {
                         "entity_name": "Agent Workflow Results",
                         "contents": [f"Successfully processed query: {query}", f"Output: {result.output}"],
-                    }
+                    },
                 ])
             else:
                 await self.memory_manager.add_observations([
                     {
                         "entity_name": "Agent Workflow Errors",
                         "contents": [f"Failed to process query: {query}", f"Error: {result.error}"],
-                    }
+                    },
                 ])
 
             # Return workflow output
@@ -156,8 +164,8 @@ class AgentWorkflow:
             await self.memory_manager.add_observations([
                 {
                     "entity_name": "Agent Workflow Errors",
-                    "contents": [f"Exception while processing query: {query}", f"Error: {str(e)}"],
-                }
+                    "contents": [f"Exception while processing query: {query}", f"Error: {e!s}"],
+                },
             ])
 
             # Return error output

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class ResearchAgent(WorkerAgent):
     """
     Research agent specializing in information gathering and synthesis.
-    
+
     This agent excels at retrieving information, finding connections,
     and synthesizing knowledge.
     """
@@ -32,15 +32,16 @@ class ResearchAgent(WorkerAgent):
         additional_tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the research agent.
-        
+
         Args:
             llm: Language model to use
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -74,7 +75,7 @@ class ResearchAgent(WorkerAgent):
 class IngestionAgent(WorkerAgent):
     """
     Ingestion agent specializing in data processing and storage.
-    
+
     This agent excels at handling various data formats, extracting
     relevant information, and storing it in the memory system.
     """
@@ -85,15 +86,16 @@ class IngestionAgent(WorkerAgent):
         additional_tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the ingestion agent.
-        
+
         Args:
             llm: Language model to use
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -127,7 +129,7 @@ class IngestionAgent(WorkerAgent):
 class AnalysisAgent(WorkerAgent):
     """
     Analysis agent specializing in data analysis and pattern recognition.
-    
+
     This agent excels at finding patterns, drawing insights, and
     providing detailed analysis of information.
     """
@@ -138,15 +140,16 @@ class AnalysisAgent(WorkerAgent):
         additional_tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the analysis agent.
-        
+
         Args:
             llm: Language model to use
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -181,7 +184,7 @@ class AnalysisAgent(WorkerAgent):
 class CreativeAgent(WorkerAgent):
     """
     Creative agent specializing in idea generation and creative solutions.
-    
+
     This agent excels at thinking outside the box, generating novel
     ideas, and finding creative solutions to problems.
     """
@@ -192,15 +195,16 @@ class CreativeAgent(WorkerAgent):
         additional_tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the creative agent.
-        
+
         Args:
             llm: Language model to use
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:

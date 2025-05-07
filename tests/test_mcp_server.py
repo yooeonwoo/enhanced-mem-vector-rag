@@ -7,12 +7,12 @@ from emvr.mcp_server.server import app
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
     """Create a test client for the FastAPI app."""
     return TestClient(app)
 
 
-def test_read_graph(client):
+def test_read_graph(client: TestClient) -> None:
     """Test the /memory.read_graph endpoint."""
     response = client.post("/memory.read_graph", json={})
     assert response.status_code == 200
@@ -20,7 +20,7 @@ def test_read_graph(client):
     assert "graph" in response.json()
 
 
-def test_search_nodes(client):
+def test_search_nodes(client: TestClient) -> None:
     """Test the /memory.search_nodes endpoint."""
     response = client.post(
         "/memory.search_nodes",
@@ -34,7 +34,7 @@ def test_search_nodes(client):
     assert "results" in response.json()
 
 
-def test_create_entities(client):
+def test_create_entities(client: TestClient) -> None:
     """Test the /memory.create_entities endpoint."""
     response = client.post(
         "/memory.create_entities",
@@ -44,15 +44,15 @@ def test_create_entities(client):
                     "name": "Test Entity",
                     "entityType": "Test",
                     "observations": ["Test observation"],
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200
     assert response.json()["status"] == "success"
 
 
-def test_create_relations(client):
+def test_create_relations(client: TestClient) -> None:
     """Test the /memory.create_relations endpoint."""
     response = client.post(
         "/memory.create_relations",
@@ -62,15 +62,15 @@ def test_create_relations(client):
                     "from_": "Entity A",
                     "to": "Entity B",
                     "relationType": "related_to",
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200
     assert response.json()["status"] == "success"
 
 
-def test_add_observations(client):
+def test_add_observations(client: TestClient) -> None:
     """Test the /memory.add_observations endpoint."""
     response = client.post(
         "/memory.add_observations",
@@ -79,15 +79,15 @@ def test_add_observations(client):
                 {
                     "entityName": "Test Entity",
                     "contents": ["New observation"],
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200
     assert response.json()["status"] == "success"
 
 
-def test_hybrid_search(client):
+def test_hybrid_search(client: TestClient) -> None:
     """Test the /search.hybrid endpoint."""
     response = client.post(
         "/search.hybrid",
@@ -101,7 +101,7 @@ def test_hybrid_search(client):
     assert "results" in response.json()
 
 
-def test_graph_query(client):
+def test_graph_query(client: TestClient) -> None:
     """Test the /graph.query endpoint."""
     response = client.post(
         "/graph.query",

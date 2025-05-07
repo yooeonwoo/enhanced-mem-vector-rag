@@ -4,9 +4,9 @@ Knowledge graph visualization component for EMVR UI.
 This module provides functionality for visualizing the knowledge graph.
 """
 
-import logging
 import json
-from typing import Dict, List, Optional, Any, Set, Union
+import logging
+from typing import Any
 
 import chainlit as cl
 
@@ -19,25 +19,26 @@ logger = logging.getLogger(__name__)
 # ----- Graph Visualization Functions -----
 
 async def prepare_graph_data(
-    center_entity: Optional[str] = None,
+    center_entity: str | None = None,
     max_nodes: int = 50,
     max_depth: int = 2,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Prepare graph data for visualization.
-    
+
     Args:
         center_entity: Optional center entity name
         max_nodes: Maximum number of nodes to include
         max_depth: Maximum relationship depth
-        
+
     Returns:
         Graph data structure for visualization
+
     """
     try:
         # Initialize memory manager if needed
         await memory_manager.initialize()
-        
+
         # Get the graph data
         if center_entity:
             # If a center entity is specified, get the local graph around it
@@ -52,21 +53,21 @@ async def prepare_graph_data(
                 RETURN allNodes, allRels
                 LIMIT {max_nodes}
                 """,
-                {"name": center_entity}
+                {"name": center_entity},
             )
         else:
             # Otherwise, get a sample of the full graph
             graph_result = await memory_manager.read_graph()
-        
+
         # Process nodes and relationships for visualization
         nodes = []
         edges = []
-        
+
         # Process nodes
         for node in graph_result.get("nodes", []):
             if len(nodes) >= max_nodes:
                 break
-                
+
             nodes.append({
                 "id": node.get("name", ""),
                 "label": node.get("name", ""),
@@ -75,9 +76,9 @@ async def prepare_graph_data(
                 "properties": {
                     "type": node.get("entityType", "Entity"),
                     "observations": node.get("observations", []),
-                }
+                },
             })
-        
+
         # Process relationships
         for rel in graph_result.get("relationships", []):
             edges.append({
@@ -87,39 +88,40 @@ async def prepare_graph_data(
                 "title": rel.get("relationType", "related"),
                 "properties": {
                     "type": rel.get("relationType", "related"),
-                }
+                },
             })
-        
+
         return {
             "nodes": nodes,
             "edges": edges,
-            "status": "success"
+            "status": "success",
         }
-    
+
     except Exception as e:
-        logger.error(f"Error preparing graph data: {e}")
+        logger.exception(f"Error preparing graph data: {e}")
         return {
             "nodes": [],
             "edges": [],
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
 # ----- UI Components -----
 
 async def show_graph_visualization(
-    center_entity: Optional[str] = None,
+    center_entity: str | None = None,
     max_nodes: int = 50,
     max_depth: int = 2,
 ) -> None:
     """
     Show the knowledge graph visualization.
-    
+
     Args:
         center_entity: Optional center entity name
         max_nodes: Maximum number of nodes to include
         max_depth: Maximum relationship depth
+
     """
     try:
         # Prepare the graph data
@@ -128,17 +130,17 @@ async def show_graph_visualization(
             max_nodes=max_nodes,
             max_depth=max_depth,
         )
-        
+
         if graph_data.get("status") == "error":
             await cl.Message(
                 content=f"❌ Error preparing graph data: {graph_data.get('error')}",
                 author="System",
             ).send()
             return
-        
+
         # Convert to JSON for the iframe
         graph_json = json.dumps(graph_data)
-        
+
         # Create an HTML visualization using Vis.js
         html_content = f"""
         <!DOCTYPE html>
@@ -152,21 +154,21 @@ async def show_graph_visualization(
                     height: 600px;
                     border: 1px solid lightgray;
                 }}
-                
+
                 .controls {{
                     margin-bottom: 10px;
                 }}
-                
+
                 .legend {{
                     margin-top: 10px;
                     font-size: 12px;
                 }}
-                
+
                 .legend-item {{
                     display: inline-block;
                     margin-right: 15px;
                 }}
-                
+
                 .color-box {{
                     display: inline-block;
                     width: 12px;
@@ -187,31 +189,31 @@ async def show_graph_visualization(
                     <option value="circular">Circular Layout</option>
                 </select>
             </div>
-            
+
             <div id="graph"></div>
-            
+
             <div class="legend">
                 <div class="legend-item"><div class="color-box" style="background-color: #97C2FC;"></div>Entity</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #FFCCCC;"></div>Component</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #C2F0C2;"></div>Document</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #FFE0B2;"></div>Decision</div>
             </div>
-            
+
             <script type="text/javascript">
                 // Parse the data
                 const graphData = {graph_json};
-                
+
                 // Prepare the data for the visualization
                 const nodes = new vis.DataSet(graphData.nodes);
                 const edges = new vis.DataSet(graphData.edges);
-                
+
                 // Create the network
                 const container = document.getElementById('graph');
                 const data = {{
                     nodes: nodes,
                     edges: edges
                 }};
-                
+
                 // Configure the visualization
                 const options = {{
                     nodes: {{
@@ -261,26 +263,26 @@ async def show_graph_visualization(
                         keyboard: true
                     }}
                 }};
-                
+
                 // Create the network
                 const network = new vis.Network(container, data, options);
-                
+
                 // Add event listeners for controls
                 document.getElementById('zoom-in').addEventListener('click', function() {{
                     network.zoomIn();
                 }});
-                
+
                 document.getElementById('zoom-out').addEventListener('click', function() {{
                     network.zoomOut();
                 }});
-                
+
                 document.getElementById('fit').addEventListener('click', function() {{
                     network.fit();
                 }});
-                
+
                 document.getElementById('layout').addEventListener('change', function(e) {{
                     const layout = e.target.value;
-                    
+
                     if (layout === 'hierarchical') {{
                         network.setOptions({{
                             layout: {{
@@ -307,19 +309,19 @@ async def show_graph_visualization(
                                 }}
                             }}
                         }});
-                        
+
                         // Position nodes in a circle
                         const nodeCount = nodes.length;
                         const radius = 300;
                         const angle = 2 * Math.PI / nodeCount;
-                        
+
                         nodes.forEach((node, i) => {{
                             const x = radius * Math.cos(angle * i);
                             const y = radius * Math.sin(angle * i);
                             node.x = x;
                             node.y = y;
                         }});
-                        
+
                         network.redraw();
                     }} else {{
                         network.setOptions({{
@@ -339,13 +341,13 @@ async def show_graph_visualization(
                         }});
                     }}
                 }});
-                
+
                 // Add click event for nodes
                 network.on("click", function (params) {{
                     if (params.nodes.length > 0) {{
                         const nodeId = params.nodes[0];
                         const node = nodes.get(nodeId);
-                        
+
                         alert(`Node: ${node.label}\\nType: ${node.properties.type}\\nObservations: ${node.properties.observations.join('\\n- ')}`);
                     }}
                 }});
@@ -353,16 +355,16 @@ async def show_graph_visualization(
         </body>
         </html>
         """
-        
+
         # Create a temporary HTML file for the visualization
         import tempfile
-        
+
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".html", delete=False
+            mode="w", suffix=".html", delete=False,
         ) as f:
             f.write(html_content)
             html_path = f.name
-        
+
         # Show the visualization
         await cl.Message(
             content="📊 Knowledge Graph Visualization:",
@@ -371,15 +373,15 @@ async def show_graph_visualization(
                     path=html_path,
                     display="inline",
                     height="700px",
-                )
+                ),
             ],
             author="EMVR",
         ).send()
-    
+
     except Exception as e:
-        logger.error(f"Error showing graph visualization: {e}")
+        logger.exception(f"Error showing graph visualization: {e}")
         await cl.Message(
-            content=f"❌ Error showing graph visualization: {str(e)}",
+            content=f"❌ Error showing graph visualization: {e!s}",
             author="System",
         ).send()
 
@@ -410,7 +412,7 @@ async def show_graph_explorer_ui() -> None:
             initial=2,
         ),
     ]
-    
+
     await cl.Message(
         content="🔍 Explore the knowledge graph:",
         elements=elements,

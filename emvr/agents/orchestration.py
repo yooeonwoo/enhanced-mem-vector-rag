@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class AgentOrchestrator:
     """
     Agent orchestration framework for EMVR.
-    
+
     This class creates and manages a team of agents, including a supervisor
     and specialized workers.
     """
@@ -37,14 +37,15 @@ class AgentOrchestrator:
         llm: BaseLanguageModel,
         additional_tools: list[BaseTool] | None = None,
         custom_agents: dict[str, BaseAgent] | None = None,
-    ):
+    ) -> None:
         """
         Initialize the agent orchestrator.
-        
+
         Args:
             llm: Language model to use for all agents
             additional_tools: Additional tools to provide to agents
             custom_agents: Custom agent implementations to use
+
         """
         self.llm = llm
         self.additional_tools = additional_tools or []
@@ -61,12 +62,13 @@ class AgentOrchestrator:
     def _initialize_workers(self, custom_agents: dict[str, BaseAgent] | None = None) -> dict[str, BaseAgent]:
         """
         Initialize the worker agents.
-        
+
         Args:
             custom_agents: Custom agent implementations to use
-            
+
         Returns:
             Dict of worker agents
+
         """
         workers = {}
 
@@ -108,9 +110,10 @@ class AgentOrchestrator:
     def _initialize_supervisor(self) -> SupervisorAgent:
         """
         Initialize the supervisor agent.
-        
+
         Returns:
             Supervisor agent
+
         """
         return SupervisorAgent(
             llm=self.llm,
@@ -122,62 +125,62 @@ class AgentOrchestrator:
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent system on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Execute the supervisor agent
-            result = await self.supervisor.run(input_text, **kwargs)
+            return await self.supervisor.run(input_text, **kwargs)
 
             # Return the result
-            return result
         except Exception as e:
-            logger.error(f"Agent orchestration failed: {e}")
+            logger.exception(f"Agent orchestration failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }
 
     async def run_worker(self, worker_name: str, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run a specific worker agent on the given input.
-        
+
         Args:
             worker_name: Name of the worker agent to run
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Check if worker exists
             if worker_name not in self.workers:
-                raise ValueError(f"Worker agent '{worker_name}' not found")
+                msg = f"Worker agent '{worker_name}' not found"
+                raise ValueError(msg)
 
             # Execute the worker agent
-            result = await self.workers[worker_name].run(input_text, **kwargs)
+            return await self.workers[worker_name].run(input_text, **kwargs)
 
             # Return the result
-            return result
         except Exception as e:
-            logger.error(f"Worker agent execution failed: {e}")
+            logger.exception(f"Worker agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }
 
     async def shutdown(self) -> None:
         """Shutdown the agent system and clean up resources."""
         # Clean up tasks if needed
-        pass
 
 
 # Global orchestrator instance
@@ -191,14 +194,15 @@ async def initialize_orchestration(
 ) -> AgentOrchestrator:
     """
     Initialize the agent orchestration system.
-    
+
     Args:
         llm: Language model to use for all agents
         additional_tools: Additional tools to provide to agents
         custom_agents: Custom agent implementations to use
-        
+
     Returns:
         Agent orchestrator instance
+
     """
     global _orchestrator
 
@@ -215,8 +219,9 @@ async def initialize_orchestration(
 def get_orchestrator() -> AgentOrchestrator | None:
     """
     Get the global orchestrator instance.
-    
+
     Returns:
         Agent orchestrator instance if initialized, None otherwise
+
     """
     return _orchestrator

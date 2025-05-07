@@ -12,7 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 # Security settings
 JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key")
@@ -28,7 +28,7 @@ def load_rbac_config() -> dict[str, Any]:
             logger.warning(f"RBAC configuration file not found at {RBAC_CONFIG_PATH}")
             return {"roles": {}, "users": {}}
     except Exception as e:
-        logger.error(f"Error loading RBAC configuration: {e}")
+        logger.exception(f"Error loading RBAC configuration: {e}")
         return {"roles": {}, "users": {}}
 
 rbac_config = load_rbac_config()
@@ -37,7 +37,7 @@ rbac_config = load_rbac_config()
 security = HTTPBearer()
 
 def get_user_permissions(user_id: str) -> set[str]:
-    """Get permissions for a user based on their roles"""
+    """Get permissions for a user based on their roles."""
     permissions: set[str] = set()
 
     user_config = rbac_config.get("users", {}).get(user_id, {})
@@ -50,13 +50,12 @@ def get_user_permissions(user_id: str) -> set[str]:
     return permissions
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict[str, Any]:
-    """Verify JWT token and return payload"""
+    """Verify JWT token and return payload."""
     try:
         token = credentials.credentials
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload
+        return jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     except jwt.PyJWTError as e:
-        logger.error(f"Token verification failed: {e}")
+        logger.exception(f"Token verification failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -64,14 +63,14 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
         )
 
 def check_permission(required_permission: str) -> Callable[[dict[str, Any]], None]:
-    """Check if user has required permission"""
+    """Check if user has required permission."""
     def _check(payload: dict[str, Any]) -> None:
         user_id = payload.get("sub", "")
         permissions = get_user_permissions(user_id)
 
         # Check for wildcard permission or specific permission
         if "*" in permissions or required_permission in permissions:
-            return None
+            return
 
         logger.warning(f"User {user_id} attempted to access {required_permission} without permission")
         raise HTTPException(
@@ -82,13 +81,13 @@ def check_permission(required_permission: str) -> Callable[[dict[str, Any]], Non
     return _check
 
 def requires_permission(permission: str) -> Callable[[F], F]:
-    """Decorator to check if user has required permission"""
+    """Decorator to check if user has required permission."""
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             request = next((arg for arg in args if isinstance(arg, Request)), None)
             if not request:
-                for arg_name, arg_value in kwargs.items():
+                for arg_value in kwargs.values():
                     if isinstance(arg_value, Request):
                         request = arg_value
                         break
@@ -116,7 +115,7 @@ def requires_permission(permission: str) -> Callable[[F], F]:
                 payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
                 check_permission(permission)(payload)
             except (IndexError, jwt.PyJWTError) as e:
-                logger.error(f"Authentication error: {e}")
+                logger.exception(f"Authentication error: {e}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid authentication credentials",

@@ -37,12 +37,14 @@ class SupervisorAgent(BaseAgent):
         self,
         llm: BaseLanguageModel | None = None,
         worker_agents: dict[str, BaseAgent] | None = None,
-    ):
-        """Initialize the supervisor agent.
+    ) -> None:
+        """
+        Initialize the supervisor agent.
 
         Args:
             llm: Language model for the agent
             worker_agents: Dictionary of worker agents keyed by agent name
+
         """
         # Initialize LLM
         self.llm = llm or ChatOpenAI(
@@ -60,10 +62,12 @@ class SupervisorAgent(BaseAgent):
         self.graph = self._build_graph()
 
     def _build_graph(self) -> StateGraph:
-        """Build the supervisor graph.
+        """
+        Build the supervisor graph.
 
         Returns:
             StateGraph instance
+
         """
         # Create supervisor node
         supervisor_node = self._create_supervisor_node()
@@ -100,29 +104,33 @@ class SupervisorAgent(BaseAgent):
         return builder.compile(checkpointer=self.checkpointer)
 
     def _create_supervisor_node(self) -> Callable:
-        """Create the supervisor node function.
+        """
+        Create the supervisor node function.
 
         Returns:
             Supervisor node function
+
         """
         # Create handoff tools for each worker agent
-        handoff_tools = []
-        for agent_name in self.worker_agents.keys():
-            handoff_tools.append(self._create_handoff_tool(agent_name))
+        handoff_tools = [
+            self._create_handoff_tool(agent_name) for agent_name in self.worker_agents
+        ]
 
         # Create the supervisor agent
         supervisor_agent = create_react_agent(
             self.llm,
             handoff_tools,
             system_message=(
-                "You are a supervisor managing multiple specialist agents for the Enhanced Memory-Vector RAG system. "
+                "You are a supervisor managing multiple specialist agents "
+                "for the Enhanced Memory-Vector RAG system. "
                 "Based on the user request, decide which specialist agent to route the task to. "
                 "Available agents:\n"
                 + "\n".join(
                     [
-                        f"- {agent_name}: {agent.description if hasattr(agent, 'description') else 'Specialist agent'}"
+                        f"- {agent_name}: "
+                        f"{agent.description if hasattr(agent, 'description') else 'Specialist agent'}"
                         for agent_name, agent in self.worker_agents.items()
-                    ]
+                    ],
                 )
                 + "\n\nIf the task is complete or doesn't require a specialist, you can finish."
             ),
@@ -147,7 +155,7 @@ class SupervisorAgent(BaseAgent):
                         if tool_call.get("name", "").startswith("transfer_to_"):
                             # Extract agent name from tool call
                             next_agent = tool_call.get("name").replace(
-                                "transfer_to_", ""
+                                "transfer_to_", "",
                             )
                             break
 
@@ -160,7 +168,8 @@ class SupervisorAgent(BaseAgent):
         return supervisor_node
 
     def _create_worker_node(self, agent_name: str, agent: BaseAgent) -> Callable:
-        """Create a worker node function.
+        """
+        Create a worker node function.
 
         Args:
             agent_name: Name of the worker agent
@@ -168,6 +177,7 @@ class SupervisorAgent(BaseAgent):
 
         Returns:
             Worker node function
+
         """
 
         def worker_node(state: SupervisorAgentState) -> dict[str, Any]:
@@ -187,7 +197,7 @@ class SupervisorAgent(BaseAgent):
                         {
                             "role": "system",
                             "content": "No user message found. Returning to supervisor.",
-                        }
+                        },
                     ],
                 )
 
@@ -209,29 +219,39 @@ class SupervisorAgent(BaseAgent):
                 messages = [{"role": "assistant", "content": result.output}]
 
                 return add_messages(state, messages)
-            except Exception as e:
-                # Handle errors
-                error_message = f"Error in {agent_name}: {str(e)}"
+            except (TimeoutError, RuntimeError) as e:
+                # Handle specific runtime errors
+                error_message = f"Error in {agent_name}: {e!s}"
                 state["error"] = error_message
 
                 return add_messages(
-                    state, [{"role": "system", "content": error_message}]
+                    state, [{"role": "system", "content": error_message}],
+                )
+            except ValueError as e:
+                # Handle value errors
+                error_message = f"Value error in {agent_name}: {e!s}"
+                state["error"] = error_message
+
+                return add_messages(
+                    state, [{"role": "system", "content": error_message}],
                 )
 
         return worker_node
 
     def _create_handoff_tool(self, agent_name: str) -> Tool:
-        """Create a handoff tool for a worker agent.
+        """
+        Create a handoff tool for a worker agent.
 
         Args:
             agent_name: Name of the worker agent
 
         Returns:
             Handoff tool
+
         """
         agent = self.worker_agents[agent_name]
         description = getattr(
-            agent, "description", f"Specialist agent for {agent_name} tasks"
+            agent, "description", f"Specialist agent for {agent_name} tasks",
         )
 
         @tool(
@@ -245,15 +265,19 @@ class SupervisorAgent(BaseAgent):
         return handoff_tool
 
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
 
         Returns:
             AgentExecutor instance
-        """
-        raise NotImplementedError("Supervisor agent doesn't use AgentExecutor")
 
-    async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        msg = "Supervisor agent doesn't use AgentExecutor"
+        raise NotImplementedError(msg)
+
+    async def run(self, query: str, **kwargs: dict[str, Any]) -> AgentResult:
+        """
+        Run the agent with a query.
 
         Args:
             query: Query string
@@ -261,6 +285,7 @@ class SupervisorAgent(BaseAgent):
 
         Returns:
             Agent result
+
         """
         try:
             # Generate a thread ID if not provided
@@ -270,7 +295,7 @@ class SupervisorAgent(BaseAgent):
             config = {
                 "configurable": {
                     "thread_id": thread_id,
-                }
+                },
             }
 
             # Initialize state
@@ -309,7 +334,7 @@ class SupervisorAgent(BaseAgent):
                 intermediate_steps=intermediate_steps,
                 error=final_state.get("error"),
             )
-        except Exception as e:
+        except (ValueError, KeyError) as e:
             return AgentResult(
                 success=False,
                 output="",
