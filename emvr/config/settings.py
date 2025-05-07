@@ -13,7 +13,8 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    """Settings for the EMVR system.
+    """
+    Settings for the EMVR system.
     
     This class uses Pydantic to load and validate settings from environment variables.
     """
@@ -95,7 +96,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        extra="ignore"
+        extra="ignore",
     )
 
     @field_validator("openai_api_key")
@@ -128,9 +129,11 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get settings from environment variables with caching.
+    """
+    Get settings from environment variables with caching.
     
     Returns:
         Settings: Validated settings
+
     """
     return Settings()

@@ -10,6 +10,6 @@ from emvr.mcp_server.endpoints.retrieval_endpoints import register_retrieval_end
 __all__ = [
     "register_agent_endpoints",
     "register_agent_resources",
-    "register_retrieval_endpoints",
     "register_ingestion_endpoints",
+    "register_retrieval_endpoints",
 ]

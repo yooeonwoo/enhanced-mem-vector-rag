@@ -44,8 +44,8 @@ def test_create_entities(client):
                     "name": "Test Entity",
                     "entityType": "Test",
                     "observations": ["Test observation"],
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200
@@ -62,8 +62,8 @@ def test_create_relations(client):
                     "from_": "Entity A",
                     "to": "Entity B",
                     "relationType": "related_to",
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200
@@ -79,8 +79,8 @@ def test_add_observations(client):
                 {
                     "entityName": "Test Entity",
                     "contents": ["New observation"],
-                }
-            ]
+                },
+            ],
         },
     )
     assert response.status_code == 200

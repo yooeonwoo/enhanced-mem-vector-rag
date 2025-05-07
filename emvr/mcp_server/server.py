@@ -29,7 +29,7 @@ from emvr.retrievers.retrieval_pipeline import retrieval_pipeline
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()]
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class MemoryMCPServer:
         self._mcp_server = MCPServer(
             name="memory",
             description="EMVR Memory MCP Server",
-            version="0.1.0"
+            version="0.1.0",
         )
         self._initialized = False
 
@@ -127,6 +127,7 @@ class MemoryMCPServer:
         Args:
             host: Host to bind to (defaults to settings)
             port: Port to bind to (defaults to settings)
+
         """
         try:
             await self.initialize()

@@ -47,6 +47,7 @@ class BaseAgent(ABC):
             tools: List of tools available to the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         self.name = name
         self.description = description
@@ -100,6 +101,7 @@ class BaseAgent(ABC):
         
         Args:
             tool: Tool to add
+
         """
         self.tools.append(tool)
         self._initialize_agent()  # Reinitialize with the new tool
@@ -110,6 +112,7 @@ class BaseAgent(ABC):
         
         Args:
             tools: List of tools to add
+
         """
         self.tools.extend(tools)
         self._initialize_agent()  # Reinitialize with new tools
@@ -125,8 +128,8 @@ class BaseAgent(ABC):
             
         Returns:
             Dict containing the agent's response and any additional information
+
         """
-        pass
 
 
 class SimpleAgent(BaseAgent):
@@ -147,6 +150,7 @@ class SimpleAgent(BaseAgent):
             
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Get chat history if provided
@@ -162,12 +166,12 @@ class SimpleAgent(BaseAgent):
             return {
                 "response": result["output"],
                 "intermediate_steps": result.get("intermediate_steps", []),
-                "status": "success"
+                "status": "success",
             }
         except Exception as e:
             logger.error(f"Agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }

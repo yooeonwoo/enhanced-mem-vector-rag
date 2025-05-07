@@ -50,7 +50,7 @@ def generate_token(user_id: str, expiry_days: int = 30) -> str:
     payload = {
         "sub": user_id,
         "iat": datetime.datetime.utcnow(),
-        "exp": expiry
+        "exp": expiry,
     }
 
     # Generate token

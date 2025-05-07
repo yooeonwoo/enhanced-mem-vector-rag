@@ -22,11 +22,13 @@ class KnowledgeGraphRetriever(BaseRetriever):
         graph_store: Neo4jMemoryStore | None = None,
         include_text: bool = True,
     ):
-        """Initialize the knowledge graph retriever.
+        """
+        Initialize the knowledge graph retriever.
         
         Args:
             graph_store: Neo4j memory store
             include_text: Whether to include text in results
+
         """
         # Initialize graph store
         self.graph_store = graph_store or Neo4jMemoryStore()
@@ -56,9 +58,10 @@ class KnowledgeGraphRetriever(BaseRetriever):
         return self._query_engine
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None
+        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
-        """Retrieve knowledge graph paths based on a query.
+        """
+        Retrieve knowledge graph paths based on a query.
         
         Args:
             query: Query string
@@ -67,6 +70,7 @@ class KnowledgeGraphRetriever(BaseRetriever):
             
         Returns:
             List of retrieval results
+
         """
         try:
             logger.info(f"Performing knowledge graph retrieval for query: {query}")
@@ -184,12 +188,12 @@ class KnowledgeGraphRetriever(BaseRetriever):
                                 "target_entity": target["name"],
                                 "target_type": target["entity_type"],
                             },
-                        )
+                        ),
                     )
 
                 logger.info(f"Found {len(retrieval_results)} knowledge graph results")
                 return retrieval_results
 
         except Exception as e:
-            logger.error(f"Error in knowledge graph retrieval: {str(e)}")
+            logger.error(f"Error in knowledge graph retrieval: {e!s}")
             return []

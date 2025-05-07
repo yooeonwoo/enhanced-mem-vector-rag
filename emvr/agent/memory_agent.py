@@ -24,12 +24,14 @@ class MemoryAgent(BaseAgent):
         memory_manager: MemoryManager | None = None,
         retriever: HybridRetriever | None = None,
     ):
-        """Initialize the memory agent.
+        """
+        Initialize the memory agent.
         
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
             retriever: Retriever instance
+
         """
         # Initialize LLM
         self.llm = llm or ChatOpenAI(
@@ -47,10 +49,12 @@ class MemoryAgent(BaseAgent):
         self.agent_executor = self._create_agent_executor()
 
     def _create_agent_executor(self) -> AgentExecutor:
-        """Create an agent executor with memory tools.
+        """
+        Create an agent executor with memory tools.
         
         Returns:
             AgentExecutor instance
+
         """
         # Define tools
         from langchain.tools import BaseTool
@@ -72,7 +76,7 @@ class MemoryAgent(BaseAgent):
                 for i, result in enumerate(results):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
-                        f"Source: {result.metadata.get('source', 'Unknown')}"
+                        f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -88,7 +92,7 @@ class MemoryAgent(BaseAgent):
                 for i, result in enumerate(results):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
-                        f"Source: {result.metadata.get('source', 'Unknown')}"
+                        f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -117,13 +121,13 @@ class MemoryAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     entity_descriptions.append(
-                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}"
+                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
                 relation_descriptions = []
                 for relation in relations[:10]:  # Limit to 10 relations
                     relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}"
+                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}",
                     )
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
@@ -153,13 +157,13 @@ class MemoryAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     entity_descriptions.append(
-                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}"
+                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
                 relation_descriptions = []
                 for relation in relations[:10]:  # Limit to 10 relations
                     relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}"
+                        f"{relation.get('from')} --{relation.get('relation')}--> {relation.get('to')}",
                     )
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
@@ -191,15 +195,18 @@ class MemoryAgent(BaseAgent):
         return agent
 
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
         
         Returns:
             AgentExecutor instance
+
         """
         return self.agent_executor
 
     async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        Run the agent with a query.
         
         Args:
             query: Query string
@@ -207,6 +214,7 @@ class MemoryAgent(BaseAgent):
             
         Returns:
             Agent result
+
         """
         try:
             # Initialize agent input

@@ -20,27 +20,32 @@ logger = logging.getLogger(__name__)
 
 class SearchNodesInput(BaseModel):
     """Input schema for search_nodes tool."""
+
     query: str = Field(..., description="The search query string")
     limit: int = Field(10, description="Maximum number of results to return")
 
 
 class CreateEntitiesInput(BaseModel):
     """Input schema for create_entities tool."""
+
     entities: list[dict[str, Any]] = Field(..., description="List of entities to create")
 
 
 class CreateRelationsInput(BaseModel):
     """Input schema for create_relations tool."""
+
     relations: list[dict[str, Any]] = Field(..., description="List of relations to create")
 
 
 class AddObservationsInput(BaseModel):
     """Input schema for add_observations tool."""
+
     observations: list[dict[str, Any]] = Field(..., description="List of observations to add")
 
 
 class DeleteEntitiesInput(BaseModel):
     """Input schema for delete_entities tool."""
+
     entity_names: list[str] = Field(..., description="List of entity names to delete")
 
 
@@ -60,6 +65,7 @@ async def search_memory(
         
     Returns:
         Dict containing search results
+
     """
     try:
         # Initialize memory manager if needed
@@ -73,7 +79,7 @@ async def search_memory(
         logger.error(f"Memory search failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -84,6 +90,7 @@ async def read_memory_graph() -> dict[str, Any]:
     
     Returns:
         Dict containing the complete graph structure
+
     """
     try:
         # Initialize memory manager if needed
@@ -97,7 +104,7 @@ async def read_memory_graph() -> dict[str, Any]:
         logger.error(f"Reading memory graph failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -111,6 +118,7 @@ async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, An
         
     Returns:
         Dict containing the result of the operation
+
     """
     try:
         # Initialize memory manager if needed
@@ -124,7 +132,7 @@ async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, An
         logger.error(f"Entity creation failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -138,6 +146,7 @@ async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, 
         
     Returns:
         Dict containing the result of the operation
+
     """
     try:
         # Initialize memory manager if needed
@@ -151,7 +160,7 @@ async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, 
         logger.error(f"Relation creation failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -165,6 +174,7 @@ async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[st
         
     Returns:
         Dict containing the result of the operation
+
     """
     try:
         # Initialize memory manager if needed
@@ -178,7 +188,7 @@ async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[st
         logger.error(f"Adding observations failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -192,6 +202,7 @@ async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
         
     Returns:
         Dict containing the result of the operation
+
     """
     try:
         # Initialize memory manager if needed
@@ -205,7 +216,7 @@ async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
         logger.error(f"Entity deletion failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -217,6 +228,7 @@ def get_memory_tools() -> list[BaseTool]:
     
     Returns:
         List of memory tools
+
     """
     return [
         search_memory,

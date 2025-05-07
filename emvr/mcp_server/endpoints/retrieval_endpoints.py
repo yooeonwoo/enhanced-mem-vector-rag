@@ -16,10 +16,12 @@ retrieval_pipeline = None
 
 
 async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
-    """Register retrieval endpoints with the MCP server.
+    """
+    Register retrieval endpoints with the MCP server.
     
     Args:
         mcp_server: MCP server instance
+
     """
     global retrieval_pipeline
 
@@ -73,7 +75,7 @@ async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
         logger.info("Retrieval endpoints registered successfully")
 
     except Exception as e:
-        logger.error(f"Failed to register retrieval endpoints: {str(e)}")
+        logger.error(f"Failed to register retrieval endpoints: {e!s}")
         raise
 
 
@@ -84,7 +86,8 @@ async def hybrid_search(
     top_k: int = 5,
     filters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Perform hybrid search across vector and graph stores.
+    """
+    Perform hybrid search across vector and graph stores.
     
     Args:
         query: Search query string
@@ -93,6 +96,7 @@ async def hybrid_search(
         
     Returns:
         Dictionary with search results
+
     """
     try:
         result = await retrieval_pipeline.search_hybrid(
@@ -102,7 +106,7 @@ async def hybrid_search(
         )
         return result
     except Exception as e:
-        logger.error(f"Error performing hybrid search: {str(e)}")
+        logger.error(f"Error performing hybrid search: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -111,7 +115,8 @@ async def vector_search(
     top_k: int = 5,
     filters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Perform vector search against the vector store.
+    """
+    Perform vector search against the vector store.
     
     Args:
         query: Search query string
@@ -120,6 +125,7 @@ async def vector_search(
         
     Returns:
         Dictionary with search results
+
     """
     try:
         result = await retrieval_pipeline.retrieve(
@@ -130,7 +136,7 @@ async def vector_search(
         )
         return result
     except Exception as e:
-        logger.error(f"Error performing vector search: {str(e)}")
+        logger.error(f"Error performing vector search: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -139,7 +145,8 @@ async def graph_search(
     top_k: int = 5,
     filters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Perform graph search against the knowledge graph.
+    """
+    Perform graph search against the knowledge graph.
     
     Args:
         query: Search query string
@@ -148,6 +155,7 @@ async def graph_search(
         
     Returns:
         Dictionary with search results
+
     """
     try:
         result = await retrieval_pipeline.retrieve(
@@ -158,7 +166,7 @@ async def graph_search(
         )
         return result
     except Exception as e:
-        logger.error(f"Error performing graph search: {str(e)}")
+        logger.error(f"Error performing graph search: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -167,7 +175,8 @@ async def enrich_context(
     context: str | None = None,
     top_k: int = 3,
 ) -> dict[str, Any]:
-    """Enrich context with retrieved information.
+    """
+    Enrich context with retrieved information.
     
     Args:
         query: Query string
@@ -176,6 +185,7 @@ async def enrich_context(
         
     Returns:
         Dictionary with enriched context
+
     """
     try:
         result = await retrieval_pipeline.enrich_context(
@@ -185,5 +195,5 @@ async def enrich_context(
         )
         return result
     except Exception as e:
-        logger.error(f"Error enriching context: {str(e)}")
+        logger.error(f"Error enriching context: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))

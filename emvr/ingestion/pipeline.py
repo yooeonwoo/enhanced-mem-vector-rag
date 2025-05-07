@@ -77,7 +77,7 @@ class IngestionPipeline:
     def _split_text(
         self,
         text: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Split text into chunks.
@@ -88,6 +88,7 @@ class IngestionPipeline:
         
         Returns:
             List[Dict]: List of chunk dictionaries with "text" and "metadata"
+
         """
         # Placeholder implementation
         # This will be replaced with actual LlamaIndex usage
@@ -95,7 +96,7 @@ class IngestionPipeline:
         # For now, simply treat the entire text as a single chunk
         chunk = {
             "text": text,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         return [chunk]
@@ -115,7 +116,7 @@ class IngestionPipeline:
         self,
         text: str,
         metadata: dict[str, Any] | None = None,
-        source_name: str | None = None
+        source_name: str | None = None,
     ) -> dict[str, Any]:
         """
         Ingest raw text into the memory system.
@@ -127,6 +128,7 @@ class IngestionPipeline:
         
         Returns:
             Dict: Ingestion result
+
         """
         await self.ensure_initialized()
 
@@ -141,7 +143,7 @@ class IngestionPipeline:
             full_metadata.update({
                 "source": source_id,
                 "source_type": "text",
-                "ingestion_time": datetime.now(UTC).isoformat()
+                "ingestion_time": datetime.now(UTC).isoformat(),
             })
 
             # Split text into chunks
@@ -154,7 +156,7 @@ class IngestionPipeline:
                 chunk_metadata = chunk["metadata"].copy()
                 chunk_metadata.update({
                     "chunk_index": i,
-                    "chunk_count": len(chunks)
+                    "chunk_count": len(chunks),
                 })
 
                 # Generate embedding
@@ -167,12 +169,12 @@ class IngestionPipeline:
                     content=chunk["text"],
                     user_id=self._settings.mem0_memory_id,
                     metadata=chunk_metadata,
-                    embedding=embedding
+                    embedding=embedding,
                 )
 
                 stored_chunks.append({
                     "mem0_id": mem0_id,
-                    "metadata": chunk_metadata
+                    "metadata": chunk_metadata,
                 })
 
             # Create an entity in the graph for this document
@@ -181,7 +183,7 @@ class IngestionPipeline:
             await self._memory_manager.create_entities([{
                 "name": entity_name,
                 "entityType": "Document",
-                "observations": [f"Text content with {len(chunks)} chunks. First 100 chars: {text[:100]}..."]
+                "observations": [f"Text content with {len(chunks)} chunks. First 100 chars: {text[:100]}..."],
             }])
 
             logger.info(f"Successfully ingested text as '{entity_name}'")
@@ -191,20 +193,20 @@ class IngestionPipeline:
                 "source_id": source_id,
                 "entity_name": entity_name,
                 "chunk_count": len(chunks),
-                "stored_chunks": stored_chunks
+                "stored_chunks": stored_chunks,
             }
 
         except Exception as e:
             logger.error(f"Failed to ingest text: {e}")
             return {
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
 
     async def ingest_file(
         self,
         file_path: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Ingest a file into the memory system.
@@ -215,6 +217,7 @@ class IngestionPipeline:
         
         Returns:
             Dict: Ingestion result
+
         """
         await self.ensure_initialized()
 
@@ -227,7 +230,7 @@ class IngestionPipeline:
             if not documents:
                 return {
                     "success": False,
-                    "error": f"Failed to load file: {file_path}"
+                    "error": f"Failed to load file: {file_path}",
                 }
 
             # Process each document
@@ -236,7 +239,7 @@ class IngestionPipeline:
                 result = await self.ingest_text(
                     text=doc["text"],
                     metadata=doc["metadata"],
-                    source_name=f"File: {doc['metadata'].get('file_name', file_path)}"
+                    source_name=f"File: {doc['metadata'].get('file_name', file_path)}",
                 )
                 results.append(result)
 
@@ -244,14 +247,14 @@ class IngestionPipeline:
                 "success": True,
                 "file_path": file_path,
                 "document_count": len(documents),
-                "results": results
+                "results": results,
             }
 
         except Exception as e:
             logger.error(f"Failed to ingest file {file_path}: {e}")
             return {
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
 
     async def ingest_directory(
@@ -260,7 +263,7 @@ class IngestionPipeline:
         recursive: bool = True,
         metadata: dict[str, Any] | None = None,
         exclude_hidden: bool = True,
-        file_extensions: list[str] | None = None
+        file_extensions: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Ingest all files from a directory.
@@ -274,6 +277,7 @@ class IngestionPipeline:
         
         Returns:
             Dict: Ingestion result
+
         """
         await self.ensure_initialized()
 
@@ -286,13 +290,13 @@ class IngestionPipeline:
                 recursive,
                 metadata,
                 exclude_hidden,
-                file_extensions
+                file_extensions,
             )
 
             if not documents:
                 return {
                     "success": False,
-                    "error": f"No documents found in directory: {directory_path}"
+                    "error": f"No documents found in directory: {directory_path}",
                 }
 
             # Process each document
@@ -301,7 +305,7 @@ class IngestionPipeline:
                 result = await self.ingest_text(
                     text=doc["text"],
                     metadata=doc["metadata"],
-                    source_name=f"File: {doc['metadata'].get('file_name', 'unknown')}"
+                    source_name=f"File: {doc['metadata'].get('file_name', 'unknown')}",
                 )
                 results.append(result)
 
@@ -309,20 +313,20 @@ class IngestionPipeline:
                 "success": True,
                 "directory_path": directory_path,
                 "document_count": len(documents),
-                "results": results
+                "results": results,
             }
 
         except Exception as e:
             logger.error(f"Failed to ingest directory {directory_path}: {e}")
             return {
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
 
     async def ingest_url(
         self,
         url: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Ingest content from a URL.
@@ -333,6 +337,7 @@ class IngestionPipeline:
         
         Returns:
             Dict: Ingestion result
+
         """
         await self.ensure_initialized()
 
@@ -345,7 +350,7 @@ class IngestionPipeline:
             if not documents:
                 return {
                     "success": False,
-                    "error": f"Failed to load URL: {url}"
+                    "error": f"Failed to load URL: {url}",
                 }
 
             # Process each document
@@ -354,7 +359,7 @@ class IngestionPipeline:
                 result = await self.ingest_text(
                     text=doc["text"],
                     metadata=doc["metadata"],
-                    source_name=f"URL: {url}"
+                    source_name=f"URL: {url}",
                 )
                 results.append(result)
 
@@ -362,14 +367,14 @@ class IngestionPipeline:
                 "success": True,
                 "url": url,
                 "document_count": len(documents),
-                "results": results
+                "results": results,
             }
 
         except Exception as e:
             logger.error(f"Failed to ingest URL {url}: {e}")
             return {
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
 
 

@@ -55,7 +55,7 @@ class FileLoader:
     def load_file(
         self,
         file_path: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load a single file.
@@ -66,6 +66,7 @@ class FileLoader:
         
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 
@@ -81,7 +82,7 @@ class FileLoader:
                 return []
 
             # Basic file read as a placeholder
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Create a document dict
@@ -90,13 +91,13 @@ class FileLoader:
                 "source": file_path,
                 "file_name": os.path.basename(file_path),
                 "file_type": os.path.splitext(file_path)[1][1:],
-                "file_size": os.path.getsize(file_path)
+                "file_size": os.path.getsize(file_path),
             })
 
             # Return as a list of documents (single document in this case)
             return [{
                 "text": content,
-                "metadata": doc_metadata
+                "metadata": doc_metadata,
             }]
 
             # TODO: Implement with LlamaIndex SimpleDirectoryReader
@@ -125,7 +126,7 @@ class FileLoader:
         recursive: bool = True,
         metadata: dict[str, Any] | None = None,
         exclude_hidden: bool = True,
-        file_extensions: list[str] | None = None
+        file_extensions: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load all files from a directory.
@@ -139,6 +140,7 @@ class FileLoader:
         
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 
@@ -162,14 +164,14 @@ class FileLoader:
                     item_path = os.path.join(path, item)
 
                     # Skip hidden files/dirs if requested
-                    if exclude_hidden and item.startswith('.'):
+                    if exclude_hidden and item.startswith("."):
                         continue
 
                     if os.path.isfile(item_path):
                         # Check file extension if specified
                         if file_extensions:
                             ext = os.path.splitext(item)[1][1:].lower()
-                            if ext not in [e.lower().lstrip('.') for e in file_extensions]:
+                            if ext not in [e.lower().lstrip(".") for e in file_extensions]:
                                 continue
                         files.append(item_path)
                     elif os.path.isdir(item_path) and recursive:

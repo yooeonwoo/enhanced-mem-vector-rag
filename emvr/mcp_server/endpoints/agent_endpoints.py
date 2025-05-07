@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class AgentRunRequest(BaseModel):
     """Request schema for running an agent."""
+
     query: str
     thread_id: str | None = None
     context: list[dict[str, Any]] | None = None
@@ -29,6 +30,7 @@ class AgentRunRequest(BaseModel):
 
 class WorkerRunRequest(BaseModel):
     """Request schema for running a worker agent."""
+
     worker_name: str
     query: str
     thread_id: str | None = None
@@ -40,7 +42,6 @@ class WorkerRunRequest(BaseModel):
 
 async def register_agent_endpoints(mcp: MCPServer) -> None:
     """Register all agent MCP endpoints."""
-
     # Agent workflow singleton
     agent_workflow = None
 
@@ -59,7 +60,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
         context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
         params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Run the agent workflow on a query.
@@ -92,7 +93,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "output": result.output,
                 "thread_id": thread_id,
                 "error": result.error,
-                "status": "success" if result.success else "error"
+                "status": "success" if result.success else "error",
             }
         except Exception as e:
             logger.error(f"Agent workflow execution failed: {e}")
@@ -103,7 +104,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "output": "",
                 "thread_id": thread_id or str(uuid.uuid4()),
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }
 
     @mcp.tool()
@@ -113,7 +114,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
         thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
         context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
         params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Run a specific worker agent on a query.
@@ -133,7 +134,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                     "output": "",
                     "thread_id": thread_id or str(uuid.uuid4()),
                     "error": f"Worker agent '{worker_name}' not found",
-                    "status": "error"
+                    "status": "error",
                 }
 
             # Process parameters
@@ -157,7 +158,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "output": result.output,
                 "thread_id": thread_id,
                 "error": result.error,
-                "status": "success" if result.success else "error"
+                "status": "success" if result.success else "error",
             }
         except Exception as e:
             logger.error(f"Worker agent execution failed: {e}")
@@ -168,7 +169,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "output": "",
                 "thread_id": thread_id or str(uuid.uuid4()),
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }
 
 
@@ -181,7 +182,7 @@ async def register_agent_resources(mcp: MCPServer) -> None:
         uri="memory://agent-guide",
         name="AgentSystemGuide",
         description="Guide for using the agent system",
-        mime_type="text/markdown"
+        mime_type="text/markdown",
     )
     async def agent_guide() -> str:
         """Return the Agent System usage guide."""

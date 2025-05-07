@@ -24,7 +24,8 @@ class AgentWorkflowFactory:
         memory_manager: MemoryManager | None = None,
         retrieval_pipeline: RetrievalPipeline | None = None,
     ) -> AgentWorkflow:
-        """Create an agent workflow.
+        """
+        Create an agent workflow.
         
         Args:
             supervisor_llm: Language model for the supervisor agent
@@ -34,6 +35,7 @@ class AgentWorkflowFactory:
             
         Returns:
             AgentWorkflow instance
+
         """
         # Initialize components if not provided
         if supervisor_llm is None:

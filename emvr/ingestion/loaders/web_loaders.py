@@ -53,7 +53,7 @@ class WebLoader:
     def load_url(
         self,
         url: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load content from a URL.
@@ -64,6 +64,7 @@ class WebLoader:
         
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 
@@ -83,13 +84,13 @@ class WebLoader:
             doc_metadata = metadata or {}
             doc_metadata.update({
                 "source": url,
-                "source_type": "web"
+                "source_type": "web",
             })
 
             # Return as a list of documents (empty for now)
             return [{
                 "text": f"Placeholder content for URL: {url}",
-                "metadata": doc_metadata
+                "metadata": doc_metadata,
             }]
 
             # TODO: Implement with LlamaIndex SimpleWebPageReader
@@ -111,7 +112,7 @@ class WebLoader:
     def load_urls(
         self,
         urls: list[str],
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Load content from multiple URLs.
@@ -122,6 +123,7 @@ class WebLoader:
         
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
+
         """
         self.ensure_initialized()
 

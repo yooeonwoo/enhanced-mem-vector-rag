@@ -45,6 +45,7 @@ class WorkerAgent(BaseAgent):
             tools: List of tools available to the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         self.specialty = specialty
 
@@ -77,6 +78,7 @@ class WorkerAgent(BaseAgent):
             
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Get chat history if provided
@@ -107,12 +109,12 @@ class WorkerAgent(BaseAgent):
             return {
                 "response": result["output"],
                 "intermediate_steps": result.get("intermediate_steps", []),
-                "status": "success"
+                "status": "success",
             }
         except Exception as e:
             logger.error(f"Worker agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }

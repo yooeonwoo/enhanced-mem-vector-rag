@@ -27,11 +27,13 @@ class ResearchWorkerAgent(BaseAgent):
         llm: BaseLanguageModel | None = None,
         retrieval_pipeline: RetrievalPipeline | None = None,
     ):
-        """Initialize the research worker agent.
+        """
+        Initialize the research worker agent.
         
         Args:
             llm: Language model for the agent
             retrieval_pipeline: Retrieval pipeline instance
+
         """
         # Initialize LLM
         self.llm = llm or ChatOpenAI(
@@ -46,10 +48,12 @@ class ResearchWorkerAgent(BaseAgent):
         self.agent_executor = self._create_agent_executor()
 
     def _create_agent_executor(self) -> AgentExecutor:
-        """Create an agent executor with research tools.
+        """
+        Create an agent executor with research tools.
         
         Returns:
             AgentExecutor instance
+
         """
         # Define tools
         class SearchTool(BaseTool):
@@ -69,7 +73,7 @@ class ResearchWorkerAgent(BaseAgent):
                 for i, result in enumerate(results):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
-                        f"Source: {result.metadata.get('source', 'Unknown')}"
+                        f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -86,7 +90,7 @@ class ResearchWorkerAgent(BaseAgent):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}\n"
-                        f"Relevance: {result.metadata.get('score', 'Unknown')}"
+                        f"Relevance: {result.metadata.get('score', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -108,15 +112,18 @@ class ResearchWorkerAgent(BaseAgent):
         return agent
 
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
         
         Returns:
             AgentExecutor instance
+
         """
         return self.agent_executor
 
     async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        Run the agent with a query.
         
         Args:
             query: Query string
@@ -124,6 +131,7 @@ class ResearchWorkerAgent(BaseAgent):
             
         Returns:
             Agent result
+
         """
         try:
             # Initialize agent input
@@ -159,12 +167,14 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
         memory_manager: MemoryManager | None = None,
         kg_retriever: KnowledgeGraphRetriever | None = None,
     ):
-        """Initialize the knowledge graph worker agent.
+        """
+        Initialize the knowledge graph worker agent.
         
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
             kg_retriever: Knowledge graph retriever instance
+
         """
         # Initialize LLM
         self.llm = llm or ChatOpenAI(
@@ -182,10 +192,12 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
         self.agent_executor = self._create_agent_executor()
 
     def _create_agent_executor(self) -> AgentExecutor:
-        """Create an agent executor with knowledge graph tools.
+        """
+        Create an agent executor with knowledge graph tools.
         
         Returns:
             AgentExecutor instance
+
         """
         # Define tools
         class KGSearchTool(BaseTool):
@@ -205,7 +217,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                 for i, result in enumerate(results):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
-                        f"Source: {result.metadata.get('source', 'Unknown')}"
+                        f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -222,7 +234,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                     formatted_results.append(
                         f"[{i+1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}\n"
-                        f"Relevance: {result.metadata.get('score', 'Unknown')}"
+                        f"Relevance: {result.metadata.get('score', 'Unknown')}",
                     )
 
                 return "\n\n".join(formatted_results)
@@ -251,13 +263,13 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     entity_descriptions.append(
-                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}"
+                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
                 relation_descriptions = []
                 for relation in relations[:10]:  # Limit to 10 relations
                     relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation_type')}--> {relation.get('to')}"
+                        f"{relation.get('from')} --{relation.get('relation_type')}--> {relation.get('to')}",
                     )
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
@@ -287,13 +299,13 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     entity_descriptions.append(
-                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}"
+                        f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
                     )
 
                 relation_descriptions = []
                 for relation in relations[:10]:  # Limit to 10 relations
                     relation_descriptions.append(
-                        f"{relation.get('from')} --{relation.get('relation_type')}--> {relation.get('to')}"
+                        f"{relation.get('from')} --{relation.get('relation_type')}--> {relation.get('to')}",
                     )
 
                 output = "Entities:\n" + "\n".join(entity_descriptions)
@@ -325,15 +337,18 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
         return agent
 
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
         
         Returns:
             AgentExecutor instance
+
         """
         return self.agent_executor
 
     async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        Run the agent with a query.
         
         Args:
             query: Query string
@@ -341,6 +356,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
             
         Returns:
             Agent result
+
         """
         try:
             # Initialize agent input
@@ -375,11 +391,13 @@ class MemoryManagementWorkerAgent(BaseAgent):
         llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
     ):
-        """Initialize the memory management worker agent.
+        """
+        Initialize the memory management worker agent.
         
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
+
         """
         # Initialize LLM
         self.llm = llm or ChatOpenAI(
@@ -394,10 +412,12 @@ class MemoryManagementWorkerAgent(BaseAgent):
         self.agent_executor = self._create_agent_executor()
 
     def _create_agent_executor(self) -> AgentExecutor:
-        """Create an agent executor with memory management tools.
+        """
+        Create an agent executor with memory management tools.
         
         Returns:
             AgentExecutor instance
+
         """
         # Define tools
         class CreateEntityTool(BaseTool):
@@ -413,7 +433,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         "name": name,
                         "entity_type": entity_type,
                         "observations": observations,
-                    }
+                    },
                 ]))
 
                 return f"Entity created: {name} ({entity_type})"
@@ -425,7 +445,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         "name": name,
                         "entity_type": entity_type,
                         "observations": observations,
-                    }
+                    },
                 ])
 
                 return f"Entity created: {name} ({entity_type})"
@@ -443,7 +463,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         "from": from_entity,
                         "relation_type": relation_type,
                         "to": to_entity,
-                    }
+                    },
                 ]))
 
                 return f"Relation created: {from_entity} --{relation_type}--> {to_entity}"
@@ -455,7 +475,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         "from": from_entity,
                         "relation_type": relation_type,
                         "to": to_entity,
-                    }
+                    },
                 ])
 
                 return f"Relation created: {from_entity} --{relation_type}--> {to_entity}"
@@ -472,7 +492,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                     {
                         "entity_name": entity_name,
                         "contents": observations,
-                    }
+                    },
                 ]))
 
                 return f"Observations added to entity: {entity_name}"
@@ -483,7 +503,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                     {
                         "entity_name": entity_name,
                         "contents": observations,
-                    }
+                    },
                 ])
 
                 return f"Observations added to entity: {entity_name}"
@@ -511,7 +531,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     node_descriptions.append(
-                        f"{node.get('name')} ({node.get('entity_type')}): {observation_text}"
+                        f"{node.get('name')} ({node.get('entity_type')}): {observation_text}",
                     )
 
                 output = "Nodes:\n" + "\n".join(node_descriptions)
@@ -538,7 +558,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                         observation_text += f" (and {len(observations)-3} more)"
 
                     node_descriptions.append(
-                        f"{node.get('name')} ({node.get('entity_type')}): {observation_text}"
+                        f"{node.get('name')} ({node.get('entity_type')}): {observation_text}",
                     )
 
                 output = "Nodes:\n" + "\n".join(node_descriptions)
@@ -579,15 +599,18 @@ class MemoryManagementWorkerAgent(BaseAgent):
         return agent
 
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
         
         Returns:
             AgentExecutor instance
+
         """
         return self.agent_executor
 
     async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        Run the agent with a query.
         
         Args:
             query: Query string
@@ -595,6 +618,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
             
         Returns:
             Agent result
+
         """
         try:
             # Initialize agent input

@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class AgentState(Enum):
     """States for the supervisor agent workflow."""
+
     PLANNING = "planning"
     RETRIEVING = "retrieving"
     INGESTING = "ingesting"
@@ -106,6 +107,7 @@ class SupervisorAgent(BaseAgent):
             additional_tools: Additional tools for the supervisor
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -174,7 +176,7 @@ class SupervisorAgent(BaseAgent):
                 "needs_ingestion": AgentState.INGESTING,
                 "execute": AgentState.EXECUTING,
                 "respond": AgentState.RESPONDING,
-            }
+            },
         )
         workflow.add_edge(AgentState.INGESTING, AgentState.ANALYZING)
         workflow.add_edge(AgentState.EXECUTING, AgentState.REFLECTING)
@@ -196,6 +198,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Create planning prompt
@@ -237,6 +240,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Get the query from the input
@@ -249,7 +253,7 @@ class SupervisorAgent(BaseAgent):
                     "query": query,
                     "limit": 10,
                     "rerank": True,
-                }
+                },
             })
 
             # Update state
@@ -276,6 +280,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Create context string from retrieved documents
@@ -326,15 +331,15 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Next state
+
         """
         analysis = state.get("analysis", "")
 
         if "needs_ingestion" in analysis.lower():
             return "needs_ingestion"
-        elif "execute" in analysis.lower():
+        if "execute" in analysis.lower():
             return "execute"
-        else:
-            return "respond"
+        return "respond"
 
     async def _ingesting_step(self, state: SupervisorState) -> SupervisorState:
         """
@@ -345,6 +350,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Create ingestion prompt
@@ -392,6 +398,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Create context string from retrieved documents
@@ -428,7 +435,7 @@ class SupervisorAgent(BaseAgent):
             # Proceed to reflection even with error
             new_state = state.copy()
             new_state["error"] = str(e)
-            new_state["execution_result"] = f"Error during execution: {str(e)}"
+            new_state["execution_result"] = f"Error during execution: {e!s}"
             new_state["current_state"] = AgentState.REFLECTING
             return new_state
 
@@ -441,6 +448,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Create reflection prompt
@@ -471,7 +479,7 @@ class SupervisorAgent(BaseAgent):
             # Proceed to response even with error
             new_state = state.copy()
             new_state["error"] = str(e)
-            new_state["reflection"] = f"Error during reflection: {str(e)}"
+            new_state["reflection"] = f"Error during reflection: {e!s}"
             new_state["current_state"] = AgentState.RESPONDING
             return new_state
 
@@ -484,6 +492,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Updated state
+
         """
         try:
             # Determine what to include in the final response
@@ -519,7 +528,7 @@ class SupervisorAgent(BaseAgent):
             new_state["error"] = str(e)
             new_state["final_response"] = (
                 "I apologize, but I encountered an error while preparing your response. "
-                f"Error: {str(e)}"
+                f"Error: {e!s}"
             )
             return new_state
 
@@ -533,6 +542,7 @@ class SupervisorAgent(BaseAgent):
             
         Returns:
             Dict containing the agent's response and any additional information
+
         """
         try:
             # Initialize state
@@ -555,12 +565,12 @@ class SupervisorAgent(BaseAgent):
                     "execution_result": result.get("execution_result"),
                     "reflection": result.get("reflection"),
                 },
-                "status": "success"
+                "status": "success",
             }
         except Exception as e:
             logger.error(f"Agent execution failed: {e}")
             return {
-                "response": f"I encountered an error: {str(e)}",
+                "response": f"I encountered an error: {e!s}",
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }

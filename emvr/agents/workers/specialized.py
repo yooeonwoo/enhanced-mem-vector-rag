@@ -41,6 +41,7 @@ class ResearchAgent(WorkerAgent):
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -94,6 +95,7 @@ class IngestionAgent(WorkerAgent):
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -147,6 +149,7 @@ class AnalysisAgent(WorkerAgent):
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:
@@ -201,6 +204,7 @@ class CreativeAgent(WorkerAgent):
             additional_tools: Additional tools for the agent
             system_prompt: System prompt for the agent
             memory_enabled: Whether to enable memory for the agent
+
         """
         # Set default system prompt if not provided
         if system_prompt is None:

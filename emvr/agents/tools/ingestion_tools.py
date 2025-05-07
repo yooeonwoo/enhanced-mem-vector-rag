@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class IngestTextInput(BaseModel):
     """Input schema for ingest_text tool."""
+
     content: str = Field(..., description="Text content to ingest")
     metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the text")
     source_name: str | None = Field(None, description="Optional source name for the text")
@@ -27,18 +28,21 @@ class IngestTextInput(BaseModel):
 
 class IngestFileInput(BaseModel):
     """Input schema for ingest_file tool."""
+
     file_path: str = Field(..., description="Path to the file to ingest")
     metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the file")
 
 
 class IngestUrlInput(BaseModel):
     """Input schema for ingest_url tool."""
+
     url: str = Field(..., description="URL to ingest")
     metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the URL content")
 
 
 class IngestDirectoryInput(BaseModel):
     """Input schema for ingest_directory tool."""
+
     directory_path: str = Field(..., description="Path to the directory to ingest")
     recursive: bool = Field(True, description="Whether to search subdirectories")
     metadata: dict[str, Any] | None = Field(None, description="Optional metadata for all documents")
@@ -64,6 +68,7 @@ async def ingest_text(
         
     Returns:
         Dict containing the result of the ingestion
+
     """
     try:
         # Initialize ingestion pipeline if needed
@@ -86,7 +91,7 @@ async def ingest_text(
         logger.error(f"Text ingestion failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -104,6 +109,7 @@ async def ingest_file(
         
     Returns:
         Dict containing the result of the ingestion
+
     """
     try:
         # Initialize ingestion pipeline if needed
@@ -125,7 +131,7 @@ async def ingest_file(
         logger.error(f"File ingestion failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -143,6 +149,7 @@ async def ingest_url(
         
     Returns:
         Dict containing the result of the ingestion
+
     """
     try:
         # Initialize ingestion pipeline if needed
@@ -164,7 +171,7 @@ async def ingest_url(
         logger.error(f"URL ingestion failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -188,6 +195,7 @@ async def ingest_directory(
         
     Returns:
         Dict containing the result of the ingestion
+
     """
     try:
         # Initialize ingestion pipeline if needed
@@ -213,7 +221,7 @@ async def ingest_directory(
         logger.error(f"Directory ingestion failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -225,6 +233,7 @@ def get_ingestion_tools() -> list[BaseTool]:
     
     Returns:
         List of ingestion tools
+
     """
     return [
         ingest_text,

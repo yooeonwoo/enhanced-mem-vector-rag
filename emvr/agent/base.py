@@ -21,16 +21,18 @@ class BaseAgent(ABC):
 
     @abstractmethod
     def get_agent_executor(self) -> AgentExecutor:
-        """Get the agent executor.
+        """
+        Get the agent executor.
         
         Returns:
             AgentExecutor instance
+
         """
-        pass
 
     @abstractmethod
     async def run(self, query: str, **kwargs) -> AgentResult:
-        """Run the agent with a query.
+        """
+        Run the agent with a query.
         
         Args:
             query: Query string
@@ -38,5 +40,5 @@ class BaseAgent(ABC):
             
         Returns:
             Agent result
+
         """
-        pass

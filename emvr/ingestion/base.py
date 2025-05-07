@@ -28,24 +28,26 @@ class BaseIngestionConnector(ABC):
 
     @abstractmethod
     async def ingest(self, documents: list[Document]) -> list[IngestResult]:
-        """Ingest documents into the system.
+        """
+        Ingest documents into the system.
         
         Args:
             documents: List of documents to ingest
             
         Returns:
             List of ingestion results
+
         """
-        pass
 
     @abstractmethod
     async def delete(self, document_ids: list[str]) -> list[IngestResult]:
-        """Delete documents from the system.
+        """
+        Delete documents from the system.
         
         Args:
             document_ids: List of document IDs to delete
             
         Returns:
             List of deletion results
+
         """
-        pass

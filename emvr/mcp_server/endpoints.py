@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class Entity(BaseModel):
     """Entity schema for memory operations."""
+
     name: str
     entityType: str
     observations: list[str]
@@ -28,11 +29,13 @@ class Entity(BaseModel):
 
 class CreateEntitiesRequest(BaseModel):
     """Request schema for creating entities."""
+
     entities: list[Entity]
 
 
 class Relation(BaseModel):
     """Relation schema for memory operations."""
+
     from_: str
     to: str
     relationType: str
@@ -40,27 +43,32 @@ class Relation(BaseModel):
 
 class CreateRelationsRequest(BaseModel):
     """Request schema for creating relations."""
+
     relations: list[Relation]
 
 
 class Observation(BaseModel):
     """Observation schema for memory operations."""
+
     entityName: str
     contents: list[str]
 
 
 class AddObservationsRequest(BaseModel):
     """Request schema for adding observations."""
+
     observations: list[Observation]
 
 
 class DeleteEntitiesRequest(BaseModel):
     """Request schema for deleting entities."""
+
     entityNames: list[str]
 
 
 class SearchRequest(BaseModel):
     """Request schema for search operations."""
+
     query: str
     limit: int | None = 10
 
@@ -69,13 +77,12 @@ class SearchRequest(BaseModel):
 
 async def register_endpoints(mcp: MCPServer) -> None:
     """Register all memory MCP endpoints."""
-
     # ----- Memory Operations -----
 
     @mcp.tool()
     async def memory_create_entities(
         entities: Annotated[list[dict[str, Any]], Field(description="List of entities to create")],
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Create multiple new entities in the knowledge graph.
@@ -100,7 +107,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def memory_create_relations(
         relations: Annotated[list[dict[str, Any]], Field(description="List of relations to create")],
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Create multiple new relations between entities in the knowledge graph.
@@ -125,7 +132,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def memory_add_observations(
         observations: Annotated[list[dict[str, Any]], Field(description="List of observations to add")],
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Add new observations to existing entities in the knowledge graph.
@@ -151,7 +158,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def memory_search_nodes(
         query: Annotated[str, Field(description="The search query string")],
         limit: Annotated[int, Field(description="Maximum number of results to return")] = 10,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Search for nodes in the knowledge graph based on a query.
@@ -175,7 +182,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
     @mcp.tool()
     async def memory_read_graph(
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Read the entire knowledge graph.
@@ -200,7 +207,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def memory_delete_entities(
         entityNames: Annotated[list[str], Field(description="List of entity names to delete")],
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Delete multiple entities and their associated relations from the knowledge graph.
@@ -228,7 +235,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def search_hybrid(
         query: Annotated[str, Field(description="The search query string")],
         limit: Annotated[int, Field(description="Maximum number of results to return")] = 10,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Perform a hybrid search across vector and graph stores.
@@ -258,7 +265,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def graph_query(
         query: Annotated[str, Field(description="The Cypher query to execute")],
         parameters: Annotated[dict[str, Any] | None, Field(description="Query parameters")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Execute a Cypher query against the Neo4j graph database.
@@ -287,7 +294,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
         content: Annotated[str, Field(description="Text content to ingest")],
         metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the text")] = None,
         source_name: Annotated[str | None, Field(description="Optional source name for the text")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Ingest raw text into the memory system.
@@ -314,7 +321,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def ingest_file(
         file_path: Annotated[str, Field(description="Path to the file to ingest")],
         metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the file")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Ingest a file into the memory system.
@@ -341,7 +348,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def ingest_url(
         url: Annotated[str, Field(description="URL to ingest")],
         metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the URL content")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Ingest content from a URL into the memory system.
@@ -370,7 +377,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
         metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for all documents")] = None,
         exclude_hidden: Annotated[bool, Field(description="Whether to exclude hidden files/dirs")] = True,
         file_extensions: Annotated[list[str] | None, Field(description="List of file extensions to include")] = None,
-        ctx: Context = None
+        ctx: Context = None,
     ) -> dict[str, Any]:
         """
         Ingest all files from a directory into the memory system.
@@ -389,7 +396,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
                 recursive,
                 metadata,
                 exclude_hidden,
-                file_extensions
+                file_extensions,
             )
 
             return result
@@ -408,7 +415,7 @@ async def register_resources(mcp: MCPServer) -> None:
         uri="memory://api-guide",
         name="MemoryAPIGuide",
         description="Guide for using the memory API endpoints",
-        mime_type="text/markdown"
+        mime_type="text/markdown",
     )
     async def memory_api_guide() -> str:
         """Return the Memory API usage guide."""

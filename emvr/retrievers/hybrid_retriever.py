@@ -46,6 +46,7 @@ class HybridRetriever(BaseRetriever):
             graph_top_k: Number of results to retrieve from graph search
             reranking_threshold: Threshold for reranking results
             use_hybrid_fusion: Whether to use hybrid fusion for combining results
+
         """
         super().__init__()
         self.qdrant_collection = qdrant_collection
@@ -77,6 +78,7 @@ class HybridRetriever(BaseRetriever):
             
         Returns:
             List of nodes with scores
+
         """
         # TODO: Implement hybrid retrieval logic
         # 1. Retrieve from vector store

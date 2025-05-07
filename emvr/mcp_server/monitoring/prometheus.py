@@ -8,68 +8,68 @@ from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client.openmetrics.exposition import generate_latest
 
 # Type variables
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 # Metrics
 REQUESTS = Counter(
-    'emvr_mcp_server_requests_total',
-    'Total number of requests received',
-    ['method', 'endpoint', 'status']
+    "emvr_mcp_server_requests_total",
+    "Total number of requests received",
+    ["method", "endpoint", "status"],
 )
 
 REQUESTS_IN_PROGRESS = Gauge(
-    'emvr_mcp_server_requests_in_progress',
-    'Number of requests currently being processed',
-    ['method', 'endpoint']
+    "emvr_mcp_server_requests_in_progress",
+    "Number of requests currently being processed",
+    ["method", "endpoint"],
 )
 
 REQUEST_LATENCY = Histogram(
-    'emvr_mcp_server_request_latency_seconds',
-    'Request latency in seconds',
-    ['method', 'endpoint'],
-    buckets=(0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, 25.0, 50.0, 75.0, 100.0, float("inf"))
+    "emvr_mcp_server_request_latency_seconds",
+    "Request latency in seconds",
+    ["method", "endpoint"],
+    buckets=(0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, 25.0, 50.0, 75.0, 100.0, float("inf")),
 )
 
 VECTOR_COUNT = Gauge(
-    'emvr_qdrant_vector_count',
-    'Number of vectors stored in Qdrant',
-    ['collection']
+    "emvr_qdrant_vector_count",
+    "Number of vectors stored in Qdrant",
+    ["collection"],
 )
 
 GRAPH_NODE_COUNT = Gauge(
-    'emvr_neo4j_node_count',
-    'Number of nodes in Neo4j graph',
-    ['label']
+    "emvr_neo4j_node_count",
+    "Number of nodes in Neo4j graph",
+    ["label"],
 )
 
 GRAPH_RELATION_COUNT = Gauge(
-    'emvr_neo4j_relation_count',
-    'Number of relations in Neo4j graph',
-    ['type']
+    "emvr_neo4j_relation_count",
+    "Number of relations in Neo4j graph",
+    ["type"],
 )
 
 AGENT_OPERATIONS = Counter(
-    'emvr_agent_operations_total',
-    'Total number of agent operations',
-    ['agent_type', 'operation', 'status']
+    "emvr_agent_operations_total",
+    "Total number of agent operations",
+    ["agent_type", "operation", "status"],
 )
 
 MEM_OPERATIONS = Counter(
-    'emvr_memory_operations_total',
-    'Total number of memory operations',
-    ['operation', 'status']
+    "emvr_memory_operations_total",
+    "Total number of memory operations",
+    ["operation", "status"],
 )
 
 ACTIVE_SESSIONS = Gauge(
-    'emvr_active_sessions',
-    'Number of active sessions',
-    ['session_type']
+    "emvr_active_sessions",
+    "Number of active sessions",
+    ["session_type"],
 )
 
 def setup_metrics(app: FastAPI) -> None:
     """Setup metrics endpoint and middleware for the FastAPI app"""
 
-    @app.get('/metrics')
+    @app.get("/metrics")
     async def metrics():
         return generate_latest()
 

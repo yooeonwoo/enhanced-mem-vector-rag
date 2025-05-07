@@ -12,7 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 # Security settings
 JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key")
@@ -71,7 +71,7 @@ def check_permission(required_permission: str) -> Callable[[dict[str, Any]], Non
 
         # Check for wildcard permission or specific permission
         if "*" in permissions or required_permission in permissions:
-            return None
+            return
 
         logger.warning(f"User {user_id} attempted to access {required_permission} without permission")
         raise HTTPException(

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class RetrieveInput(BaseModel):
     """Input schema for hybrid_search tool."""
+
     query: str = Field(..., description="The search query string")
     limit: int = Field(10, description="Maximum number of results to return")
     rerank: bool = Field(True, description="Whether to rerank results")
@@ -27,6 +28,7 @@ class RetrieveInput(BaseModel):
 
 class RetrieveAndGenerateInput(BaseModel):
     """Input schema for retrieve_and_generate tool."""
+
     query: str = Field(..., description="The search query string")
     limit: int = Field(10, description="Maximum number of results to return")
     context_limit: int = Field(5, description="Maximum number of context documents to include")
@@ -51,6 +53,7 @@ async def hybrid_search(
         
     Returns:
         Dict containing search results
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -65,13 +68,13 @@ async def hybrid_search(
 
         return {
             "results": result,
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Hybrid search failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -89,6 +92,7 @@ async def vector_search(
         
     Returns:
         Dict containing search results
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -102,13 +106,13 @@ async def vector_search(
 
         return {
             "results": result,
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Vector search failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -126,6 +130,7 @@ async def graph_search(
         
     Returns:
         Dict containing search results
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -139,13 +144,13 @@ async def graph_search(
 
         return {
             "results": result,
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Graph search failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -167,6 +172,7 @@ async def retrieve_and_generate(
         
     Returns:
         Dict containing the generated response and retrieved context
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -184,13 +190,13 @@ async def retrieve_and_generate(
             "response": result["response"],
             "context": result["context"],
             "sources": result["sources"],
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Retrieve and generate failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -208,6 +214,7 @@ async def find_entities(
         
     Returns:
         Dict containing the found entities
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -221,13 +228,13 @@ async def find_entities(
 
         return {
             "entities": result,
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Entity extraction failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -249,6 +256,7 @@ async def find_relationships(
         
     Returns:
         Dict containing the found relationships
+
     """
     try:
         # Initialize retrieval pipeline if needed
@@ -264,13 +272,13 @@ async def find_relationships(
 
         return {
             "relationships": result,
-            "status": "success"
+            "status": "success",
         }
     except Exception as e:
         logger.error(f"Relationship finding failed: {e}")
         return {
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -282,6 +290,7 @@ def get_retrieval_tools() -> list[BaseTool]:
     
     Returns:
         List of retrieval tools
+
     """
     return [
         hybrid_search,
