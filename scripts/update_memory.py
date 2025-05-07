@@ -22,9 +22,12 @@ BASE_URL = f"http://{MCP_HOST}:{MCP_PORT}"
 HEADERS = {"Content-Type": "application/json"}
 
 
-async def create_entities():
+async def create_entities() -> None:
     """Create entities for new components."""
     url = f"{BASE_URL}/memory.create_entities"
+
+    # HTTP status code for successful response
+    HTTP_OK = 200
 
     # Get today's date for progress entity
     today = datetime.now().strftime("%Y-%m-%d")
@@ -85,17 +88,23 @@ async def create_entities():
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=data, headers=HEADERS)
             print(f"Create entities response: {response.status_code}")
-            if response.status_code == 200:
+            if response.status_code == HTTP_OK:
                 print("Successfully created entities")
             else:
                 print(f"Error creating entities: {response.text}")
-    except Exception as e:
+    except httpx.RequestError as e:
         print(f"Error creating entities: {e}")
 
 
-async def create_relations():
+async def create_relations() -> None:
     """Create relations between components."""
     url = f"{BASE_URL}/memory.create_relations"
+
+    # HTTP status code for successful response
+    HTTP_OK = 200
+
+    # Get today's date in consistent format
+    today = datetime.now().strftime("%Y-%m-%d")
 
     data = {
         "relations": [
@@ -115,7 +124,7 @@ async def create_relations():
                 "to": "Phase 8: Deployment & Testing",
             },
             {
-                "from": "Implementation Progress - " + datetime.now().strftime("%Y-%m-%d"),
+                "from": f"Implementation Progress - {today}",
                 "relation_type": "documents",
                 "to": "Phase 8: Deployment & Testing",
             },
@@ -141,17 +150,20 @@ async def create_relations():
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=data, headers=HEADERS)
             print(f"Create relations response: {response.status_code}")
-            if response.status_code == 200:
+            if response.status_code == HTTP_OK:
                 print("Successfully created relations")
             else:
                 print(f"Error creating relations: {response.text}")
-    except Exception as e:
+    except httpx.RequestError as e:
         print(f"Error creating relations: {e}")
 
 
-async def add_observations():
+async def add_observations() -> None:
     """Add observations to existing entities."""
     url = f"{BASE_URL}/memory.add_observations"
+
+    # HTTP status code for successful response
+    HTTP_OK = 200
 
     data = {
         "observations": [
@@ -189,24 +201,32 @@ async def add_observations():
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=data, headers=HEADERS)
             print(f"Add observations response: {response.status_code}")
-            if response.status_code == 200:
+            if response.status_code == HTTP_OK:
                 print("Successfully added observations")
             else:
                 print(f"Error adding observations: {response.text}")
-    except Exception as e:
+    except httpx.RequestError as e:
         print(f"Error adding observations: {e}")
 
 
-async def main():
-    """Main function to update memory."""
+async def main() -> None:
+    """Execute the memory update process."""
     print("Updating memory with implementation progress...")
+
+    # HTTP status code for successful response
+    HTTP_OK = 200
+    # Timeout for server connection check in seconds
+    CONNECTION_TIMEOUT = 5.0
 
     try:
         # Check if the MCP server is running
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(f"{BASE_URL}/memory.read_graph", timeout=5.0)
-                if response.status_code != 200:
+                response = await client.get(
+                    f"{BASE_URL}/memory.read_graph", 
+                    timeout=CONNECTION_TIMEOUT
+                )
+                if response.status_code != HTTP_OK:
                     print(f"Error: MCP server not available at {BASE_URL}")
                     print("Please make sure the MCP server is running.")
                     sys.exit(1)
@@ -220,7 +240,7 @@ async def main():
         await add_observations()
 
         print("Memory update completed successfully")
-    except Exception as e:
+    except httpx.RequestError as e:
         print(f"Error updating memory: {e}")
         sys.exit(1)
 
