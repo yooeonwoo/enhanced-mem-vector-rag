@@ -1,7 +1,7 @@
 """Memory-augmented agent implementation."""
 
 import os
-from typing import Any, Dict
+from typing import Any
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
@@ -211,7 +211,7 @@ class MemoryAgent(BaseAgent):
         """
         return self.agent_executor
 
-    async def run(self, query: str, **kwargs: Dict[str, Any]) -> AgentResult:
+    async def run(self, query: str, **kwargs: dict[str, Any]) -> AgentResult:
         """
         Run the agent with a query.
 
@@ -243,12 +243,12 @@ class MemoryAgent(BaseAgent):
             return AgentResult(
                 success=False,
                 output="",
-                error=f"Agent execution error: {str(e)}",
+                error=f"Agent execution error: {e!s}",
             )
         except RuntimeError as e:
             # Handle runtime errors
             return AgentResult(
                 success=False,
                 output="",
-                error=f"Runtime error: {str(e)}",
+                error=f"Runtime error: {e!s}",
             )

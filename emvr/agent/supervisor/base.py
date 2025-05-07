@@ -3,7 +3,7 @@
 import os
 import uuid
 from collections.abc import Callable
-from typing import Any, Dict
+from typing import Any
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor
@@ -219,7 +219,7 @@ class SupervisorAgent(BaseAgent):
                 messages = [{"role": "assistant", "content": result.output}]
 
                 return add_messages(state, messages)
-            except (RuntimeError, asyncio.TimeoutError) as e:
+            except (TimeoutError, RuntimeError) as e:
                 # Handle specific runtime errors
                 error_message = f"Error in {agent_name}: {e!s}"
                 state["error"] = error_message
@@ -275,7 +275,7 @@ class SupervisorAgent(BaseAgent):
         msg = "Supervisor agent doesn't use AgentExecutor"
         raise NotImplementedError(msg)
 
-    async def run(self, query: str, **kwargs: Dict[str, Any]) -> AgentResult:
+    async def run(self, query: str, **kwargs: dict[str, Any]) -> AgentResult:
         """
         Run the agent with a query.
 
