@@ -99,8 +99,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @classmethod
     @field_validator("openai_api_key")
-    def validate_openai_api_key(self, v: str | None, info) -> str | None:
+    def validate_openai_api_key(cls, v: str | None, info) -> str | None:
         """Validate OpenAI API key if OpenAI is used."""
         values = info.data
         if values.get("default_llm_provider") == "openai" and not v:
@@ -109,8 +110,9 @@ class Settings(BaseSettings):
                 raise ValueError(msg)
         return v
 
+    @classmethod
     @field_validator("anthropic_api_key")
-    def validate_anthropic_api_key(self, v: str | None, info) -> str | None:
+    def validate_anthropic_api_key(cls, v: str | None, info) -> str | None:
         """Validate Anthropic API key if Anthropic is used."""
         values = info.data
         if values.get("default_llm_provider") == "anthropic" and not v:
@@ -119,8 +121,9 @@ class Settings(BaseSettings):
                 raise ValueError(msg)
         return v
 
+    @classmethod
     @field_validator("cohere_api_key")
-    def validate_cohere_api_key(self, v: str | None, info) -> str | None:
+    def validate_cohere_api_key(cls, v: str | None, info) -> str | None:
         """Validate Cohere API key if Cohere is used."""
         values = info.data
         if values.get("default_llm_provider") == "cohere" and not v:

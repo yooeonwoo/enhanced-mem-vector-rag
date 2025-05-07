@@ -13,6 +13,7 @@ import jwt
 # Add parent directory to Python path
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
+
 def load_env() -> dict[str, str]:
     """Load environment variables from .env file."""
     env_vars = {}
@@ -27,6 +28,7 @@ def load_env() -> dict[str, str]:
                     env_vars[key] = value
 
     return env_vars
+
 
 def generate_token(user_id: str, expiry_days: int = 30) -> str:
     """Generate a JWT token for the specified user."""
@@ -78,6 +80,7 @@ def main() -> None:
         print(f"\nThis token will expire in {args.expiry} days")
         print("\nUse this token in the Authorization header:")
         print(f"Authorization: Bearer {token}")
+
 
 if __name__ == "__main__":
     main()

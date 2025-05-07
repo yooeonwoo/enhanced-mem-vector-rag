@@ -82,6 +82,7 @@ async def register_ingestion_endpoints(mcp_server: MCPServer) -> None:
 
 # Define MCP tool functions
 
+
 async def ingest_text(
     content: str,
     metadata: dict[str, Any] | None = None,

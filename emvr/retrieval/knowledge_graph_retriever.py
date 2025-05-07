@@ -58,7 +58,10 @@ class KnowledgeGraphRetriever(BaseRetriever):
         return self._query_engine
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
+        self,
+        query: str,
+        top_k: int = 5,
+        filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
         """
         Retrieve knowledge graph paths based on a query.
@@ -117,7 +120,15 @@ class KnowledgeGraphRetriever(BaseRetriever):
                 # Extract likely keyword from query
                 tokens = query.lower().split()
                 for token in tokens:
-                    if len(token) > 3 and token not in ["what", "who", "when", "where", "how", "related", "connection"]:
+                    if len(token) > 3 and token not in [
+                        "what",
+                        "who",
+                        "when",
+                        "where",
+                        "how",
+                        "related",
+                        "connection",
+                    ]:
                         cypher_params["keyword"] = token
                         break
                 else:
@@ -133,7 +144,9 @@ class KnowledgeGraphRetriever(BaseRetriever):
                 cypher_params["query"] = query
 
             # Execute custom Cypher query
-            async with self.graph_store.driver.session(database=self.graph_store.database) as session:
+            async with self.graph_store.driver.session(
+                database=self.graph_store.database
+            ) as session:
                 result = await session.run(cypher_query, **cypher_params)
 
                 # Process results

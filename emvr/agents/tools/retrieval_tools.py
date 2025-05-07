@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Tool Input/Output Schemas -----
 
+
 class RetrieveInput(BaseModel):
     """Input schema for hybrid_search tool."""
 
@@ -36,6 +37,7 @@ class RetrieveAndGenerateInput(BaseModel):
 
 
 # ----- Retrieval Tools -----
+
 
 @tool
 async def hybrid_search(
@@ -283,6 +285,7 @@ async def find_relationships(
 
 
 # ----- Tool Collection -----
+
 
 def get_retrieval_tools() -> list[BaseTool]:
     """

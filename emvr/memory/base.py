@@ -43,7 +43,9 @@ class MemoryInterface(ABC):
 
     @abstractmethod
     async def delete_observations(
-        self, entity_name: str, observations: list[str],
+        self,
+        entity_name: str,
+        observations: list[str],
     ) -> dict[str, Any]:
         """Delete specific observations from an entity in the knowledge graph."""
 

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Graph Visualization Functions -----
 
+
 async def prepare_graph_data(
     center_entity: str | None = None,
     max_nodes: int = 50,
@@ -68,28 +69,32 @@ async def prepare_graph_data(
             if len(nodes) >= max_nodes:
                 break
 
-            nodes.append({
-                "id": node.get("name", ""),
-                "label": node.get("name", ""),
-                "title": node.get("entityType", "Entity"),
-                "group": node.get("entityType", "Entity"),
-                "properties": {
-                    "type": node.get("entityType", "Entity"),
-                    "observations": node.get("observations", []),
-                },
-            })
+            nodes.append(
+                {
+                    "id": node.get("name", ""),
+                    "label": node.get("name", ""),
+                    "title": node.get("entityType", "Entity"),
+                    "group": node.get("entityType", "Entity"),
+                    "properties": {
+                        "type": node.get("entityType", "Entity"),
+                        "observations": node.get("observations", []),
+                    },
+                }
+            )
 
         # Process relationships
         for rel in graph_result.get("relationships", []):
-            edges.append({
-                "from": rel.get("from", ""),
-                "to": rel.get("to", ""),
-                "label": rel.get("relationType", "related"),
-                "title": rel.get("relationType", "related"),
-                "properties": {
-                    "type": rel.get("relationType", "related"),
-                },
-            })
+            edges.append(
+                {
+                    "from": rel.get("from", ""),
+                    "to": rel.get("to", ""),
+                    "label": rel.get("relationType", "related"),
+                    "title": rel.get("relationType", "related"),
+                    "properties": {
+                        "type": rel.get("relationType", "related"),
+                    },
+                }
+            )
 
         return {
             "nodes": nodes,
@@ -108,6 +113,7 @@ async def prepare_graph_data(
 
 
 # ----- UI Components -----
+
 
 async def show_graph_visualization(
     center_entity: str | None = None,
@@ -348,7 +354,7 @@ async def show_graph_visualization(
                         const nodeId = params.nodes[0];
                         const node = nodes.get(nodeId);
 
-                        alert(`Node: ${node.label}\\nType: ${node.properties.type}\\nObservations: ${node.properties.observations.join('\\n- ')}`);
+                        alert(`Node: ${node.label}\\nType: ${node.properties.type}\\nObservations: ${node.properties.observations.join("\\n- ")}`);
                     }}
                 }});
             </script>
@@ -360,7 +366,9 @@ async def show_graph_visualization(
         import tempfile
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".html", delete=False,
+            mode="w",
+            suffix=".html",
+            delete=False,
         ) as f:
             f.write(html_content)
             html_path = f.name

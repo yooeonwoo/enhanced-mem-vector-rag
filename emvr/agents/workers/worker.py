@@ -94,16 +94,18 @@ class WorkerAgent(BaseAgent):
                 for i, doc in enumerate(context):
                     content = doc.get("content", "")
                     source = doc.get("source", "Unknown")
-                    context_str += f"[{i+1}] From {source}: {content}\n\n"
+                    context_str += f"[{i + 1}] From {source}: {content}\n\n"
 
             # Combine context and input
             full_input = f"{context_str}\n\nTask: {input_text}" if context_str else input_text
 
             # Execute the agent
-            result = await self.agent_executor.ainvoke({
-                "input": full_input,
-                "chat_history": chat_history,
-            })
+            result = await self.agent_executor.ainvoke(
+                {
+                    "input": full_input,
+                    "chat_history": chat_history,
+                }
+            )
 
             # Return the result
             return {

@@ -123,12 +123,14 @@ class AgentWorkflow:
         # Run memory-related operations to track the interaction
         try:
             # Add observation about the query
-            await self.memory_manager.add_observations([
-                {
-                    "entity_name": f"Query - {uuid.uuid4()}",
-                    "contents": [query],
-                },
-            ])
+            await self.memory_manager.add_observations(
+                [
+                    {
+                        "entity_name": f"Query - {uuid.uuid4()}",
+                        "contents": [query],
+                    },
+                ]
+            )
 
             # Get thread ID if available
             thread_id = kwargs.get("thread_id", str(uuid.uuid4()))
@@ -138,19 +140,29 @@ class AgentWorkflow:
 
             # Record the result in memory
             if result.success:
-                await self.memory_manager.add_observations([
-                    {
-                        "entity_name": "Agent Workflow Results",
-                        "contents": [f"Successfully processed query: {query}", f"Output: {result.output}"],
-                    },
-                ])
+                await self.memory_manager.add_observations(
+                    [
+                        {
+                            "entity_name": "Agent Workflow Results",
+                            "contents": [
+                                f"Successfully processed query: {query}",
+                                f"Output: {result.output}",
+                            ],
+                        },
+                    ]
+                )
             else:
-                await self.memory_manager.add_observations([
-                    {
-                        "entity_name": "Agent Workflow Errors",
-                        "contents": [f"Failed to process query: {query}", f"Error: {result.error}"],
-                    },
-                ])
+                await self.memory_manager.add_observations(
+                    [
+                        {
+                            "entity_name": "Agent Workflow Errors",
+                            "contents": [
+                                f"Failed to process query: {query}",
+                                f"Error: {result.error}",
+                            ],
+                        },
+                    ]
+                )
 
             # Return workflow output
             return WorkflowOutput(
@@ -161,12 +173,14 @@ class AgentWorkflow:
             )
         except Exception as e:
             # Record error in memory
-            await self.memory_manager.add_observations([
-                {
-                    "entity_name": "Agent Workflow Errors",
-                    "contents": [f"Exception while processing query: {query}", f"Error: {e!s}"],
-                },
-            ])
+            await self.memory_manager.add_observations(
+                [
+                    {
+                        "entity_name": "Agent Workflow Errors",
+                        "contents": [f"Exception while processing query: {query}", f"Error: {e!s}"],
+                    },
+                ]
+            )
 
             # Return error output
             return WorkflowOutput(

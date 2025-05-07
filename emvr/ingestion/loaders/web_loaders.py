@@ -82,16 +82,20 @@ class WebLoader:
 
             # Create a document dict with placeholder content
             doc_metadata = metadata or {}
-            doc_metadata.update({
-                "source": url,
-                "source_type": "web",
-            })
+            doc_metadata.update(
+                {
+                    "source": url,
+                    "source_type": "web",
+                }
+            )
 
             # Return as a list of documents (empty for now)
-            return [{
-                "text": f"Placeholder content for URL: {url}",
-                "metadata": doc_metadata,
-            }]
+            return [
+                {
+                    "text": f"Placeholder content for URL: {url}",
+                    "metadata": doc_metadata,
+                }
+            ]
 
             # TODO: Implement with LlamaIndex SimpleWebPageReader
             # documents = SimpleWebPageReader(html_to_text=True).load_data([url])

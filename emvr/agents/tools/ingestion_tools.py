@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Tool Input/Output Schemas -----
 
+
 class IngestTextInput(BaseModel):
     """Input schema for ingest_text tool."""
 
@@ -37,7 +38,9 @@ class IngestUrlInput(BaseModel):
     """Input schema for ingest_url tool."""
 
     url: str = Field(..., description="URL to ingest")
-    metadata: dict[str, Any] | None = Field(None, description="Optional metadata for the URL content")
+    metadata: dict[str, Any] | None = Field(
+        None, description="Optional metadata for the URL content"
+    )
 
 
 class IngestDirectoryInput(BaseModel):
@@ -47,10 +50,13 @@ class IngestDirectoryInput(BaseModel):
     recursive: bool = Field(True, description="Whether to search subdirectories")
     metadata: dict[str, Any] | None = Field(None, description="Optional metadata for all documents")
     exclude_hidden: bool = Field(True, description="Whether to exclude hidden files/dirs")
-    file_extensions: list[str] | None = Field(None, description="List of file extensions to include")
+    file_extensions: list[str] | None = Field(
+        None, description="List of file extensions to include"
+    )
 
 
 # ----- Ingestion Tools -----
+
 
 @tool
 async def ingest_text(
@@ -226,6 +232,7 @@ async def ingest_directory(
 
 
 # ----- Tool Collection -----
+
 
 def get_ingestion_tools() -> list[BaseTool]:
     """

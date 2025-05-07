@@ -18,6 +18,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key")
 RBAC_CONFIG_PATH = Path(__file__).parent.parent.parent / "deployment" / "security" / "rbac.json"
 
+
 # Load RBAC configuration
 def load_rbac_config() -> dict[str, Any]:
     try:
@@ -31,10 +32,12 @@ def load_rbac_config() -> dict[str, Any]:
         logger.exception(f"Error loading RBAC configuration: {e}")
         return {"roles": {}, "users": {}}
 
+
 rbac_config = load_rbac_config()
 
 # Security bearer token
 security = HTTPBearer()
+
 
 def get_user_permissions(user_id: str) -> set[str]:
     """Get permissions for a user based on their roles."""
@@ -49,6 +52,7 @@ def get_user_permissions(user_id: str) -> set[str]:
 
     return permissions
 
+
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict[str, Any]:
     """Verify JWT token and return payload."""
     try:
@@ -62,8 +66,10 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 def check_permission(required_permission: str) -> Callable[[dict[str, Any]], None]:
     """Check if user has required permission."""
+
     def _check(payload: dict[str, Any]) -> None:
         user_id = payload.get("sub", "")
         permissions = get_user_permissions(user_id)
@@ -72,7 +78,9 @@ def check_permission(required_permission: str) -> Callable[[dict[str, Any]], Non
         if "*" in permissions or required_permission in permissions:
             return
 
-        logger.warning(f"User {user_id} attempted to access {required_permission} without permission")
+        logger.warning(
+            f"User {user_id} attempted to access {required_permission} without permission"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
@@ -80,8 +88,10 @@ def check_permission(required_permission: str) -> Callable[[dict[str, Any]], Non
 
     return _check
 
+
 def requires_permission(permission: str) -> Callable[[F], F]:
     """Decorator to check if user has required permission."""
+
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:

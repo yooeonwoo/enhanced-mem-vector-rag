@@ -66,6 +66,7 @@ ACTIVE_SESSIONS = Gauge(
     ["session_type"],
 )
 
+
 def setup_metrics(app: FastAPI) -> None:
     """Setup metrics endpoint and middleware for the FastAPI app."""
 
@@ -97,23 +98,33 @@ def setup_metrics(app: FastAPI) -> None:
             REQUESTS.labels(method=method, endpoint=path, status=status_code).inc()
             REQUEST_LATENCY.labels(method=method, endpoint=path).observe(time.time() - start_time)
 
+
 def track_agent_operation(agent_type: str, operation: str) -> Callable[[F], F]:
     """Decorator to track agent operations."""
+
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 result = await func(*args, **kwargs)
-                AGENT_OPERATIONS.labels(agent_type=agent_type, operation=operation, status="success").inc()
+                AGENT_OPERATIONS.labels(
+                    agent_type=agent_type, operation=operation, status="success"
+                ).inc()
                 return result
             except Exception:
-                AGENT_OPERATIONS.labels(agent_type=agent_type, operation=operation, status="failure").inc()
+                AGENT_OPERATIONS.labels(
+                    agent_type=agent_type, operation=operation, status="failure"
+                ).inc()
                 raise
+
         return wrapper
+
     return decorator
+
 
 def track_memory_operation(operation: str) -> Callable[[F], F]:
     """Decorator to track memory operations."""
+
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -124,12 +135,16 @@ def track_memory_operation(operation: str) -> Callable[[F], F]:
             except Exception:
                 MEM_OPERATIONS.labels(operation=operation, status="failure").inc()
                 raise
+
         return wrapper
+
     return decorator
+
 
 def update_vector_count(collection: str, count: int) -> None:
     """Update the vector count metric for a collection."""
     VECTOR_COUNT.labels(collection=collection).set(count)
+
 
 def update_graph_counts(node_counts: dict[str, int], relation_counts: dict[str, int]) -> None:
     """Update Neo4j graph count metrics."""
@@ -138,6 +153,7 @@ def update_graph_counts(node_counts: dict[str, int], relation_counts: dict[str, 
 
     for rel_type, count in relation_counts.items():
         GRAPH_RELATION_COUNT.labels(type=rel_type).set(count)
+
 
 def update_active_sessions(session_type: str, count: int) -> None:
     """Update active sessions metric."""

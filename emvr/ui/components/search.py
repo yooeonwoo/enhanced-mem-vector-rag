@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Search Functions -----
 
+
 async def perform_search(
     query: str,
     search_type: str = "hybrid",
@@ -110,7 +111,6 @@ async def retrieve_and_generate(
             rerank=rerank,
         )
 
-
     except Exception as e:
         logger.exception(f"Error in retrieve and generate: {e}")
         return {
@@ -123,6 +123,7 @@ async def retrieve_and_generate(
 
 
 # ----- UI Components -----
+
 
 async def show_search_ui() -> None:
     """Show the search UI."""
@@ -187,13 +188,15 @@ async def display_search_results(
         return
 
     # Format search results
-    result_format = "\n\n".join([
-        f"**Result {i+1}:** {result.get('title', 'Unknown')}\n"
-        f"**Source:** {result.get('source', 'Unknown')}\n"
-        f"**Score:** {result.get('score', 0):.4f}\n"
-        f"**Content:**\n{result.get('content', 'No content available')}"
-        for i, result in enumerate(results[:10])
-    ])
+    result_format = "\n\n".join(
+        [
+            f"**Result {i + 1}:** {result.get('title', 'Unknown')}\n"
+            f"**Source:** {result.get('source', 'Unknown')}\n"
+            f"**Score:** {result.get('score', 0):.4f}\n"
+            f"**Content:**\n{result.get('content', 'No content available')}"
+            for i, result in enumerate(results[:10])
+        ]
+    )
 
     # Create result message with elements
     elements = [

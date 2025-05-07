@@ -112,9 +112,7 @@ class SupervisorAgent(BaseAgent):
 
         """
         # Create handoff tools for each worker agent
-        handoff_tools = [
-            self._create_handoff_tool(agent_name) for agent_name in self.worker_agents
-        ]
+        handoff_tools = [self._create_handoff_tool(agent_name) for agent_name in self.worker_agents]
 
         # Create the supervisor agent
         supervisor_agent = create_react_agent(
@@ -155,7 +153,8 @@ class SupervisorAgent(BaseAgent):
                         if tool_call.get("name", "").startswith("transfer_to_"):
                             # Extract agent name from tool call
                             next_agent = tool_call.get("name").replace(
-                                "transfer_to_", "",
+                                "transfer_to_",
+                                "",
                             )
                             break
 
@@ -225,7 +224,8 @@ class SupervisorAgent(BaseAgent):
                 state["error"] = error_message
 
                 return add_messages(
-                    state, [{"role": "system", "content": error_message}],
+                    state,
+                    [{"role": "system", "content": error_message}],
                 )
             except ValueError as e:
                 # Handle value errors
@@ -233,7 +233,8 @@ class SupervisorAgent(BaseAgent):
                 state["error"] = error_message
 
                 return add_messages(
-                    state, [{"role": "system", "content": error_message}],
+                    state,
+                    [{"role": "system", "content": error_message}],
                 )
 
         return worker_node
@@ -251,7 +252,9 @@ class SupervisorAgent(BaseAgent):
         """
         agent = self.worker_agents[agent_name]
         description = getattr(
-            agent, "description", f"Specialist agent for {agent_name} tasks",
+            agent,
+            "description",
+            f"Specialist agent for {agent_name} tasks",
         )
 
         @tool(
@@ -318,9 +321,7 @@ class SupervisorAgent(BaseAgent):
             # Extract final output
             if final_state:
                 assistant_messages = [
-                    m
-                    for m in final_state.get("messages", [])
-                    if m.get("role") == "assistant"
+                    m for m in final_state.get("messages", []) if m.get("role") == "assistant"
                 ]
 
                 output = ""

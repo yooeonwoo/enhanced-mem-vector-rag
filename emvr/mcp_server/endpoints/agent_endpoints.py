@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Request/Response Models -----
 
+
 class AgentRunRequest(BaseModel):
     """Request schema for running an agent."""
 
@@ -40,6 +41,7 @@ class WorkerRunRequest(BaseModel):
 
 # ----- MCP Endpoint Functions -----
 
+
 async def register_agent_endpoints(mcp: MCPServer) -> None:
     """Register all agent MCP endpoints."""
     # Agent workflow singleton
@@ -57,9 +59,15 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def agent_run(
         query: Annotated[str, Field(description="The query to process")],
-        thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
-        context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
-        params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
+        thread_id: Annotated[
+            str | None, Field(description="Optional thread ID for conversation context")
+        ] = None,
+        context: Annotated[
+            list[dict[str, Any]] | None, Field(description="Optional context for the agent")
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, Field(description="Optional parameters for the agent")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -111,9 +119,15 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
     async def agent_run_worker(
         worker_name: Annotated[str, Field(description="Name of the worker agent to run")],
         query: Annotated[str, Field(description="The query to process")],
-        thread_id: Annotated[str | None, Field(description="Optional thread ID for conversation context")] = None,
-        context: Annotated[list[dict[str, Any]] | None, Field(description="Optional context for the agent")] = None,
-        params: Annotated[dict[str, Any] | None, Field(description="Optional parameters for the agent")] = None,
+        thread_id: Annotated[
+            str | None, Field(description="Optional thread ID for conversation context")
+        ] = None,
+        context: Annotated[
+            list[dict[str, Any]] | None, Field(description="Optional context for the agent")
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, Field(description="Optional parameters for the agent")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -174,6 +188,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
 
 
 # ----- Resources (Static Knowledge) -----
+
 
 async def register_agent_resources(mcp: MCPServer) -> None:
     """Register all agent MCP resources."""
