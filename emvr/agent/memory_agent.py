@@ -81,7 +81,7 @@ class MemoryAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
@@ -97,7 +97,7 @@ class MemoryAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
@@ -199,7 +199,6 @@ class MemoryAgent(BaseAgent):
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
-
 
     def get_agent_executor(self) -> AgentExecutor:
         """

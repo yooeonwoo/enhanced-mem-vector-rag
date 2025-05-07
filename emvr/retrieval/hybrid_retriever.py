@@ -37,7 +37,8 @@ class HybridRetriever(BaseRetriever):
 
         # Initialize embedding model
         self.embedding_model_name = embedding_model or os.environ.get(
-            "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5",
+            "EMBEDDING_MODEL",
+            "BAAI/bge-small-en-v1.5",
         )
 
         # Will lazy-load the embedding model when needed
@@ -57,7 +58,10 @@ class HybridRetriever(BaseRetriever):
         return self._embedding_model
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
+        self,
+        query: str,
+        top_k: int = 5,
+        filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
         """
         Retrieve documents based on a query.
@@ -102,7 +106,10 @@ class HybridRetriever(BaseRetriever):
         return results
 
     def _rerank_nodes(
-        self, query: str, nodes: list[NodeWithScore], top_k: int,
+        self,
+        query: str,
+        nodes: list[NodeWithScore],
+        top_k: int,
     ) -> list[NodeWithScore]:
         """
         Rerank nodes based on relevance to query.

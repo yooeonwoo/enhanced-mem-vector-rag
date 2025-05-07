@@ -40,13 +40,25 @@ SUPPORTED_IMAGE_TYPES: set[str] = {
 }
 
 SUPPORTED_FILE_EXTENSIONS: set[str] = {
-    ".txt", ".md", ".csv", ".json", ".html", ".pdf",
-    ".docx", ".xlsx", ".pptx",
-    ".jpg", ".jpeg", ".png", ".gif", ".webp",
+    ".txt",
+    ".md",
+    ".csv",
+    ".json",
+    ".html",
+    ".pdf",
+    ".docx",
+    ".xlsx",
+    ".pptx",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
 }
 
 
 # ----- File Upload Functions -----
+
 
 async def process_file_upload(file: FileDict) -> tuple[bool, str, dict[str, Any]]:
     """
@@ -68,7 +80,11 @@ async def process_file_upload(file: FileDict) -> tuple[bool, str, dict[str, Any]
         file_ext = Path(file_name).suffix.lower()
 
         # Check if file is supported
-        if file_type and file_type not in SUPPORTED_TEXT_TYPES and file_type not in SUPPORTED_IMAGE_TYPES:
+        if (
+            file_type
+            and file_type not in SUPPORTED_TEXT_TYPES
+            and file_type not in SUPPORTED_IMAGE_TYPES
+        ):
             if file_ext not in SUPPORTED_FILE_EXTENSIONS:
                 return (
                     False,
@@ -120,6 +136,7 @@ async def process_file_upload(file: FileDict) -> tuple[bool, str, dict[str, Any]
 
 
 # ----- UI Components -----
+
 
 async def show_file_upload_ui() -> None:
     """Show the file upload UI."""

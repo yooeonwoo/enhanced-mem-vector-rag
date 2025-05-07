@@ -50,7 +50,9 @@ dependencies = [
     # Knowledge Representation
     "rdflib>=7.0.0,<8.0.0",
     "owlready2>=0.45,<0.46.0",
-    "fastembed>=0.2.0,<0.3.0",
+    # Embeddings - temporarily simplified for testing
+    # "fastembed>=0.2.0,<0.3.0",  # Commented out due to ONNX build issues
+    # "sentence-transformers>=2.6.0,<3.0.0",  # Temporarily disabled for testing
     
     # Backend & API
     "fastmcp>=0.1.0,<0.2.0",

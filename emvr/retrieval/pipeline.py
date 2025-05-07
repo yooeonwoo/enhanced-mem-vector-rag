@@ -59,6 +59,22 @@ class RetrievalPipeline:
 
         # Track active retriever
         self._active_retriever = None
+        
+        # Initialization status
+        self._initialized = False
+        
+    async def initialize(self) -> None:
+        """Initialize the retrieval pipeline."""
+        if self._initialized:
+            return
+            
+        logger.info("Initializing retrieval pipeline")
+        
+        # In a real implementation, this would initialize the vector store
+        # and any other needed components
+        
+        self._initialized = True
+        logger.info("Retrieval pipeline initialized")
 
     @property
     def vector_retriever(self) -> HybridRetriever:
@@ -285,3 +301,7 @@ class RetrievalPipeline:
                 "sources_count": 0,
                 "error": str(e),
             }
+
+
+# Singleton instance
+retrieval_pipeline = RetrievalPipeline()

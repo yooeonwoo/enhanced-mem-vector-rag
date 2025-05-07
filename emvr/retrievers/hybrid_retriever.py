@@ -4,7 +4,6 @@ Hybrid Retriever implementation.
 This module implements a hybrid retrieval system that combines vector search with graph traversal.
 """
 
-
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.schema import NodeWithScore, QueryBundle
 
@@ -24,7 +23,7 @@ class HybridRetriever(BaseRetriever):
         qdrant_api_key: str | None = None,
         neo4j_uri: str = "bolt://localhost:7687",
         neo4j_user: str = "neo4j",
-        neo4j_password: str = "password",
+        neo4j_password: str = "password",  # noqa: S107
         neo4j_database: str = "emvr",
         vector_top_k: int = 5,
         graph_top_k: int = 3,

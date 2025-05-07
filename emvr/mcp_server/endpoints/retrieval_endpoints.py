@@ -81,6 +81,7 @@ async def register_retrieval_endpoints(mcp_server: MCPServer) -> None:
 
 # Define MCP tool functions
 
+
 async def hybrid_search(
     query: str,
     top_k: int = 5,

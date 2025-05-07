@@ -59,7 +59,9 @@ class AgentOrchestrator:
 
         logger.info("Agent orchestrator initialized with supervisor and workers")
 
-    def _initialize_workers(self, custom_agents: dict[str, BaseAgent] | None = None) -> dict[str, BaseAgent]:
+    def _initialize_workers(
+        self, custom_agents: dict[str, BaseAgent] | None = None
+    ) -> dict[str, BaseAgent]:
         """
         Initialize the worker agents.
 

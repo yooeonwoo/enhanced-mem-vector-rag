@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Agent States -----
 
+
 class AgentState(Enum):
     """States for the supervisor agent workflow."""
 
@@ -40,6 +41,7 @@ class AgentState(Enum):
 
 
 # ----- State Management -----
+
 
 class SupervisorState(dict[str, Any]):
     """State object for the supervisor agent workflow."""
@@ -81,6 +83,7 @@ class SupervisorState(dict[str, Any]):
 
 
 # ----- Supervisor Agent -----
+
 
 class SupervisorAgent(BaseAgent):
     """
@@ -202,14 +205,18 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Create planning prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Planning Agent. Your job is to create a plan for solving "
-                    "the user's request. Break down the task into steps, considering what "
-                    "information you need and what actions to take."
-                )),
-                HumanMessage(content=state.get("input", "")),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Planning Agent. Your job is to create a plan for solving "
+                            "the user's request. Break down the task into steps, considering what "
+                            "information you need and what actions to take."
+                        )
+                    ),
+                    HumanMessage(content=state.get("input", "")),
+                ]
+            )
 
             # Get the plan
             plan_result = await self.llm.ainvoke(prompt)
@@ -247,14 +254,16 @@ class SupervisorAgent(BaseAgent):
             query = state.get("input", "")
 
             # Use hybrid search to get relevant context
-            retrieval_result = await self.tool_executor.ainvoke({
-                "tool": "hybrid_search",
-                "tool_input": {
-                    "query": query,
-                    "limit": 10,
-                    "rerank": True,
-                },
-            })
+            retrieval_result = await self.tool_executor.ainvoke(
+                {
+                    "tool": "hybrid_search",
+                    "tool_input": {
+                        "query": query,
+                        "limit": 10,
+                        "rerank": True,
+                    },
+                }
+            )
 
             # Update state
             new_state = state.copy()
@@ -284,27 +293,35 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Create context string from retrieved documents
-            context_str = "\n\n".join([
-                f"Document {i+1}:\n{doc.get('content', '')}"
-                for i, doc in enumerate(state.get("context", []))
-            ])
+            context_str = "\n\n".join(
+                [
+                    f"Document {i + 1}:\n{doc.get('content', '')}"
+                    for i, doc in enumerate(state.get("context", []))
+                ]
+            )
 
             # Create analyzing prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Analysis Agent. Your job is to analyze the retrieved "
-                    "context and determine the next action. There are three possibilities:\n"
-                    "1. We need to ingest more information (respond with 'needs_ingestion')\n"
-                    "2. We have enough information and need to execute the plan (respond with 'execute')\n"
-                    "3. We have enough information to respond directly (respond with 'respond')\n"
-                    "Provide your reasoning and then state your decision as a single word."
-                )),
-                HumanMessage(content=(
-                    f"User query: {state.get('input', '')}\n\n"
-                    f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
-                    f"Retrieved context: {context_str}"
-                )),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Analysis Agent. Your job is to analyze the retrieved "
+                            "context and determine the next action. There are three possibilities:\n"
+                            "1. We need to ingest more information (respond with 'needs_ingestion')\n"
+                            "2. We have enough information and need to execute the plan (respond with 'execute')\n"
+                            "3. We have enough information to respond directly (respond with 'respond')\n"
+                            "Provide your reasoning and then state your decision as a single word."
+                        )
+                    ),
+                    HumanMessage(
+                        content=(
+                            f"User query: {state.get('input', '')}\n\n"
+                            f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
+                            f"Retrieved context: {context_str}"
+                        )
+                    ),
+                ]
+            )
 
             # Get the analysis
             analysis_result = await self.llm.ainvoke(prompt)
@@ -354,18 +371,24 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Create ingestion prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Ingestion Agent. Your job is to determine what "
-                    "information needs to be ingested to answer the user's query. "
-                    "This could be a URL, a file, or text provided by the user."
-                )),
-                HumanMessage(content=(
-                    f"User query: {state.get('input', '')}\n\n"
-                    f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
-                    f"Analysis: {state.get('analysis', '')}"
-                )),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Ingestion Agent. Your job is to determine what "
+                            "information needs to be ingested to answer the user's query. "
+                            "This could be a URL, a file, or text provided by the user."
+                        )
+                    ),
+                    HumanMessage(
+                        content=(
+                            f"User query: {state.get('input', '')}\n\n"
+                            f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
+                            f"Analysis: {state.get('analysis', '')}"
+                        )
+                    ),
+                ]
+            )
 
             # Get the ingestion plan
             ingestion_result = await self.llm.ainvoke(prompt)
@@ -402,24 +425,32 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Create context string from retrieved documents
-            context_str = "\n\n".join([
-                f"Document {i+1}:\n{doc.get('content', '')}"
-                for i, doc in enumerate(state.get("context", []))
-            ])
+            context_str = "\n\n".join(
+                [
+                    f"Document {i + 1}:\n{doc.get('content', '')}"
+                    for i, doc in enumerate(state.get("context", []))
+                ]
+            )
 
             # Create execution prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Execution Agent. Your job is to execute the plan "
-                    "using the retrieved context. Think step-by-step and provide "
-                    "a detailed solution to the user's query."
-                )),
-                HumanMessage(content=(
-                    f"User query: {state.get('input', '')}\n\n"
-                    f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
-                    f"Retrieved context: {context_str}"
-                )),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Execution Agent. Your job is to execute the plan "
+                            "using the retrieved context. Think step-by-step and provide "
+                            "a detailed solution to the user's query."
+                        )
+                    ),
+                    HumanMessage(
+                        content=(
+                            f"User query: {state.get('input', '')}\n\n"
+                            f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
+                            f"Retrieved context: {context_str}"
+                        )
+                    ),
+                ]
+            )
 
             # Execute the plan
             execution_result = await self.llm.ainvoke(prompt)
@@ -452,18 +483,24 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Create reflection prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Reflection Agent. Your job is to reflect on the execution "
-                    "of the plan and identify any gaps or areas for improvement. Provide "
-                    "an objective assessment of the solution quality."
-                )),
-                HumanMessage(content=(
-                    f"User query: {state.get('input', '')}\n\n"
-                    f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
-                    f"Execution result: {state.get('execution_result', '')}"
-                )),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Reflection Agent. Your job is to reflect on the execution "
+                            "of the plan and identify any gaps or areas for improvement. Provide "
+                            "an objective assessment of the solution quality."
+                        )
+                    ),
+                    HumanMessage(
+                        content=(
+                            f"User query: {state.get('input', '')}\n\n"
+                            f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
+                            f"Execution result: {state.get('execution_result', '')}"
+                        )
+                    ),
+                ]
+            )
 
             # Get the reflection
             reflection_result = await self.llm.ainvoke(prompt)
@@ -500,18 +537,24 @@ class SupervisorAgent(BaseAgent):
             reflection = state.get("reflection", "")
 
             # Create response prompt
-            prompt = ChatPromptTemplate.from_messages([
-                SystemMessage(content=(
-                    "You are the Response Agent. Your job is to create a clear, concise, "
-                    "and helpful response to the user's query. Use the execution result "
-                    "and reflection to craft your response. Be direct and to the point."
-                )),
-                HumanMessage(content=(
-                    f"User query: {state.get('input', '')}\n\n"
-                    f"Execution result: {execution_result}\n\n"
-                    f"Reflection: {reflection}"
-                )),
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    SystemMessage(
+                        content=(
+                            "You are the Response Agent. Your job is to create a clear, concise, "
+                            "and helpful response to the user's query. Use the execution result "
+                            "and reflection to craft your response. Be direct and to the point."
+                        )
+                    ),
+                    HumanMessage(
+                        content=(
+                            f"User query: {state.get('input', '')}\n\n"
+                            f"Execution result: {execution_result}\n\n"
+                            f"Reflection: {reflection}"
+                        )
+                    ),
+                ]
+            )
 
             # Get the final response
             response_result = await self.llm.ainvoke(prompt)
@@ -546,18 +589,22 @@ class SupervisorAgent(BaseAgent):
         """
         try:
             # Initialize state
-            initial_state = SupervisorState({
-                "input": input_text,
-                "messages": [],
-                "current_state": AgentState.PLANNING,
-            })
+            initial_state = SupervisorState(
+                {
+                    "input": input_text,
+                    "messages": [],
+                    "current_state": AgentState.PLANNING,
+                }
+            )
 
             # Execute the workflow
             result = await self.workflow.ainvoke(initial_state)
 
             # Return the result
             return {
-                "response": result.get("final_response", "I'm sorry, I couldn't generate a response."),
+                "response": result.get(
+                    "final_response", "I'm sorry, I couldn't generate a response."
+                ),
                 "workflow_trace": {
                     "plan": result.get("plan"),
                     "context": result.get("context"),

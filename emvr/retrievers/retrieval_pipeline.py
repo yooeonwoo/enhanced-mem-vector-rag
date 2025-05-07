@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class RetrievalPipeline:
     """
     Unified retrieval pipeline that combines multiple retrieval methods.
-    
+
     Orchestrates the complete retrieval process:
     1. Query understanding and preprocessing
     2. Parallel retrieval from multiple sources
@@ -71,10 +71,10 @@ class RetrievalPipeline:
     def _preprocess_query(self, query: str) -> str:
         """
         Preprocess the query for better retrieval.
-        
+
         Args:
             query: The original query
-        
+
         Returns:
             str: The preprocessed query
 
@@ -84,6 +84,7 @@ class RetrievalPipeline:
 
         # Remove excess whitespace
         import re
+
         query = re.sub(r"\s+", " ", query)
 
         return query

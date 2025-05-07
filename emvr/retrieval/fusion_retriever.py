@@ -70,7 +70,10 @@ class FusionRetriever(BaseRetriever):
         self.reranking = reranking
 
     async def retrieve(
-        self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None,
+        self,
+        query: str,
+        top_k: int = 5,
+        filters: dict[str, Any] | None = None,
     ) -> list[RetrievalResult]:
         """
         Retrieve documents using multiple retrieval methods.
@@ -156,7 +159,10 @@ class FusionRetriever(BaseRetriever):
             return []
 
     def _combine_results(
-        self, query: str, source_results: dict[str, list[RetrievalResult]], top_k: int,
+        self,
+        query: str,
+        source_results: dict[str, list[RetrievalResult]],
+        top_k: int,
     ) -> list[RetrievalResult]:
         """
         Combine results from multiple sources with weights.
@@ -266,7 +272,9 @@ class FusionRetriever(BaseRetriever):
         return combined_list[:top_k]
 
     def _rerank_results(
-        self, query: str, results: list[RetrievalResult],
+        self,
+        query: str,
+        results: list[RetrievalResult],
     ) -> list[RetrievalResult]:
         """
         Rerank results based on relevance to query and source diversity.

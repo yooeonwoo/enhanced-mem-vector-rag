@@ -55,6 +55,7 @@ class ResearchWorkerAgent(BaseAgent):
             AgentExecutor instance
 
         """
+
         # Define tools
         class SearchTool(BaseTool):
             name = "search"
@@ -72,7 +73,7 @@ class ResearchWorkerAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
@@ -88,7 +89,7 @@ class ResearchWorkerAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}\n"
                         f"Relevance: {result.metadata.get('score', 'Unknown')}",
                     )
@@ -108,7 +109,6 @@ class ResearchWorkerAgent(BaseAgent):
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
-
 
     def get_agent_executor(self) -> AgentExecutor:
         """
@@ -158,7 +158,9 @@ class ResearchWorkerAgent(BaseAgent):
 class KnowledgeGraphWorkerAgent(BaseAgent):
     """Knowledge graph worker agent specializing in graph operations."""
 
-    description = "Specialized in knowledge graph operations, entity management, and relationship queries."
+    description = (
+        "Specialized in knowledge graph operations, entity management, and relationship queries."
+    )
 
     def __init__(
         self,
@@ -198,6 +200,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
             AgentExecutor instance
 
         """
+
         # Define tools
         class KGSearchTool(BaseTool):
             name = "kg_search"
@@ -215,7 +218,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}",
                     )
 
@@ -231,7 +234,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                 formatted_results = []
                 for i, result in enumerate(results):
                     formatted_results.append(
-                        f"[{i+1}] {result.text}\n"
+                        f"[{i + 1}] {result.text}\n"
                         f"Source: {result.metadata.get('source', 'Unknown')}\n"
                         f"Relevance: {result.metadata.get('score', 'Unknown')}",
                     )
@@ -259,7 +262,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                     observations = entity.get("observations", [])
                     observation_text = ", ".join(observations[:3])
                     if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                        observation_text += f" (and {len(observations) - 3} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
@@ -295,7 +298,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
                     observations = entity.get("observations", [])
                     observation_text = ", ".join(observations[:3])
                     if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                        observation_text += f" (and {len(observations) - 3} more)"
 
                     entity_descriptions.append(
                         f"{entity.get('name')} ({entity.get('entity_type')}): {observation_text}",
@@ -332,7 +335,6 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
-
 
     def get_agent_executor(self) -> AgentExecutor:
         """
@@ -382,7 +384,9 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
 class MemoryManagementWorkerAgent(BaseAgent):
     """Memory management worker agent specializing in memory operations."""
 
-    description = "Specialized in memory management, entity creation, and memory system maintenance."
+    description = (
+        "Specialized in memory management, entity creation, and memory system maintenance."
+    )
 
     def __init__(
         self,
@@ -417,6 +421,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
             AgentExecutor instance
 
         """
+
         # Define tools
         class CreateEntityTool(BaseTool):
             name = "create_entity"
@@ -426,25 +431,31 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                asyncio.run(self.memory_manager.create_entities([
-                    {
-                        "name": name,
-                        "entity_type": entity_type,
-                        "observations": observations,
-                    },
-                ]))
+                asyncio.run(
+                    self.memory_manager.create_entities(
+                        [
+                            {
+                                "name": name,
+                                "entity_type": entity_type,
+                                "observations": observations,
+                            },
+                        ]
+                    )
+                )
 
                 return f"Entity created: {name} ({entity_type})"
 
             async def _arun(self, name: str, entity_type: str, observations: list[str]) -> str:
                 """Run the tool asynchronously."""
-                await self.memory_manager.create_entities([
-                    {
-                        "name": name,
-                        "entity_type": entity_type,
-                        "observations": observations,
-                    },
-                ])
+                await self.memory_manager.create_entities(
+                    [
+                        {
+                            "name": name,
+                            "entity_type": entity_type,
+                            "observations": observations,
+                        },
+                    ]
+                )
 
                 return f"Entity created: {name} ({entity_type})"
 
@@ -456,25 +467,31 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                asyncio.run(self.memory_manager.create_relations([
-                    {
-                        "from": from_entity,
-                        "relation_type": relation_type,
-                        "to": to_entity,
-                    },
-                ]))
+                asyncio.run(
+                    self.memory_manager.create_relations(
+                        [
+                            {
+                                "from": from_entity,
+                                "relation_type": relation_type,
+                                "to": to_entity,
+                            },
+                        ]
+                    )
+                )
 
                 return f"Relation created: {from_entity} --{relation_type}--> {to_entity}"
 
             async def _arun(self, from_entity: str, relation_type: str, to_entity: str) -> str:
                 """Run the tool asynchronously."""
-                await self.memory_manager.create_relations([
-                    {
-                        "from": from_entity,
-                        "relation_type": relation_type,
-                        "to": to_entity,
-                    },
-                ])
+                await self.memory_manager.create_relations(
+                    [
+                        {
+                            "from": from_entity,
+                            "relation_type": relation_type,
+                            "to": to_entity,
+                        },
+                    ]
+                )
 
                 return f"Relation created: {from_entity} --{relation_type}--> {to_entity}"
 
@@ -486,23 +503,29 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                asyncio.run(self.memory_manager.add_observations([
-                    {
-                        "entity_name": entity_name,
-                        "contents": observations,
-                    },
-                ]))
+                asyncio.run(
+                    self.memory_manager.add_observations(
+                        [
+                            {
+                                "entity_name": entity_name,
+                                "contents": observations,
+                            },
+                        ]
+                    )
+                )
 
                 return f"Observations added to entity: {entity_name}"
 
             async def _arun(self, entity_name: str, observations: list[str]) -> str:
                 """Run the tool asynchronously."""
-                await self.memory_manager.add_observations([
-                    {
-                        "entity_name": entity_name,
-                        "contents": observations,
-                    },
-                ])
+                await self.memory_manager.add_observations(
+                    [
+                        {
+                            "entity_name": entity_name,
+                            "contents": observations,
+                        },
+                    ]
+                )
 
                 return f"Observations added to entity: {entity_name}"
 
@@ -526,7 +549,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                     observations = node.get("observations", [])
                     observation_text = ", ".join(observations[:3])
                     if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                        observation_text += f" (and {len(observations) - 3} more)"
 
                     node_descriptions.append(
                         f"{node.get('name')} ({node.get('entity_type')}): {observation_text}",
@@ -553,7 +576,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                     observations = node.get("observations", [])
                     observation_text = ", ".join(observations[:3])
                     if len(observations) > 3:
-                        observation_text += f" (and {len(observations)-3} more)"
+                        observation_text += f" (and {len(observations) - 3} more)"
 
                     node_descriptions.append(
                         f"{node.get('name')} ({node.get('entity_type')}): {observation_text}",
@@ -593,7 +616,6 @@ class MemoryManagementWorkerAgent(BaseAgent):
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
-
 
     def get_agent_executor(self) -> AgentExecutor:
         """

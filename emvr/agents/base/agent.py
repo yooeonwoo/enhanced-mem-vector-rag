@@ -71,12 +71,14 @@ class BaseAgent(ABC):
 
     def _initialize_agent(self) -> None:
         """Initialize the agent with its tools and prompt."""
-        prompt = ChatPromptTemplate.from_messages([
-            SystemMessage(content=self.system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
-            HumanMessage(content="{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessage(content=self.system_prompt),
+                MessagesPlaceholder(variable_name="chat_history"),
+                HumanMessage(content="{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
 
         # Create the agent
         agent = create_openai_tools_agent(
@@ -157,10 +159,12 @@ class SimpleAgent(BaseAgent):
             chat_history = kwargs.get("chat_history", [])
 
             # Execute the agent
-            result = await self.agent_executor.ainvoke({
-                "input": input_text,
-                "chat_history": chat_history,
-            })
+            result = await self.agent_executor.ainvoke(
+                {
+                    "input": input_text,
+                    "chat_history": chat_history,
+                }
+            )
 
             # Return the result
             return {

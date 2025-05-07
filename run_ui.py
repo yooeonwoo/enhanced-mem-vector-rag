@@ -24,15 +24,19 @@ def main() -> int:
     """Run the UI."""
     parser = argparse.ArgumentParser(description="Run the EMVR UI")
     parser.add_argument(
-        "--host", default="localhost",
+        "--host",
+        default="localhost",
         help="Host to bind to (default: localhost)",
     )
     parser.add_argument(
-        "--port", type=int, default=8000,
+        "--port",
+        type=int,
+        default=8000,
         help="Port to bind to (default: 8000)",
     )
     parser.add_argument(
-        "--debug", action="store_true",
+        "--debug",
+        action="store_true",
         help="Run in debug mode",
     )
 

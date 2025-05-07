@@ -636,8 +636,8 @@ The deployment includes comprehensive security features:
 
 Access system metrics and logs through:
 
-- Grafana dashboard: http://localhost:3000
-- Prometheus metrics: http://localhost:9090
+- Grafana dashboard: <http://localhost:3000>
+- Prometheus metrics: <http://localhost:9090>
 
 ### Backup & Restore
 

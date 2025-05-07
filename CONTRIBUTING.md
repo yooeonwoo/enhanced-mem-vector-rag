@@ -29,36 +29,36 @@ To get started with contributing to EMVR:
 2. Clone your fork locally
 3. Set up the development environment:
 
-```bash
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   ```bash
+   # Create a virtual environment
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
 
-# Install development dependencies
-pip install -e ".[dev]"
-```
+   # Install development dependencies
+   pip install -e ".[dev]"
+   ```
 
 4. Create a new branch for your feature or bugfix:
 
-```bash
-git checkout -b feature/your-feature-name
-```
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
 ## Development Workflow
 
 1. Make your changes in small, incremental commits
 2. Keep your branch updated with the main repository:
 
-```bash
-git fetch upstream
-git rebase upstream/main
-```
+   ```bash
+   git fetch upstream
+   git rebase upstream/main
+   ```
 
 3. Run tests locally before submitting a pull request:
 
-```bash
-pytest
-```
+   ```bash
+   pytest
+   ```
 
 4. Update documentation as needed
 

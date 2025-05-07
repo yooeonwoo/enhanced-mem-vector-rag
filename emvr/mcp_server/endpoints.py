@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 # ----- Request/Response Models -----
 
+
 class Entity(BaseModel):
     """Entity schema for memory operations."""
 
@@ -75,6 +76,7 @@ class SearchRequest(BaseModel):
 
 # ----- MCP Endpoint Functions -----
 
+
 async def register_endpoints(mcp: MCPServer) -> None:
     """Register all memory MCP endpoints."""
     # ----- Memory Operations -----
@@ -105,7 +107,9 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
     @mcp.tool()
     async def memory_create_relations(
-        relations: Annotated[list[dict[str, Any]], Field(description="List of relations to create")],
+        relations: Annotated[
+            list[dict[str, Any]], Field(description="List of relations to create")
+        ],
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -129,7 +133,9 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
     @mcp.tool()
     async def memory_add_observations(
-        observations: Annotated[list[dict[str, Any]], Field(description="List of observations to add")],
+        observations: Annotated[
+            list[dict[str, Any]], Field(description="List of observations to add")
+        ],
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -284,8 +290,12 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def ingest_text(
         content: Annotated[str, Field(description="Text content to ingest")],
-        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the text")] = None,
-        source_name: Annotated[str | None, Field(description="Optional source name for the text")] = None,
+        metadata: Annotated[
+            dict[str, Any] | None, Field(description="Optional metadata for the text")
+        ] = None,
+        source_name: Annotated[
+            str | None, Field(description="Optional source name for the text")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -311,7 +321,9 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def ingest_file(
         file_path: Annotated[str, Field(description="Path to the file to ingest")],
-        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the file")] = None,
+        metadata: Annotated[
+            dict[str, Any] | None, Field(description="Optional metadata for the file")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -337,7 +349,9 @@ async def register_endpoints(mcp: MCPServer) -> None:
     @mcp.tool()
     async def ingest_url(
         url: Annotated[str, Field(description="URL to ingest")],
-        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for the URL content")] = None,
+        metadata: Annotated[
+            dict[str, Any] | None, Field(description="Optional metadata for the URL content")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -363,9 +377,15 @@ async def register_endpoints(mcp: MCPServer) -> None:
     async def ingest_directory(
         directory_path: Annotated[str, Field(description="Path to the directory to ingest")],
         recursive: Annotated[bool, Field(description="Whether to search subdirectories")] = True,
-        metadata: Annotated[dict[str, Any] | None, Field(description="Optional metadata for all documents")] = None,
-        exclude_hidden: Annotated[bool, Field(description="Whether to exclude hidden files/dirs")] = True,
-        file_extensions: Annotated[list[str] | None, Field(description="List of file extensions to include")] = None,
+        metadata: Annotated[
+            dict[str, Any] | None, Field(description="Optional metadata for all documents")
+        ] = None,
+        exclude_hidden: Annotated[
+            bool, Field(description="Whether to exclude hidden files/dirs")
+        ] = True,
+        file_extensions: Annotated[
+            list[str] | None, Field(description="List of file extensions to include")
+        ] = None,
         ctx: Context = None,
     ) -> dict[str, Any]:
         """
@@ -395,6 +415,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
 
 # ----- Resources (Static Knowledge) -----
+
 
 async def register_resources(mcp: MCPServer) -> None:
     """Register all memory MCP resources."""

@@ -91,7 +91,7 @@ class GraphRetriever:
 
         Args:
             query: Natural language query
-        
+
         Returns:
             str: Cypher query
 
@@ -111,7 +111,12 @@ class GraphRetriever:
             """
 
         if "who is" in query_lower or "what is" in query_lower:
-            entity = query_lower.replace("who is", "").replace("what is", "").strip().strip("?")
+            entity = (
+                query_lower.replace("who is", "")
+                .replace("what is", "")
+                .strip()
+                .strip("?")
+            )
             return f"""
             MATCH (n {{name: "{entity}"}})
             OPTIONAL MATCH (n)-[r]-(m)
@@ -286,7 +291,9 @@ class GraphRetriever:
                 }
                 relationships.append(rel)
 
-            logger.info("Found %d relationships for entity: %s", len(relationships), entity)
+            logger.info(
+                "Found %d relationships for entity: %s", len(relationships), entity
+            )
 
             return {
                 "success": True,
@@ -345,17 +352,23 @@ class GraphRetriever:
 
             # Extract all entity names
             records = query_result.get("records", [])
-            entities = {record.get("name"): record.get("type") for record in records if record.get("name")}
+            entities = {
+                record.get("name"): record.get("type")
+                for record in records
+                if record.get("name")
+            }
 
             # Simple approach: check if each entity appears in the text
             found_entities = []
             for entity_name, entity_type in entities.items():
                 if entity_name and entity_name in text:
-                    found_entities.append({
-                        "name": entity_name,
-                        "type": entity_type,
-                        "position": text.find(entity_name),
-                    })
+                    found_entities.append(
+                        {
+                            "name": entity_name,
+                            "type": entity_type,
+                            "position": text.find(entity_name),
+                        }
+                    )
 
             # Sort by position in text
             found_entities.sort(key=lambda x: x.get("position", 0))

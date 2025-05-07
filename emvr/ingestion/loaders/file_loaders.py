@@ -87,18 +87,22 @@ class FileLoader:
 
             # Create a document dict
             doc_metadata = metadata or {}
-            doc_metadata.update({
-                "source": file_path,
-                "file_name": os.path.basename(file_path),
-                "file_type": os.path.splitext(file_path)[1][1:],
-                "file_size": os.path.getsize(file_path),
-            })
+            doc_metadata.update(
+                {
+                    "source": file_path,
+                    "file_name": os.path.basename(file_path),
+                    "file_type": os.path.splitext(file_path)[1][1:],
+                    "file_size": os.path.getsize(file_path),
+                }
+            )
 
             # Return as a list of documents (single document in this case)
-            return [{
-                "text": content,
-                "metadata": doc_metadata,
-            }]
+            return [
+                {
+                    "text": content,
+                    "metadata": doc_metadata,
+                }
+            ]
 
             # TODO: Implement with LlamaIndex SimpleDirectoryReader
             # documents = SimpleDirectoryReader(

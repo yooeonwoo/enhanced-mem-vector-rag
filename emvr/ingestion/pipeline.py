@@ -140,11 +140,13 @@ class IngestionPipeline:
 
             # Add timestamp metadata
             full_metadata = metadata or {}
-            full_metadata.update({
-                "source": source_id,
-                "source_type": "text",
-                "ingestion_time": datetime.now(UTC).isoformat(),
-            })
+            full_metadata.update(
+                {
+                    "source": source_id,
+                    "source_type": "text",
+                    "ingestion_time": datetime.now(UTC).isoformat(),
+                }
+            )
 
             # Split text into chunks
             chunks = self._split_text(text, full_metadata)
@@ -154,10 +156,12 @@ class IngestionPipeline:
             stored_chunks = []
             for i, chunk in enumerate(chunks):
                 chunk_metadata = chunk["metadata"].copy()
-                chunk_metadata.update({
-                    "chunk_index": i,
-                    "chunk_count": len(chunks),
-                })
+                chunk_metadata.update(
+                    {
+                        "chunk_index": i,
+                        "chunk_count": len(chunks),
+                    }
+                )
 
                 # Generate embedding
                 embedding = self._embedding_manager.generate_embedding(chunk["text"])
@@ -172,19 +176,27 @@ class IngestionPipeline:
                     embedding=embedding,
                 )
 
-                stored_chunks.append({
-                    "mem0_id": mem0_id,
-                    "metadata": chunk_metadata,
-                })
+                stored_chunks.append(
+                    {
+                        "mem0_id": mem0_id,
+                        "metadata": chunk_metadata,
+                    }
+                )
 
             # Create an entity in the graph for this document
             entity_name = source_name or f"Document: {source_id}"
 
-            await self._memory_manager.create_entities([{
-                "name": entity_name,
-                "entityType": "Document",
-                "observations": [f"Text content with {len(chunks)} chunks. First 100 chars: {text[:100]}..."],
-            }])
+            await self._memory_manager.create_entities(
+                [
+                    {
+                        "name": entity_name,
+                        "entityType": "Document",
+                        "observations": [
+                            f"Text content with {len(chunks)} chunks. First 100 chars: {text[:100]}..."
+                        ],
+                    }
+                ]
+            )
 
             logger.info(f"Successfully ingested text as '{entity_name}'")
 
