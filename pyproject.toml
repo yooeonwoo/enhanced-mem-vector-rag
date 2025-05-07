@@ -36,10 +36,12 @@ multi_line_output = 3
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-select = ["E", "F", "B", "W", "I", "C", "N", "D", "UP", "ANN", "S", "BLE", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "ISC", "ICN", "G", "INP", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "ARG", "ERA", "PD", "PGH", "PL", "TRY", "NPY", "AIR", "PERF", "RUF"]
-ignore = ["D203", "D212", "ANN101", "ANN102", "ANN401", "PGH003"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I", "C", "N", "D", "UP", "ANN", "S", "BLE", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "ISC", "ICN", "G", "INP", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "ARG", "ERA", "PD", "PGH", "PL", "TRY", "NPY", "AIR", "PERF", "RUF"]
+ignore = ["D203", "D212", "ANN401", "PGH003"]
+
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "F403"]
 "tests/*" = ["S101", "ANN201", "PLR2004"]
 
