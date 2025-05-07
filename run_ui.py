@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Entry point for running the EMVR UI.
+"""Entry point for running the EMVR UI.
 
 This script is a simple wrapper around the Chainlit UI.
 """
@@ -20,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> int:
     """Run the UI."""
     parser = argparse.ArgumentParser(description="Run the EMVR UI")
     parser.add_argument(
@@ -46,8 +45,8 @@ def main():
         )
     except KeyboardInterrupt:
         logger.info("UI stopped by user")
-    except Exception as e:
-        logger.error(f"Error running UI: {e}")
+    except Exception:
+        logger.exception("Error running UI")
         return 1
 
     return 0

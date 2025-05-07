@@ -1,5 +1,4 @@
-"""
-Chainlit application runner for EMVR.
+"""Chainlit application runner for EMVR.
 
 This module provides a function to run the Chainlit UI application.
 """
@@ -22,10 +21,10 @@ def run_chainlit(
     host: str = "localhost",
     port: int = 8000,
     debug: bool = False,
-):
+) -> None:
     """
     Run the Chainlit UI application.
-    
+
     Args:
         host: Host to bind to
         port: Port to bind to
@@ -60,11 +59,11 @@ def run_chainlit(
             cmd.append("--debug")
 
         # Run Chainlit
-        logger.info(f"Starting Chainlit UI on {host}:{port}")
+        logger.info("Starting Chainlit UI on %s:%s", host, port)
         subprocess.run(cmd, env=env, cwd=str(project_root), check=False)
 
-    except Exception as e:
-        logger.error(f"Error running Chainlit: {e}")
+    except Exception:
+        logger.exception("Error running Chainlit")
         raise
 
 
