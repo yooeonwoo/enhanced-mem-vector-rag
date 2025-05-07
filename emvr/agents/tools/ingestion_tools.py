@@ -60,12 +60,12 @@ async def ingest_text(
 ) -> dict[str, Any]:
     """
     Ingest raw text into the memory system.
-    
+
     Args:
         content: Text content to ingest
         metadata: Optional metadata for the text
         source_name: Optional source name for the text
-        
+
     Returns:
         Dict containing the result of the ingestion
 
@@ -88,7 +88,7 @@ async def ingest_text(
             "message": f"Successfully ingested text ({len(content)} chars)",
         }
     except Exception as e:
-        logger.error(f"Text ingestion failed: {e}")
+        logger.exception(f"Text ingestion failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -102,11 +102,11 @@ async def ingest_file(
 ) -> dict[str, Any]:
     """
     Ingest a file into the memory system.
-    
+
     Args:
         file_path: Path to the file to ingest
         metadata: Optional metadata for the file
-        
+
     Returns:
         Dict containing the result of the ingestion
 
@@ -128,7 +128,7 @@ async def ingest_file(
             "message": f"Successfully ingested file: {file_path}",
         }
     except Exception as e:
-        logger.error(f"File ingestion failed: {e}")
+        logger.exception(f"File ingestion failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -142,11 +142,11 @@ async def ingest_url(
 ) -> dict[str, Any]:
     """
     Ingest content from a URL into the memory system.
-    
+
     Args:
         url: URL to ingest
         metadata: Optional metadata for the URL content
-        
+
     Returns:
         Dict containing the result of the ingestion
 
@@ -168,7 +168,7 @@ async def ingest_url(
             "message": f"Successfully ingested URL: {url}",
         }
     except Exception as e:
-        logger.error(f"URL ingestion failed: {e}")
+        logger.exception(f"URL ingestion failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -185,14 +185,14 @@ async def ingest_directory(
 ) -> dict[str, Any]:
     """
     Ingest all files from a directory into the memory system.
-    
+
     Args:
         directory_path: Path to the directory to ingest
         recursive: Whether to search subdirectories
         metadata: Optional metadata for all documents
         exclude_hidden: Whether to exclude hidden files/dirs
         file_extensions: List of file extensions to include
-        
+
     Returns:
         Dict containing the result of the ingestion
 
@@ -218,7 +218,7 @@ async def ingest_directory(
             "message": f"Successfully ingested directory: {directory_path}",
         }
     except Exception as e:
-        logger.error(f"Directory ingestion failed: {e}")
+        logger.exception(f"Directory ingestion failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -230,7 +230,7 @@ async def ingest_directory(
 def get_ingestion_tools() -> list[BaseTool]:
     """
     Get all ingestion tools.
-    
+
     Returns:
         List of ingestion tools
 

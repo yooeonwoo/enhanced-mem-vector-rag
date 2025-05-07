@@ -37,7 +37,7 @@ class SupervisorAgent(BaseAgent):
         self,
         llm: BaseLanguageModel | None = None,
         worker_agents: dict[str, BaseAgent] | None = None,
-    ):
+    ) -> None:
         """
         Initialize the supervisor agent.
 
@@ -113,7 +113,7 @@ class SupervisorAgent(BaseAgent):
         """
         # Create handoff tools for each worker agent
         handoff_tools = []
-        for agent_name in self.worker_agents.keys():
+        for agent_name in self.worker_agents:
             handoff_tools.append(self._create_handoff_tool(agent_name))
 
         # Create the supervisor agent
@@ -262,7 +262,8 @@ class SupervisorAgent(BaseAgent):
             AgentExecutor instance
 
         """
-        raise NotImplementedError("Supervisor agent doesn't use AgentExecutor")
+        msg = "Supervisor agent doesn't use AgentExecutor"
+        raise NotImplementedError(msg)
 
     async def run(self, query: str, **kwargs) -> AgentResult:
         """

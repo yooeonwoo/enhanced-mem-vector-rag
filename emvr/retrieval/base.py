@@ -24,12 +24,12 @@ class BaseRetriever(ABC):
     ) -> list[RetrievalResult]:
         """
         Retrieve documents based on a query.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             List of retrieval results
 

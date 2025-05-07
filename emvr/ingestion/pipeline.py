@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class IngestionPipeline:
     """
     Ingestion pipeline for processing and storing documents.
-    
+
     Handles:
     - Document loading from various sources
     - Text splitting/chunking
@@ -33,7 +33,7 @@ class IngestionPipeline:
     - Storage in memory system (vector + graph)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the ingestion pipeline."""
         self._settings = get_settings()
         self._embedding_manager = embedding_manager
@@ -42,7 +42,7 @@ class IngestionPipeline:
         self._web_loader = web_loader
         self._initialized = False
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the ingestion pipeline."""
         if self._initialized:
             return
@@ -66,10 +66,10 @@ class IngestionPipeline:
             logger.info("Ingestion pipeline initialized")
 
         except Exception as e:
-            logger.error(f"Failed to initialize ingestion pipeline: {e}")
+            logger.exception(f"Failed to initialize ingestion pipeline: {e}")
             raise
 
-    async def ensure_initialized(self):
+    async def ensure_initialized(self) -> None:
         """Ensure the pipeline is initialized."""
         if not self._initialized:
             await self.initialize()
@@ -81,11 +81,11 @@ class IngestionPipeline:
     ) -> list[dict[str, Any]]:
         """
         Split text into chunks.
-        
+
         Args:
             text: Text to split
             metadata: Optional metadata for the chunks
-        
+
         Returns:
             List[Dict]: List of chunk dictionaries with "text" and "metadata"
 
@@ -120,12 +120,12 @@ class IngestionPipeline:
     ) -> dict[str, Any]:
         """
         Ingest raw text into the memory system.
-        
+
         Args:
             text: Text to ingest
             metadata: Optional metadata for the text
             source_name: Optional source name for the text
-        
+
         Returns:
             Dict: Ingestion result
 
@@ -197,7 +197,7 @@ class IngestionPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Failed to ingest text: {e}")
+            logger.exception(f"Failed to ingest text: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -210,11 +210,11 @@ class IngestionPipeline:
     ) -> dict[str, Any]:
         """
         Ingest a file into the memory system.
-        
+
         Args:
             file_path: Path to the file
             metadata: Optional metadata for the file
-        
+
         Returns:
             Dict: Ingestion result
 
@@ -251,7 +251,7 @@ class IngestionPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Failed to ingest file {file_path}: {e}")
+            logger.exception(f"Failed to ingest file {file_path}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -267,14 +267,14 @@ class IngestionPipeline:
     ) -> dict[str, Any]:
         """
         Ingest all files from a directory.
-        
+
         Args:
             directory_path: Path to the directory
             recursive: Whether to search subdirectories
             metadata: Optional metadata for all documents
             exclude_hidden: Whether to exclude hidden files/dirs
             file_extensions: List of file extensions to include
-        
+
         Returns:
             Dict: Ingestion result
 
@@ -317,7 +317,7 @@ class IngestionPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Failed to ingest directory {directory_path}: {e}")
+            logger.exception(f"Failed to ingest directory {directory_path}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -330,11 +330,11 @@ class IngestionPipeline:
     ) -> dict[str, Any]:
         """
         Ingest content from a URL.
-        
+
         Args:
             url: The URL to ingest
             metadata: Optional metadata for the URL
-        
+
         Returns:
             Dict: Ingestion result
 
@@ -371,7 +371,7 @@ class IngestionPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Failed to ingest URL {url}: {e}")
+            logger.exception(f"Failed to ingest URL {url}: {e}")
             return {
                 "success": False,
                 "error": str(e),

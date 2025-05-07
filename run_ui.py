@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Entry point for running the EMVR UI.
+"""
+Entry point for running the EMVR UI.
 
 This script is a simple wrapper around the Chainlit UI.
 """

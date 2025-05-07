@@ -40,10 +40,10 @@ class AgentWorkflow:
         worker_llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
         retrieval_pipeline: RetrievalPipeline | None = None,
-    ):
+    ) -> None:
         """
         Initialize the agent workflow.
-        
+
         Args:
             supervisor_llm: Language model for the supervisor agent
             worker_llm: Language model for worker agents
@@ -75,7 +75,7 @@ class AgentWorkflow:
     def _create_worker_agents(self) -> dict[str, Any]:
         """
         Create worker agents.
-        
+
         Returns:
             Dictionary of worker agents
 
@@ -98,7 +98,7 @@ class AgentWorkflow:
     def _create_supervisor_agent(self) -> SupervisorAgent:
         """
         Create supervisor agent.
-        
+
         Returns:
             SupervisorAgent instance
 
@@ -111,11 +111,11 @@ class AgentWorkflow:
     async def run(self, query: str, **kwargs) -> WorkflowOutput:
         """
         Run the agent workflow with a query.
-        
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             WorkflowOutput instance
 

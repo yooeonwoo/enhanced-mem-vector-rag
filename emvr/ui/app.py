@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # ----- Initialization -----
 
 @cl.on_app_start
-async def setup():
+async def setup() -> None:
     """Initialize the EMVR components."""
     try:
         settings = get_settings()
@@ -80,7 +80,7 @@ async def setup():
         ).send()
 
     except Exception as e:
-        logger.error(f"Failed to initialize UI: {e}")
+        logger.exception(f"Failed to initialize UI: {e}")
         await cl.Message(
             content=f"❌ Error initializing system: {e!s}",
             author="System",
@@ -90,10 +90,10 @@ async def setup():
 # ----- Message Handling -----
 
 @cl.on_message
-async def on_message(message: cl.Message):
+async def on_message(message: cl.Message) -> None:
     """
     Process user messages.
-    
+
     Args:
         message: The user message
 
@@ -110,9 +110,8 @@ async def on_message(message: cl.Message):
             return
 
         # Get uploaded files if any
-        files = None
         if message.elements:
-            files = [e for e in message.elements if isinstance(e, cl.File)]
+            [e for e in message.elements if isinstance(e, cl.File)]
 
         # Process the message
         thinking_msg = cl.Message(content="", author="EMVR")
@@ -181,7 +180,7 @@ async def on_message(message: cl.Message):
                 thinking_msg.steps = steps
 
     except Exception as e:
-        logger.error(f"Error processing message: {e}")
+        logger.exception(f"Error processing message: {e}")
         await cl.Message(
             content=f"❌ Error: {e!s}",
             author="System",
@@ -191,10 +190,10 @@ async def on_message(message: cl.Message):
 # ----- File Handling -----
 
 @cl.on_file
-async def on_file(file: FileDict):
+async def on_file(file: FileDict) -> None:
     """
     Process uploaded files.
-    
+
     Args:
         file: The uploaded file
 
@@ -213,7 +212,7 @@ async def on_file(file: FileDict):
         # Process the file
         file_path = file["path"]
         file_name = file["name"]
-        file_type = file["type"]
+        file["type"]
 
         ingestion_msg = cl.Message(content="", author="EMVR")
         await ingestion_msg.send()
@@ -239,7 +238,7 @@ async def on_file(file: FileDict):
                 )
 
     except Exception as e:
-        logger.error(f"Error processing file: {e}")
+        logger.exception(f"Error processing file: {e}")
         await cl.Message(
             content=f"❌ Error processing file: {e!s}",
             author="System",
@@ -249,10 +248,10 @@ async def on_file(file: FileDict):
 # ----- Action Handlers -----
 
 @cl.action_callback("search")
-async def on_search(action):
+async def on_search(action) -> None:
     """
     Handle search action.
-    
+
     Args:
         action: The action
 
@@ -265,10 +264,10 @@ async def on_search(action):
 
 
 @cl.action_callback("ingest")
-async def on_ingest(action):
+async def on_ingest(action) -> None:
     """
     Handle ingest action.
-    
+
     Args:
         action: The action
 
@@ -281,10 +280,10 @@ async def on_ingest(action):
 
 
 @cl.action_callback("analyze")
-async def on_analyze(action):
+async def on_analyze(action) -> None:
     """
     Handle analyze action.
-    
+
     Args:
         action: The action
 
@@ -299,10 +298,10 @@ async def on_analyze(action):
 # ----- UI Customization -----
 
 @cl.on_settings_update
-async def on_settings_update(settings: dict[str, Any]):
+async def on_settings_update(settings: dict[str, Any]) -> None:
     """
     Handle settings updates.
-    
+
     Args:
         settings: The new settings
 
@@ -320,7 +319,7 @@ async def on_settings_update(settings: dict[str, Any]):
 # ----- Shutdown -----
 
 @cl.on_app_stop
-async def shutdown():
+async def shutdown() -> None:
     """Clean up resources when app is shutting down."""
     try:
         # Get orchestrator and close connections
@@ -333,4 +332,4 @@ async def shutdown():
 
         logger.info("UI shutdown successfully")
     except Exception as e:
-        logger.error(f"Error during shutdown: {e}")
+        logger.exception(f"Error during shutdown: {e}")

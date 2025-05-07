@@ -21,10 +21,10 @@ class KnowledgeGraphRetriever(BaseRetriever):
         self,
         graph_store: Neo4jMemoryStore | None = None,
         include_text: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the knowledge graph retriever.
-        
+
         Args:
             graph_store: Neo4j memory store
             include_text: Whether to include text in results
@@ -62,12 +62,12 @@ class KnowledgeGraphRetriever(BaseRetriever):
     ) -> list[RetrievalResult]:
         """
         Retrieve knowledge graph paths based on a query.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return (used as a limit in Cypher)
             filters: Optional filters to apply (entity types, relation types)
-            
+
         Returns:
             List of retrieval results
 
@@ -76,7 +76,7 @@ class KnowledgeGraphRetriever(BaseRetriever):
             logger.info(f"Performing knowledge graph retrieval for query: {query}")
 
             # Create query bundle
-            query_bundle = QueryBundle(query)
+            QueryBundle(query)
 
             # Additional Cypher parameters based on filters
             cypher_params = {}
@@ -195,5 +195,5 @@ class KnowledgeGraphRetriever(BaseRetriever):
                 return retrieval_results
 
         except Exception as e:
-            logger.error(f"Error in knowledge graph retrieval: {e!s}")
+            logger.exception(f"Error in knowledge graph retrieval: {e!s}")
             return []

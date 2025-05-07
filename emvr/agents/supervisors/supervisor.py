@@ -85,7 +85,7 @@ class SupervisorState(dict[str, Any]):
 class SupervisorAgent(BaseAgent):
     """
     Supervisor agent that orchestrates worker agents.
-    
+
     This agent is responsible for managing the workflow and delegating
     tasks to specialized worker agents.
     """
@@ -97,10 +97,10 @@ class SupervisorAgent(BaseAgent):
         additional_tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the supervisor agent.
-        
+
         Args:
             llm: Language model to use
             worker_agents: Worker agents to delegate tasks to
@@ -192,10 +192,10 @@ class SupervisorAgent(BaseAgent):
     async def _planning_step(self, state: SupervisorState) -> SupervisorState:
         """
         Planning step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -208,7 +208,7 @@ class SupervisorAgent(BaseAgent):
                     "the user's request. Break down the task into steps, considering what "
                     "information you need and what actions to take."
                 )),
-                HumanMessage(content=state["input"] if "input" in state else ""),
+                HumanMessage(content=state.get("input", "")),
             ])
 
             # Get the plan
@@ -224,7 +224,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Planning step failed: {e}")
+            logger.exception(f"Planning step failed: {e}")
             # Return original state with error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -234,17 +234,17 @@ class SupervisorAgent(BaseAgent):
     async def _retrieving_step(self, state: SupervisorState) -> SupervisorState:
         """
         Retrieving step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
         """
         try:
             # Get the query from the input
-            query = state["input"] if "input" in state else ""
+            query = state.get("input", "")
 
             # Use hybrid search to get relevant context
             retrieval_result = await self.tool_executor.ainvoke({
@@ -263,7 +263,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Retrieving step failed: {e}")
+            logger.exception(f"Retrieving step failed: {e}")
             # Proceed to analysis even with error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -274,10 +274,10 @@ class SupervisorAgent(BaseAgent):
     async def _analyzing_step(self, state: SupervisorState) -> SupervisorState:
         """
         Analyzing step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -300,7 +300,7 @@ class SupervisorAgent(BaseAgent):
                     "Provide your reasoning and then state your decision as a single word."
                 )),
                 HumanMessage(content=(
-                    f"User query: {state['input'] if 'input' in state else ''}\n\n"
+                    f"User query: {state.get('input', '')}\n\n"
                     f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
                     f"Retrieved context: {context_str}"
                 )),
@@ -315,7 +315,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Analyzing step failed: {e}")
+            logger.exception(f"Analyzing step failed: {e}")
             # Default to execution on error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -325,10 +325,10 @@ class SupervisorAgent(BaseAgent):
     def _analyze_condition(self, state: SupervisorState) -> str:
         """
         Condition function for analyzing step.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Next state
 
@@ -344,10 +344,10 @@ class SupervisorAgent(BaseAgent):
     async def _ingesting_step(self, state: SupervisorState) -> SupervisorState:
         """
         Ingesting step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -361,7 +361,7 @@ class SupervisorAgent(BaseAgent):
                     "This could be a URL, a file, or text provided by the user."
                 )),
                 HumanMessage(content=(
-                    f"User query: {state['input'] if 'input' in state else ''}\n\n"
+                    f"User query: {state.get('input', '')}\n\n"
                     f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
                     f"Analysis: {state.get('analysis', '')}"
                 )),
@@ -382,7 +382,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Ingesting step failed: {e}")
+            logger.exception(f"Ingesting step failed: {e}")
             # Proceed to analysis even with error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -392,10 +392,10 @@ class SupervisorAgent(BaseAgent):
     async def _executing_step(self, state: SupervisorState) -> SupervisorState:
         """
         Executing step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -415,7 +415,7 @@ class SupervisorAgent(BaseAgent):
                     "a detailed solution to the user's query."
                 )),
                 HumanMessage(content=(
-                    f"User query: {state['input'] if 'input' in state else ''}\n\n"
+                    f"User query: {state.get('input', '')}\n\n"
                     f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
                     f"Retrieved context: {context_str}"
                 )),
@@ -431,7 +431,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Executing step failed: {e}")
+            logger.exception(f"Executing step failed: {e}")
             # Proceed to reflection even with error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -442,10 +442,10 @@ class SupervisorAgent(BaseAgent):
     async def _reflecting_step(self, state: SupervisorState) -> SupervisorState:
         """
         Reflecting step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -459,7 +459,7 @@ class SupervisorAgent(BaseAgent):
                     "an objective assessment of the solution quality."
                 )),
                 HumanMessage(content=(
-                    f"User query: {state['input'] if 'input' in state else ''}\n\n"
+                    f"User query: {state.get('input', '')}\n\n"
                     f"Plan: {state.get('plan', {}).get('steps', [])}\n\n"
                     f"Execution result: {state.get('execution_result', '')}"
                 )),
@@ -475,7 +475,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Reflecting step failed: {e}")
+            logger.exception(f"Reflecting step failed: {e}")
             # Proceed to response even with error
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -486,10 +486,10 @@ class SupervisorAgent(BaseAgent):
     async def _responding_step(self, state: SupervisorState) -> SupervisorState:
         """
         Responding step of the workflow.
-        
+
         Args:
             state: Current state
-            
+
         Returns:
             Updated state
 
@@ -507,7 +507,7 @@ class SupervisorAgent(BaseAgent):
                     "and reflection to craft your response. Be direct and to the point."
                 )),
                 HumanMessage(content=(
-                    f"User query: {state['input'] if 'input' in state else ''}\n\n"
+                    f"User query: {state.get('input', '')}\n\n"
                     f"Execution result: {execution_result}\n\n"
                     f"Reflection: {reflection}"
                 )),
@@ -522,7 +522,7 @@ class SupervisorAgent(BaseAgent):
 
             return new_state
         except Exception as e:
-            logger.error(f"Responding step failed: {e}")
+            logger.exception(f"Responding step failed: {e}")
             # Provide error message as response
             new_state = state.copy()
             new_state["error"] = str(e)
@@ -535,11 +535,11 @@ class SupervisorAgent(BaseAgent):
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
 
@@ -568,7 +568,7 @@ class SupervisorAgent(BaseAgent):
                 "status": "success",
             }
         except Exception as e:
-            logger.error(f"Agent execution failed: {e}")
+            logger.exception(f"Agent execution failed: {e}")
             return {
                 "response": f"I encountered an error: {e!s}",
                 "error": str(e),

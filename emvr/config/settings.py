@@ -15,7 +15,7 @@ load_dotenv()
 class Settings(BaseSettings):
     """
     Settings for the EMVR system.
-    
+
     This class uses Pydantic to load and validate settings from environment variables.
     """
 
@@ -100,30 +100,33 @@ class Settings(BaseSettings):
     )
 
     @field_validator("openai_api_key")
-    def validate_openai_api_key(cls, v: str | None, info) -> str | None:
+    def validate_openai_api_key(self, v: str | None, info) -> str | None:
         """Validate OpenAI API key if OpenAI is used."""
         values = info.data
         if values.get("default_llm_provider") == "openai" and not v:
             if os.environ.get("APP_ENV") != "test":
-                raise ValueError("OpenAI API key is required when using OpenAI provider")
+                msg = "OpenAI API key is required when using OpenAI provider"
+                raise ValueError(msg)
         return v
 
     @field_validator("anthropic_api_key")
-    def validate_anthropic_api_key(cls, v: str | None, info) -> str | None:
+    def validate_anthropic_api_key(self, v: str | None, info) -> str | None:
         """Validate Anthropic API key if Anthropic is used."""
         values = info.data
         if values.get("default_llm_provider") == "anthropic" and not v:
             if os.environ.get("APP_ENV") != "test":
-                raise ValueError("Anthropic API key is required when using Anthropic provider")
+                msg = "Anthropic API key is required when using Anthropic provider"
+                raise ValueError(msg)
         return v
 
     @field_validator("cohere_api_key")
-    def validate_cohere_api_key(cls, v: str | None, info) -> str | None:
+    def validate_cohere_api_key(self, v: str | None, info) -> str | None:
         """Validate Cohere API key if Cohere is used."""
         values = info.data
         if values.get("default_llm_provider") == "cohere" and not v:
             if os.environ.get("APP_ENV") != "test":
-                raise ValueError("Cohere API key is required when using Cohere provider")
+                msg = "Cohere API key is required when using Cohere provider"
+                raise ValueError(msg)
         return v
 
 
@@ -131,7 +134,7 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """
     Get settings from environment variables with caching.
-    
+
     Returns:
         Settings: Validated settings
 

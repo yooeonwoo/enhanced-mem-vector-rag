@@ -45,12 +45,12 @@ async def hybrid_search(
 ) -> dict[str, Any]:
     """
     Perform a hybrid search across vector and graph stores.
-    
+
     Args:
         query: The search query string
         limit: Maximum number of results to return
         rerank: Whether to rerank results
-        
+
     Returns:
         Dict containing search results
 
@@ -71,7 +71,7 @@ async def hybrid_search(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Hybrid search failed: {e}")
+        logger.exception(f"Hybrid search failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -85,11 +85,11 @@ async def vector_search(
 ) -> dict[str, Any]:
     """
     Perform a vector search using embeddings.
-    
+
     Args:
         query: The search query string
         limit: Maximum number of results to return
-        
+
     Returns:
         Dict containing search results
 
@@ -109,7 +109,7 @@ async def vector_search(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Vector search failed: {e}")
+        logger.exception(f"Vector search failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -123,11 +123,11 @@ async def graph_search(
 ) -> dict[str, Any]:
     """
     Perform a graph search using knowledge graph.
-    
+
     Args:
         query: The search query string
         limit: Maximum number of results to return
-        
+
     Returns:
         Dict containing search results
 
@@ -147,7 +147,7 @@ async def graph_search(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Graph search failed: {e}")
+        logger.exception(f"Graph search failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -163,13 +163,13 @@ async def retrieve_and_generate(
 ) -> dict[str, Any]:
     """
     Retrieve information and generate a response.
-    
+
     Args:
         query: The search query string
         limit: Maximum number of results to return
         context_limit: Maximum number of context documents to include
         rerank: Whether to rerank results
-        
+
     Returns:
         Dict containing the generated response and retrieved context
 
@@ -193,7 +193,7 @@ async def retrieve_and_generate(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Retrieve and generate failed: {e}")
+        logger.exception(f"Retrieve and generate failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -207,11 +207,11 @@ async def find_entities(
 ) -> dict[str, Any]:
     """
     Extract entities from text and find them in the knowledge graph.
-    
+
     Args:
         query: The text to extract entities from
         limit: Maximum number of entities to return
-        
+
     Returns:
         Dict containing the found entities
 
@@ -231,7 +231,7 @@ async def find_entities(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Entity extraction failed: {e}")
+        logger.exception(f"Entity extraction failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -247,13 +247,13 @@ async def find_relationships(
 ) -> dict[str, Any]:
     """
     Find relationships for an entity in the knowledge graph.
-    
+
     Args:
         entity_name: The name of the entity to find relationships for
         relation_type: Optional type of relation to filter by
         direction: Direction of relationships ("outgoing", "incoming", or "both")
         limit: Maximum number of relationships to return
-        
+
     Returns:
         Dict containing the found relationships
 
@@ -275,7 +275,7 @@ async def find_relationships(
             "status": "success",
         }
     except Exception as e:
-        logger.error(f"Relationship finding failed: {e}")
+        logger.exception(f"Relationship finding failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -287,7 +287,7 @@ async def find_relationships(
 def get_retrieval_tools() -> list[BaseTool]:
     """
     Get all retrieval tools.
-    
+
     Returns:
         List of retrieval tools
 

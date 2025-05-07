@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class UserProfile(BaseModel):
     """
     User profile model.
-    
+
     This class represents a user profile with preferences and settings.
     """
 
@@ -29,11 +29,11 @@ class UserProfile(BaseModel):
     def get_preference(self, key: str, default: Any = None) -> Any:
         """
         Get a user preference.
-        
+
         Args:
             key: The preference key
             default: Default value if not found
-            
+
         Returns:
             The preference value
 
@@ -43,7 +43,7 @@ class UserProfile(BaseModel):
     def set_preference(self, key: str, value: Any) -> None:
         """
         Set a user preference.
-        
+
         Args:
             key: The preference key
             value: The preference value
@@ -54,10 +54,10 @@ class UserProfile(BaseModel):
     def get_api_key(self, service: str) -> str | None:
         """
         Get an API key for a service.
-        
+
         Args:
             service: The service name
-            
+
         Returns:
             The API key if available
 
@@ -67,7 +67,7 @@ class UserProfile(BaseModel):
     def set_api_key(self, service: str, key: str) -> None:
         """
         Set an API key for a service.
-        
+
         Args:
             service: The service name
             key: The API key
@@ -79,7 +79,7 @@ class UserProfile(BaseModel):
 def get_current_user_profile() -> UserProfile | None:
     """
     Get the current user's profile.
-    
+
     Returns:
         The user profile if available
 
@@ -94,11 +94,11 @@ def get_current_user_profile() -> UserProfile | None:
 async def create_user_profile(user_id: str, display_name: str | None = None) -> UserProfile:
     """
     Create a new user profile.
-    
+
     Args:
         user_id: The user ID
         display_name: Optional display name
-        
+
     Returns:
         The created user profile
 
@@ -119,7 +119,7 @@ async def create_user_profile(user_id: str, display_name: str | None = None) -> 
 async def update_user_profile(profile: UserProfile) -> None:
     """
     Update a user profile in the session.
-    
+
     Args:
         profile: The updated profile
 

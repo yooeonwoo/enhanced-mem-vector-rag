@@ -29,10 +29,10 @@ class RetrievalPipeline:
         graph_store: Neo4jMemoryStore | None = None,
         memory_manager: MemoryManager | None = None,
         retrieval_mode: str = "fusion",
-    ):
+    ) -> None:
         """
         Initialize the retrieval pipeline.
-        
+
         Args:
             vector_store: Vector store for semantic search
             graph_store: Graph store for knowledge graph queries
@@ -121,18 +121,19 @@ class RetrievalPipeline:
     def set_retrieval_mode(self, mode: str) -> None:
         """
         Set the retrieval mode.
-        
+
         Args:
             mode: Retrieval mode ("vector", "graph", "hybrid", "fusion")
-            
+
         Raises:
             ValueError: If the mode is invalid
 
         """
         valid_modes = ["vector", "graph", "hybrid", "fusion"]
         if mode not in valid_modes:
+            msg = f"Invalid retrieval mode: {mode}. Must be one of {valid_modes}"
             raise ValueError(
-                f"Invalid retrieval mode: {mode}. Must be one of {valid_modes}",
+                msg,
             )
 
         self.retrieval_mode = mode
@@ -147,13 +148,13 @@ class RetrievalPipeline:
     ) -> dict[str, Any]:
         """
         Retrieve documents based on a query.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
             mode: Override the retrieval mode for this query
-            
+
         Returns:
             Dictionary with retrieval results and metadata
 
@@ -191,7 +192,7 @@ class RetrievalPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Error in retrieval pipeline: {e!s}")
+            logger.exception(f"Error in retrieval pipeline: {e!s}")
             return {
                 "query": query,
                 "mode": self.retrieval_mode,
@@ -208,14 +209,14 @@ class RetrievalPipeline:
     ) -> dict[str, Any]:
         """
         Perform hybrid search using fusion retrieval.
-        
+
         This is a convenience method for the MCP server.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             Dictionary with search results
 
@@ -235,12 +236,12 @@ class RetrievalPipeline:
     ) -> dict[str, Any]:
         """
         Enrich context with retrieved information.
-        
+
         Args:
             query: Query string
             context: Optional existing context to enrich
             top_k: Number of results to include
-            
+
         Returns:
             Dictionary with enriched context
 
@@ -276,7 +277,7 @@ class RetrievalPipeline:
             }
 
         except Exception as e:
-            logger.error(f"Error enriching context: {e!s}")
+            logger.exception(f"Error enriching context: {e!s}")
             return {
                 "query": query,
                 "original_context": context,

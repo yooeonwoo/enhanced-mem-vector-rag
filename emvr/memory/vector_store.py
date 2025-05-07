@@ -20,10 +20,10 @@ class QdrantMemoryStore:
         collection_name: str = "emvr_memory",
         url: str | None = None,
         api_key: str | None = None,
-    ):
+    ) -> None:
         """
         Initialize the Qdrant memory store.
-        
+
         Args:
             collection_name: Name of the Qdrant collection
             url: URL of the Qdrant server (defaults to env var QDRANT_URL)
@@ -54,12 +54,12 @@ class QdrantMemoryStore:
     ) -> list[dict[str, Any]]:
         """
         Perform similarity search against the vector store.
-        
+
         Args:
             query: The query text
             top_k: Number of results to return
             filters: Optional filters to apply to the search
-            
+
         Returns:
             List of matching documents with scores
 
@@ -90,12 +90,12 @@ class QdrantMemoryStore:
     ) -> list[dict[str, Any]]:
         """
         Perform hybrid (vector + keyword) search against the vector store.
-        
+
         Args:
             query: The query text
             top_k: Number of results to return
             filters: Optional filters to apply to the search
-            
+
         Returns:
             List of matching documents with scores
 

@@ -58,11 +58,11 @@ async def search_memory(
 ) -> dict[str, Any]:
     """
     Search the memory system for nodes matching the query.
-    
+
     Args:
         query: The search query string
         limit: Maximum number of results to return
-        
+
     Returns:
         Dict containing search results
 
@@ -72,11 +72,10 @@ async def search_memory(
         await memory_manager.initialize()
 
         # Execute the search
-        result = await memory_manager.search_nodes(query, limit)
+        return await memory_manager.search_nodes(query, limit)
 
-        return result
     except Exception as e:
-        logger.error(f"Memory search failed: {e}")
+        logger.exception(f"Memory search failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -87,7 +86,7 @@ async def search_memory(
 async def read_memory_graph() -> dict[str, Any]:
     """
     Read the entire memory graph.
-    
+
     Returns:
         Dict containing the complete graph structure
 
@@ -97,11 +96,10 @@ async def read_memory_graph() -> dict[str, Any]:
         await memory_manager.initialize()
 
         # Read the graph
-        result = await memory_manager.read_graph()
+        return await memory_manager.read_graph()
 
-        return result
     except Exception as e:
-        logger.error(f"Reading memory graph failed: {e}")
+        logger.exception(f"Reading memory graph failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -112,10 +110,10 @@ async def read_memory_graph() -> dict[str, Any]:
 async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Create new entities in the memory system.
-    
+
     Args:
         entities: List of entities to create, each with name, entityType, and observations
-        
+
     Returns:
         Dict containing the result of the operation
 
@@ -125,11 +123,10 @@ async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, An
         await memory_manager.initialize()
 
         # Create the entities
-        result = await memory_manager.create_entities(entities)
+        return await memory_manager.create_entities(entities)
 
-        return result
     except Exception as e:
-        logger.error(f"Entity creation failed: {e}")
+        logger.exception(f"Entity creation failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -140,10 +137,10 @@ async def create_memory_entities(entities: list[dict[str, Any]]) -> dict[str, An
 async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Create new relations between entities in the memory system.
-    
+
     Args:
         relations: List of relations to create, each with from, to, and relationType
-        
+
     Returns:
         Dict containing the result of the operation
 
@@ -153,11 +150,10 @@ async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, 
         await memory_manager.initialize()
 
         # Create the relations
-        result = await memory_manager.create_relations(relations)
+        return await memory_manager.create_relations(relations)
 
-        return result
     except Exception as e:
-        logger.error(f"Relation creation failed: {e}")
+        logger.exception(f"Relation creation failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -168,10 +164,10 @@ async def create_memory_relations(relations: list[dict[str, Any]]) -> dict[str, 
 async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Add new observations to existing entities in the memory system.
-    
+
     Args:
         observations: List of observations to add, each with entityName and contents
-        
+
     Returns:
         Dict containing the result of the operation
 
@@ -181,11 +177,10 @@ async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[st
         await memory_manager.initialize()
 
         # Add the observations
-        result = await memory_manager.add_observations(observations)
+        return await memory_manager.add_observations(observations)
 
-        return result
     except Exception as e:
-        logger.error(f"Adding observations failed: {e}")
+        logger.exception(f"Adding observations failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -196,10 +191,10 @@ async def add_memory_observations(observations: list[dict[str, Any]]) -> dict[st
 async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
     """
     Delete entities from the memory system.
-    
+
     Args:
         entity_names: List of entity names to delete
-        
+
     Returns:
         Dict containing the result of the operation
 
@@ -209,11 +204,10 @@ async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
         await memory_manager.initialize()
 
         # Delete the entities
-        result = await memory_manager.delete_entities(entity_names)
+        return await memory_manager.delete_entities(entity_names)
 
-        return result
     except Exception as e:
-        logger.error(f"Entity deletion failed: {e}")
+        logger.exception(f"Entity deletion failed: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -225,7 +219,7 @@ async def delete_memory_entities(entity_names: list[str]) -> dict[str, Any]:
 def get_memory_tools() -> list[BaseTool]:
     """
     Get all memory tools.
-    
+
     Returns:
         List of memory tools
 

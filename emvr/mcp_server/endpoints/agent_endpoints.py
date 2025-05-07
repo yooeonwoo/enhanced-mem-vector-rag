@@ -64,7 +64,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Run the agent workflow on a query.
-        
+
         The agent will process the query through the supervisor-worker pattern and return a response.
         """
         try:
@@ -96,7 +96,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "status": "success" if result.success else "error",
             }
         except Exception as e:
-            logger.error(f"Agent workflow execution failed: {e}")
+            logger.exception(f"Agent workflow execution failed: {e}")
             await ctx.error(f"Failed to execute agent workflow: {e}")
 
             return {
@@ -118,7 +118,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Run a specific worker agent on a query.
-        
+
         Each worker agent has a specialized capability (research, knowledge_graph, memory_management).
         """
         try:
@@ -161,7 +161,7 @@ async def register_agent_endpoints(mcp: MCPServer) -> None:
                 "status": "success" if result.success else "error",
             }
         except Exception as e:
-            logger.error(f"Worker agent execution failed: {e}")
+            logger.exception(f"Worker agent execution failed: {e}")
             await ctx.error(f"Failed to execute worker agent: {e}")
 
             return {
@@ -188,62 +188,62 @@ async def register_agent_resources(mcp: MCPServer) -> None:
         """Return the Agent System usage guide."""
         return """
         # Agent System Guide
-        
+
         The EMVR system includes an agent orchestration framework with a supervisor agent
         and multiple specialized worker agents using LangGraph.
-        
+
         ## Main Agent Workflow
-        
+
         Use the main agent workflow for general queries and tasks:
-        
+
         ```python
         result = await agent.run(
             query="What information do we have about machine learning?",
             thread_id="optional-conversation-id"
         )
         ```
-        
+
         ## Worker Agents
-        
+
         For specialized tasks, you can use specific worker agents directly:
-        
+
         ### Research Agent
-        
+
         Specializes in information retrieval and search:
-        
+
         ```python
         result = await agent.run_worker(
             worker_name="research_agent",
             query="Find all information related to transformers architecture"
         )
         ```
-        
+
         ### Knowledge Graph Agent
-        
+
         Specializes in knowledge graph operations and queries:
-        
+
         ```python
         result = await agent.run_worker(
             worker_name="knowledge_graph_agent",
             query="What entities are related to LlamaIndex?"
         )
         ```
-        
+
         ### Memory Management Agent
-        
+
         Specializes in memory operations like entity creation and observation management:
-        
+
         ```python
         result = await agent.run_worker(
             worker_name="memory_management_agent",
             query="Create a new entity for the FastEmbed library"
         )
         ```
-        
+
         ## Providing Context
-        
+
         You can provide additional context to any agent:
-        
+
         ```python
         result = await agent.run(
             query="What can you tell me about this concept?",
@@ -253,22 +253,22 @@ async def register_agent_resources(mcp: MCPServer) -> None:
             ]
         )
         ```
-        
+
         ## Thread ID for Conversation Context
-        
+
         Pass a thread_id to maintain conversation context across multiple requests:
-        
+
         ```python
         result = await agent.run(
             query="Tell me more about that",
             thread_id="previous-conversation-id"
         )
         ```
-        
+
         ## Additional Parameters
-        
+
         Pass additional parameters as needed:
-        
+
         ```python
         result = await agent.run(
             query="...",

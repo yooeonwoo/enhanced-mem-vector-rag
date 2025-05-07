@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Generate JWT tokens for user authentication with the EMVR MCP server
-"""
+"""Generate JWT tokens for user authentication with the EMVR MCP server."""
 
 import argparse
 import datetime
@@ -16,7 +14,7 @@ import jwt
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 def load_env() -> dict[str, str]:
-    """Load environment variables from .env file"""
+    """Load environment variables from .env file."""
     env_vars = {}
     env_path = Path(__file__).parent.parent / ".env"
 
@@ -31,7 +29,7 @@ def load_env() -> dict[str, str]:
     return env_vars
 
 def generate_token(user_id: str, expiry_days: int = 30) -> str:
-    """Generate a JWT token for the specified user"""
+    """Generate a JWT token for the specified user."""
     env_vars = load_env()
     jwt_secret = env_vars.get("JWT_SECRET") or os.environ.get("JWT_SECRET", "your-jwt-secret-key")
 
@@ -54,12 +52,11 @@ def generate_token(user_id: str, expiry_days: int = 30) -> str:
     }
 
     # Generate token
-    token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+    return jwt.encode(payload, jwt_secret, algorithm="HS256")
 
-    return token
 
 def main() -> None:
-    """Parse arguments and generate token"""
+    """Parse arguments and generate token."""
     parser = argparse.ArgumentParser(description="Generate JWT token for EMVR authentication")
     parser.add_argument("user_id", help="User ID to generate token for")
     parser.add_argument("--expiry", type=int, default=30, help="Token expiry in days (default: 30)")

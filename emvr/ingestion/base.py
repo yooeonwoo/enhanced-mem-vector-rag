@@ -30,10 +30,10 @@ class BaseIngestionConnector(ABC):
     async def ingest(self, documents: list[Document]) -> list[IngestResult]:
         """
         Ingest documents into the system.
-        
+
         Args:
             documents: List of documents to ingest
-            
+
         Returns:
             List of ingestion results
 
@@ -43,10 +43,10 @@ class BaseIngestionConnector(ABC):
     async def delete(self, document_ids: list[str]) -> list[IngestResult]:
         """
         Delete documents from the system.
-        
+
         Args:
             document_ids: List of document IDs to delete
-            
+
         Returns:
             List of deletion results
 

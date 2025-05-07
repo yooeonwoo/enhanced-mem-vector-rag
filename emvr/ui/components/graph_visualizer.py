@@ -25,12 +25,12 @@ async def prepare_graph_data(
 ) -> dict[str, Any]:
     """
     Prepare graph data for visualization.
-    
+
     Args:
         center_entity: Optional center entity name
         max_nodes: Maximum number of nodes to include
         max_depth: Maximum relationship depth
-        
+
     Returns:
         Graph data structure for visualization
 
@@ -98,7 +98,7 @@ async def prepare_graph_data(
         }
 
     except Exception as e:
-        logger.error(f"Error preparing graph data: {e}")
+        logger.exception(f"Error preparing graph data: {e}")
         return {
             "nodes": [],
             "edges": [],
@@ -116,7 +116,7 @@ async def show_graph_visualization(
 ) -> None:
     """
     Show the knowledge graph visualization.
-    
+
     Args:
         center_entity: Optional center entity name
         max_nodes: Maximum number of nodes to include
@@ -154,21 +154,21 @@ async def show_graph_visualization(
                     height: 600px;
                     border: 1px solid lightgray;
                 }}
-                
+
                 .controls {{
                     margin-bottom: 10px;
                 }}
-                
+
                 .legend {{
                     margin-top: 10px;
                     font-size: 12px;
                 }}
-                
+
                 .legend-item {{
                     display: inline-block;
                     margin-right: 15px;
                 }}
-                
+
                 .color-box {{
                     display: inline-block;
                     width: 12px;
@@ -189,31 +189,31 @@ async def show_graph_visualization(
                     <option value="circular">Circular Layout</option>
                 </select>
             </div>
-            
+
             <div id="graph"></div>
-            
+
             <div class="legend">
                 <div class="legend-item"><div class="color-box" style="background-color: #97C2FC;"></div>Entity</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #FFCCCC;"></div>Component</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #C2F0C2;"></div>Document</div>
                 <div class="legend-item"><div class="color-box" style="background-color: #FFE0B2;"></div>Decision</div>
             </div>
-            
+
             <script type="text/javascript">
                 // Parse the data
                 const graphData = {graph_json};
-                
+
                 // Prepare the data for the visualization
                 const nodes = new vis.DataSet(graphData.nodes);
                 const edges = new vis.DataSet(graphData.edges);
-                
+
                 // Create the network
                 const container = document.getElementById('graph');
                 const data = {{
                     nodes: nodes,
                     edges: edges
                 }};
-                
+
                 // Configure the visualization
                 const options = {{
                     nodes: {{
@@ -263,26 +263,26 @@ async def show_graph_visualization(
                         keyboard: true
                     }}
                 }};
-                
+
                 // Create the network
                 const network = new vis.Network(container, data, options);
-                
+
                 // Add event listeners for controls
                 document.getElementById('zoom-in').addEventListener('click', function() {{
                     network.zoomIn();
                 }});
-                
+
                 document.getElementById('zoom-out').addEventListener('click', function() {{
                     network.zoomOut();
                 }});
-                
+
                 document.getElementById('fit').addEventListener('click', function() {{
                     network.fit();
                 }});
-                
+
                 document.getElementById('layout').addEventListener('change', function(e) {{
                     const layout = e.target.value;
-                    
+
                     if (layout === 'hierarchical') {{
                         network.setOptions({{
                             layout: {{
@@ -309,19 +309,19 @@ async def show_graph_visualization(
                                 }}
                             }}
                         }});
-                        
+
                         // Position nodes in a circle
                         const nodeCount = nodes.length;
                         const radius = 300;
                         const angle = 2 * Math.PI / nodeCount;
-                        
+
                         nodes.forEach((node, i) => {{
                             const x = radius * Math.cos(angle * i);
                             const y = radius * Math.sin(angle * i);
                             node.x = x;
                             node.y = y;
                         }});
-                        
+
                         network.redraw();
                     }} else {{
                         network.setOptions({{
@@ -341,13 +341,13 @@ async def show_graph_visualization(
                         }});
                     }}
                 }});
-                
+
                 // Add click event for nodes
                 network.on("click", function (params) {{
                     if (params.nodes.length > 0) {{
                         const nodeId = params.nodes[0];
                         const node = nodes.get(nodeId);
-                        
+
                         alert(`Node: ${node.label}\\nType: ${node.properties.type}\\nObservations: ${node.properties.observations.join('\\n- ')}`);
                     }}
                 }});
@@ -379,7 +379,7 @@ async def show_graph_visualization(
         ).send()
 
     except Exception as e:
-        logger.error(f"Error showing graph visualization: {e}")
+        logger.exception(f"Error showing graph visualization: {e}")
         await cl.Message(
             content=f"❌ Error showing graph visualization: {e!s}",
             author="System",

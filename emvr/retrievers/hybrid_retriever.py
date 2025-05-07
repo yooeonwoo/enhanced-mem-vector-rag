@@ -12,7 +12,7 @@ from llama_index.core.schema import NodeWithScore, QueryBundle
 class HybridRetriever(BaseRetriever):
     """
     Hybrid retriever that combines vector search with graph traversal.
-    
+
     This retriever uses LlamaIndex to orchestrate retrieval from both Qdrant (vector)
     and Neo4j (graph) stores, combining the results for improved accuracy.
     """
@@ -30,10 +30,10 @@ class HybridRetriever(BaseRetriever):
         graph_top_k: int = 3,
         reranking_threshold: float = 0.7,
         use_hybrid_fusion: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the hybrid retriever.
-        
+
         Args:
             qdrant_collection: Name of the Qdrant collection
             qdrant_url: URL of the Qdrant server
@@ -72,10 +72,10 @@ class HybridRetriever(BaseRetriever):
     def _retrieve(self, query_bundle: QueryBundle) -> list[NodeWithScore]:
         """
         Retrieve nodes given a query bundle.
-        
+
         Args:
             query_bundle: Query bundle containing query string and optional filters
-            
+
         Returns:
             List of nodes with scores
 

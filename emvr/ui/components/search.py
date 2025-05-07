@@ -25,13 +25,13 @@ async def perform_search(
 ) -> dict[str, Any]:
     """
     Perform a search.
-    
+
     Args:
         query: The search query
         search_type: The type of search (hybrid, vector, graph)
         limit: Maximum number of results to return
         rerank: Whether to rerank results
-        
+
     Returns:
         Search results
 
@@ -68,7 +68,7 @@ async def perform_search(
         }
 
     except Exception as e:
-        logger.error(f"Error in search: {e}")
+        logger.exception(f"Error in search: {e}")
         return {
             "error": str(e),
             "status": "error",
@@ -83,13 +83,13 @@ async def retrieve_and_generate(
 ) -> dict[str, Any]:
     """
     Retrieve information and generate a response.
-    
+
     Args:
         query: The search query
         limit: Maximum number of search results
         context_limit: Maximum number of context documents to include
         rerank: Whether to rerank results
-        
+
     Returns:
         Response and context
 
@@ -103,17 +103,16 @@ async def retrieve_and_generate(
             cl.user_session.set("retrieval_pipeline", pipeline)
 
         # Retrieve and generate
-        result = await pipeline.retrieve_and_generate(
+        return await pipeline.retrieve_and_generate(
             query=query,
             limit=limit,
             context_limit=context_limit,
             rerank=rerank,
         )
 
-        return result
 
     except Exception as e:
-        logger.error(f"Error in retrieve and generate: {e}")
+        logger.exception(f"Error in retrieve and generate: {e}")
         return {
             "response": f"Error: {e!s}",
             "context": [],
@@ -173,7 +172,7 @@ async def display_search_results(
 ) -> None:
     """
     Display search results in the UI.
-    
+
     Args:
         results: Search results
         query: The search query

@@ -26,10 +26,10 @@ class ResearchWorkerAgent(BaseAgent):
         self,
         llm: BaseLanguageModel | None = None,
         retrieval_pipeline: RetrievalPipeline | None = None,
-    ):
+    ) -> None:
         """
         Initialize the research worker agent.
-        
+
         Args:
             llm: Language model for the agent
             retrieval_pipeline: Retrieval pipeline instance
@@ -50,7 +50,7 @@ class ResearchWorkerAgent(BaseAgent):
     def _create_agent_executor(self) -> AgentExecutor:
         """
         Create an agent executor with research tools.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -102,19 +102,18 @@ class ResearchWorkerAgent(BaseAgent):
         tools = [search_tool]
 
         # Initialize agent
-        agent = initialize_agent(
+        return initialize_agent(
             tools,
             self.llm,
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
 
-        return agent
 
     def get_agent_executor(self) -> AgentExecutor:
         """
         Get the agent executor.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -124,11 +123,11 @@ class ResearchWorkerAgent(BaseAgent):
     async def run(self, query: str, **kwargs) -> AgentResult:
         """
         Run the agent with a query.
-        
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             Agent result
 
@@ -166,10 +165,10 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
         llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
         kg_retriever: KnowledgeGraphRetriever | None = None,
-    ):
+    ) -> None:
         """
         Initialize the knowledge graph worker agent.
-        
+
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
@@ -194,7 +193,7 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
     def _create_agent_executor(self) -> AgentExecutor:
         """
         Create an agent executor with knowledge graph tools.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -327,19 +326,18 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
         tools = [kg_search_tool, read_graph_tool]
 
         # Initialize agent
-        agent = initialize_agent(
+        return initialize_agent(
             tools,
             self.llm,
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
 
-        return agent
 
     def get_agent_executor(self) -> AgentExecutor:
         """
         Get the agent executor.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -349,11 +347,11 @@ class KnowledgeGraphWorkerAgent(BaseAgent):
     async def run(self, query: str, **kwargs) -> AgentResult:
         """
         Run the agent with a query.
-        
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             Agent result
 
@@ -390,10 +388,10 @@ class MemoryManagementWorkerAgent(BaseAgent):
         self,
         llm: BaseLanguageModel | None = None,
         memory_manager: MemoryManager | None = None,
-    ):
+    ) -> None:
         """
         Initialize the memory management worker agent.
-        
+
         Args:
             llm: Language model for the agent
             memory_manager: Memory manager instance
@@ -414,7 +412,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
     def _create_agent_executor(self) -> AgentExecutor:
         """
         Create an agent executor with memory management tools.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -428,7 +426,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                result = asyncio.run(self.memory_manager.create_entities([
+                asyncio.run(self.memory_manager.create_entities([
                     {
                         "name": name,
                         "entity_type": entity_type,
@@ -440,7 +438,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
 
             async def _arun(self, name: str, entity_type: str, observations: list[str]) -> str:
                 """Run the tool asynchronously."""
-                result = await self.memory_manager.create_entities([
+                await self.memory_manager.create_entities([
                     {
                         "name": name,
                         "entity_type": entity_type,
@@ -458,7 +456,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                result = asyncio.run(self.memory_manager.create_relations([
+                asyncio.run(self.memory_manager.create_relations([
                     {
                         "from": from_entity,
                         "relation_type": relation_type,
@@ -470,7 +468,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
 
             async def _arun(self, from_entity: str, relation_type: str, to_entity: str) -> str:
                 """Run the tool asynchronously."""
-                result = await self.memory_manager.create_relations([
+                await self.memory_manager.create_relations([
                     {
                         "from": from_entity,
                         "relation_type": relation_type,
@@ -488,7 +486,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
                 """Run the tool."""
                 import asyncio
 
-                result = asyncio.run(self.memory_manager.add_observations([
+                asyncio.run(self.memory_manager.add_observations([
                     {
                         "entity_name": entity_name,
                         "contents": observations,
@@ -499,7 +497,7 @@ class MemoryManagementWorkerAgent(BaseAgent):
 
             async def _arun(self, entity_name: str, observations: list[str]) -> str:
                 """Run the tool asynchronously."""
-                result = await self.memory_manager.add_observations([
+                await self.memory_manager.add_observations([
                     {
                         "entity_name": entity_name,
                         "contents": observations,
@@ -589,19 +587,18 @@ class MemoryManagementWorkerAgent(BaseAgent):
         ]
 
         # Initialize agent
-        agent = initialize_agent(
+        return initialize_agent(
             tools,
             self.llm,
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
         )
 
-        return agent
 
     def get_agent_executor(self) -> AgentExecutor:
         """
         Get the agent executor.
-        
+
         Returns:
             AgentExecutor instance
 
@@ -611,11 +608,11 @@ class MemoryManagementWorkerAgent(BaseAgent):
     async def run(self, query: str, **kwargs) -> AgentResult:
         """
         Run the agent with a query.
-        
+
         Args:
             query: Query string
             **kwargs: Additional keyword arguments
-            
+
         Returns:
             Agent result
 

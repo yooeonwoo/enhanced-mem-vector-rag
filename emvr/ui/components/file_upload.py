@@ -51,10 +51,10 @@ SUPPORTED_FILE_EXTENSIONS: set[str] = {
 async def process_file_upload(file: FileDict) -> tuple[bool, str, dict[str, Any]]:
     """
     Process an uploaded file.
-    
+
     Args:
         file: The uploaded file
-        
+
     Returns:
         Tuple of (success, message, result)
 
@@ -111,7 +111,7 @@ async def process_file_upload(file: FileDict) -> tuple[bool, str, dict[str, Any]
         return (False, error_message, result)
 
     except Exception as e:
-        logger.error(f"Error processing file: {e}")
+        logger.exception(f"Error processing file: {e}")
         return (
             False,
             f"Error processing file: {e!s}",

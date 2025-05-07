@@ -22,10 +22,10 @@ class HybridRetriever(BaseRetriever):
         vector_store: QdrantMemoryStore | None = None,
         embedding_model: str | None = None,
         use_reranking: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the hybrid retriever.
-        
+
         Args:
             vector_store: Vector store for retrieval
             embedding_model: Embedding model to use for encoding queries
@@ -61,12 +61,12 @@ class HybridRetriever(BaseRetriever):
     ) -> list[RetrievalResult]:
         """
         Retrieve documents based on a query.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             List of retrieval results
 
@@ -106,15 +106,15 @@ class HybridRetriever(BaseRetriever):
     ) -> list[NodeWithScore]:
         """
         Rerank nodes based on relevance to query.
-        
+
         Note: In a more complex implementation, this would use a dedicated
         reranker model. For simplicity, we're using a basic relevance score.
-        
+
         Args:
             query: Query string
             nodes: List of nodes with scores
             top_k: Number of results to return
-            
+
         Returns:
             Reranked list of nodes
 

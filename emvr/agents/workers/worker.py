@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class WorkerAgent(BaseAgent):
     """
     Worker agent that performs specialized tasks.
-    
+
     This agent is responsible for handling specific types of tasks
     delegated by the supervisor agent.
     """
@@ -33,10 +33,10 @@ class WorkerAgent(BaseAgent):
         tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
         memory_enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the worker agent.
-        
+
         Args:
             name: Agent name
             description: Agent description
@@ -71,11 +71,11 @@ class WorkerAgent(BaseAgent):
     async def run(self, input_text: str, **kwargs: Any) -> dict[str, Any]:
         """
         Run the agent on the given input.
-        
+
         Args:
             input_text: Input text to process
             kwargs: Additional arguments
-            
+
         Returns:
             Dict containing the agent's response and any additional information
 
@@ -112,7 +112,7 @@ class WorkerAgent(BaseAgent):
                 "status": "success",
             }
         except Exception as e:
-            logger.error(f"Worker agent execution failed: {e}")
+            logger.exception(f"Worker agent execution failed: {e}")
             return {
                 "response": f"I encountered an error: {e!s}",
                 "error": str(e),

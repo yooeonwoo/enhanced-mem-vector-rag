@@ -1,4 +1,5 @@
-"""Chainlit application runner for EMVR.
+"""
+Chainlit application runner for EMVR.
 
 This module provides a function to run the Chainlit UI application.
 """

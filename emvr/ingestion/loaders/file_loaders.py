@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 class FileLoader:
     """
     Base loader for file-based documents using LlamaIndex.
-    
+
     Provides methods for loading documents from files and directories.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the file loader."""
         self._settings = get_settings()
         self._initialized = False
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the loader."""
         if self._initialized:
             return
@@ -44,10 +44,10 @@ class FileLoader:
             logger.info("File loader initialized")
 
         except Exception as e:
-            logger.error(f"Failed to initialize file loader: {e}")
+            logger.exception(f"Failed to initialize file loader: {e}")
             raise
 
-    def ensure_initialized(self):
+    def ensure_initialized(self) -> None:
         """Ensure the loader is initialized."""
         if not self._initialized:
             self.initialize()
@@ -59,11 +59,11 @@ class FileLoader:
     ) -> list[dict[str, Any]]:
         """
         Load a single file.
-        
+
         Args:
             file_path: Path to the file
             metadata: Optional metadata for the document
-        
+
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
 
@@ -117,7 +117,7 @@ class FileLoader:
             # ]
 
         except Exception as e:
-            logger.error(f"Failed to load file {file_path}: {e}")
+            logger.exception(f"Failed to load file {file_path}: {e}")
             return []
 
     def load_directory(
@@ -130,14 +130,14 @@ class FileLoader:
     ) -> list[dict[str, Any]]:
         """
         Load all files from a directory.
-        
+
         Args:
             directory_path: Path to the directory
             recursive: Whether to search subdirectories
             metadata: Optional metadata for all documents
             exclude_hidden: Whether to exclude hidden files/dirs
             file_extensions: List of file extensions to include
-        
+
         Returns:
             List[Dict]: List of document dictionaries with "text" and "metadata"
 
@@ -187,7 +187,7 @@ class FileLoader:
                     file_docs = self.load_file(file_path, metadata)
                     documents.extend(file_docs)
                 except Exception as e:
-                    logger.error(f"Error loading file {file_path}: {e}")
+                    logger.exception(f"Error loading file {file_path}: {e}")
 
             logger.info(f"Loaded {len(documents)} documents from {directory_path}")
             return documents
@@ -211,7 +211,7 @@ class FileLoader:
             # ]
 
         except Exception as e:
-            logger.error(f"Failed to load directory {directory_path}: {e}")
+            logger.exception(f"Failed to load directory {directory_path}: {e}")
             return []
 
 

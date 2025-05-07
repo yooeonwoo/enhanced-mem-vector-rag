@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Script to update the memory system with implementation progress.
+"""
+Script to update the memory system with implementation progress.
 
 This script uses HTTP requests to interact with our MCP server endpoints directly.
 """

@@ -28,10 +28,10 @@ class FusionRetriever(BaseRetriever):
         web_weight: float = 0.2,
         top_k_multiplier: int = 3,
         reranking: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the fusion retriever.
-        
+
         Args:
             vector_store: Vector store for semantic search
             graph_store: Graph store for knowledge graph queries
@@ -74,12 +74,12 @@ class FusionRetriever(BaseRetriever):
     ) -> list[RetrievalResult]:
         """
         Retrieve documents using multiple retrieval methods.
-        
+
         Args:
             query: Query string
             top_k: Number of results to return
             filters: Optional filters to apply
-            
+
         Returns:
             List of retrieval results
 
@@ -114,7 +114,6 @@ class FusionRetriever(BaseRetriever):
                 )
 
             # Web retrieval task (placeholder for future)
-            web_results = []
             if self.web_weight > 0 and self.web_retriever is not None:
                 retrieval_tasks.append(
                     self.web_retriever.retrieve(
@@ -153,7 +152,7 @@ class FusionRetriever(BaseRetriever):
             return combined_results
 
         except Exception as e:
-            logger.error(f"Error in fusion retrieval: {e!s}")
+            logger.exception(f"Error in fusion retrieval: {e!s}")
             return []
 
     def _combine_results(
@@ -161,12 +160,12 @@ class FusionRetriever(BaseRetriever):
     ) -> list[RetrievalResult]:
         """
         Combine results from multiple sources with weights.
-        
+
         Args:
             query: Original query string
             source_results: Dictionary mapping source names to result lists
             top_k: Number of final results to return
-            
+
         Returns:
             Combined and reranked list of retrieval results
 
@@ -271,14 +270,14 @@ class FusionRetriever(BaseRetriever):
     ) -> list[RetrievalResult]:
         """
         Rerank results based on relevance to query and source diversity.
-        
+
         Note: In a production system, this would use a more sophisticated reranker
         model (e.g., cross-encoder). This is a simplified version for demonstration.
-        
+
         Args:
             query: Original query string
             results: List of retrieval results to rerank
-            
+
         Returns:
             Reranked list of retrieval results
 

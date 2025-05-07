@@ -67,7 +67,7 @@ ACTIVE_SESSIONS = Gauge(
 )
 
 def setup_metrics(app: FastAPI) -> None:
-    """Setup metrics endpoint and middleware for the FastAPI app"""
+    """Setup metrics endpoint and middleware for the FastAPI app."""
 
     @app.get("/metrics")
     async def metrics():
@@ -89,16 +89,16 @@ def setup_metrics(app: FastAPI) -> None:
             response = await call_next(request)
             status_code = response.status_code
             return response
-        except Exception as e:
+        except Exception:
             status_code = 500
-            raise e
+            raise
         finally:
             REQUESTS_IN_PROGRESS.labels(method=method, endpoint=path).dec()
             REQUESTS.labels(method=method, endpoint=path, status=status_code).inc()
             REQUEST_LATENCY.labels(method=method, endpoint=path).observe(time.time() - start_time)
 
 def track_agent_operation(agent_type: str, operation: str) -> Callable[[F], F]:
-    """Decorator to track agent operations"""
+    """Decorator to track agent operations."""
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -106,14 +106,14 @@ def track_agent_operation(agent_type: str, operation: str) -> Callable[[F], F]:
                 result = await func(*args, **kwargs)
                 AGENT_OPERATIONS.labels(agent_type=agent_type, operation=operation, status="success").inc()
                 return result
-            except Exception as e:
+            except Exception:
                 AGENT_OPERATIONS.labels(agent_type=agent_type, operation=operation, status="failure").inc()
-                raise e
+                raise
         return wrapper
     return decorator
 
 def track_memory_operation(operation: str) -> Callable[[F], F]:
-    """Decorator to track memory operations"""
+    """Decorator to track memory operations."""
     def decorator(func: F) -> F:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -121,18 +121,18 @@ def track_memory_operation(operation: str) -> Callable[[F], F]:
                 result = await func(*args, **kwargs)
                 MEM_OPERATIONS.labels(operation=operation, status="success").inc()
                 return result
-            except Exception as e:
+            except Exception:
                 MEM_OPERATIONS.labels(operation=operation, status="failure").inc()
-                raise e
+                raise
         return wrapper
     return decorator
 
 def update_vector_count(collection: str, count: int) -> None:
-    """Update the vector count metric for a collection"""
+    """Update the vector count metric for a collection."""
     VECTOR_COUNT.labels(collection=collection).set(count)
 
 def update_graph_counts(node_counts: dict[str, int], relation_counts: dict[str, int]) -> None:
-    """Update Neo4j graph count metrics"""
+    """Update Neo4j graph count metrics."""
     for label, count in node_counts.items():
         GRAPH_NODE_COUNT.labels(label=label).set(count)
 
@@ -140,5 +140,5 @@ def update_graph_counts(node_counts: dict[str, int], relation_counts: dict[str, 
         GRAPH_RELATION_COUNT.labels(type=rel_type).set(count)
 
 def update_active_sessions(session_type: str, count: int) -> None:
-    """Update active sessions metric"""
+    """Update active sessions metric."""
     ACTIVE_SESSIONS.labels(session_type=session_type).set(count)

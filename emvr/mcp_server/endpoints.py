@@ -86,7 +86,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Create multiple new entities in the knowledge graph.
-        
+
         Each entity should have a name, entityType, and observations.
         """
         try:
@@ -96,11 +96,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.create_entities(entities)
+            return await memory_manager.create_entities(entities)
 
-            return result
         except Exception as e:
-            logger.error(f"Entity creation failed: {e}")
+            logger.exception(f"Entity creation failed: {e}")
             await ctx.error(f"Failed to create entities: {e}")
             raise
 
@@ -111,7 +110,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Create multiple new relations between entities in the knowledge graph.
-        
+
         Each relation should have from, to, and relationType fields.
         """
         try:
@@ -121,11 +120,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.create_relations(relations)
+            return await memory_manager.create_relations(relations)
 
-            return result
         except Exception as e:
-            logger.error(f"Relation creation failed: {e}")
+            logger.exception(f"Relation creation failed: {e}")
             await ctx.error(f"Failed to create relations: {e}")
             raise
 
@@ -136,7 +134,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Add new observations to existing entities in the knowledge graph.
-        
+
         Each observation should have an entityName and contents (list of text observations).
         """
         try:
@@ -146,11 +144,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.add_observations(observations)
+            return await memory_manager.add_observations(observations)
 
-            return result
         except Exception as e:
-            logger.error(f"Adding observations failed: {e}")
+            logger.exception(f"Adding observations failed: {e}")
             await ctx.error(f"Failed to add observations: {e}")
             raise
 
@@ -162,7 +159,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Search for nodes in the knowledge graph based on a query.
-        
+
         Uses hybrid search across vector and graph stores.
         """
         try:
@@ -172,11 +169,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.search_nodes(query, limit)
+            return await memory_manager.search_nodes(query, limit)
 
-            return result
         except Exception as e:
-            logger.error(f"Node search failed: {e}")
+            logger.exception(f"Node search failed: {e}")
             await ctx.error(f"Failed to search nodes: {e}")
             raise
 
@@ -186,7 +182,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Read the entire knowledge graph.
-        
+
         Returns the complete graph structure with entities and relationships.
         """
         try:
@@ -196,11 +192,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.read_graph()
+            return await memory_manager.read_graph()
 
-            return result
         except Exception as e:
-            logger.error(f"Reading graph failed: {e}")
+            logger.exception(f"Reading graph failed: {e}")
             await ctx.error(f"Failed to read graph: {e}")
             raise
 
@@ -211,7 +206,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Delete multiple entities and their associated relations from the knowledge graph.
-        
+
         Use this with caution as it permanently removes entities and their relationships.
         """
         try:
@@ -221,11 +216,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Process the request
-            result = await memory_manager.delete_entities(entityNames)
+            return await memory_manager.delete_entities(entityNames)
 
-            return result
         except Exception as e:
-            logger.error(f"Entity deletion failed: {e}")
+            logger.exception(f"Entity deletion failed: {e}")
             await ctx.error(f"Failed to delete entities: {e}")
             raise
 
@@ -239,7 +233,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Perform a hybrid search across vector and graph stores.
-        
+
         This endpoint combines vector search, keyword search, and graph search
         for comprehensive results.
         """
@@ -251,11 +245,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
 
             # For now, hybrid search is the same as node search
             # In the future, this will be enhanced with additional capabilities
-            result = await memory_manager.search_nodes(query, limit)
+            return await memory_manager.search_nodes(query, limit)
 
-            return result
         except Exception as e:
-            logger.error(f"Hybrid search failed: {e}")
+            logger.exception(f"Hybrid search failed: {e}")
             await ctx.error(f"Failed to perform hybrid search: {e}")
             raise
 
@@ -269,7 +262,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Execute a Cypher query against the Neo4j graph database.
-        
+
         Use this for custom graph queries when the standard tools aren't sufficient.
         """
         try:
@@ -279,11 +272,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await memory_manager.initialize()
 
             # Execute the query
-            result = await memory_manager._graphiti.execute_cypher(query, parameters)
+            return await memory_manager._graphiti.execute_cypher(query, parameters)
 
-            return result
         except Exception as e:
-            logger.error(f"Graph query failed: {e}")
+            logger.exception(f"Graph query failed: {e}")
             await ctx.error(f"Failed to execute graph query: {e}")
             raise
 
@@ -298,7 +290,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Ingest raw text into the memory system.
-        
+
         Processes the text through the ingestion pipeline, including text splitting,
         embedding generation, and storage in both vector and graph memory.
         """
@@ -309,11 +301,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await ingestion_pipeline.initialize()
 
             # Process the request
-            result = await ingestion_pipeline.ingest_text(content, metadata, source_name)
+            return await ingestion_pipeline.ingest_text(content, metadata, source_name)
 
-            return result
         except Exception as e:
-            logger.error(f"Text ingestion failed: {e}")
+            logger.exception(f"Text ingestion failed: {e}")
             await ctx.error(f"Failed to ingest text: {e}")
             raise
 
@@ -325,7 +316,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Ingest a file into the memory system.
-        
+
         Supports various file types through LlamaIndex loaders. The file will be processed
         through the ingestion pipeline and stored in memory.
         """
@@ -336,11 +327,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await ingestion_pipeline.initialize()
 
             # Process the request
-            result = await ingestion_pipeline.ingest_file(file_path, metadata)
+            return await ingestion_pipeline.ingest_file(file_path, metadata)
 
-            return result
         except Exception as e:
-            logger.error(f"File ingestion failed: {e}")
+            logger.exception(f"File ingestion failed: {e}")
             await ctx.error(f"Failed to ingest file: {e}")
             raise
 
@@ -352,7 +342,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Ingest content from a URL into the memory system.
-        
+
         Downloads and processes the content from the URL through the ingestion pipeline.
         """
         try:
@@ -362,11 +352,10 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await ingestion_pipeline.initialize()
 
             # Process the request
-            result = await ingestion_pipeline.ingest_url(url, metadata)
+            return await ingestion_pipeline.ingest_url(url, metadata)
 
-            return result
         except Exception as e:
-            logger.error(f"URL ingestion failed: {e}")
+            logger.exception(f"URL ingestion failed: {e}")
             await ctx.error(f"Failed to ingest URL: {e}")
             raise
 
@@ -381,7 +370,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
     ) -> dict[str, Any]:
         """
         Ingest all files from a directory into the memory system.
-        
+
         Recursively processes all files from the directory through the ingestion pipeline.
         """
         try:
@@ -391,7 +380,7 @@ async def register_endpoints(mcp: MCPServer) -> None:
             await ingestion_pipeline.initialize()
 
             # Process the request
-            result = await ingestion_pipeline.ingest_directory(
+            return await ingestion_pipeline.ingest_directory(
                 directory_path,
                 recursive,
                 metadata,
@@ -399,9 +388,8 @@ async def register_endpoints(mcp: MCPServer) -> None:
                 file_extensions,
             )
 
-            return result
         except Exception as e:
-            logger.error(f"Directory ingestion failed: {e}")
+            logger.exception(f"Directory ingestion failed: {e}")
             await ctx.error(f"Failed to ingest directory: {e}")
             raise
 
@@ -421,11 +409,11 @@ async def register_resources(mcp: MCPServer) -> None:
         """Return the Memory API usage guide."""
         return """
         # Memory MCP Server API Guide
-        
+
         This MCP server provides access to knowledge graphs, vector search, memory management, and data ingestion.
-        
+
         ## Memory Operations
-        
+
         ### memory_create_entities
         Create multiple entities in the memory system:
         ```python
@@ -433,7 +421,7 @@ async def register_resources(mcp: MCPServer) -> None:
             {"name": "EntityName", "entityType": "Component", "observations": ["Observation 1", "Observation 2"]}
         ])
         ```
-        
+
         ### memory_create_relations
         Create relationships between entities:
         ```python
@@ -441,7 +429,7 @@ async def register_resources(mcp: MCPServer) -> None:
             {"from": "EntityA", "to": "EntityB", "relationType": "depends_on"}
         ])
         ```
-        
+
         ### memory_add_observations
         Add observations to existing entities:
         ```python
@@ -449,61 +437,61 @@ async def register_resources(mcp: MCPServer) -> None:
             {"entityName": "EntityName", "contents": ["New observation"]}
         ])
         ```
-        
+
         ### memory_search_nodes
         Search for nodes matching a query:
         ```python
         results = await memory.search_nodes("Search query", limit=5)
         ```
-        
+
         ### memory_read_graph
         Get the complete knowledge graph:
         ```python
         graph = await memory.read_graph()
         ```
-        
+
         ### memory_delete_entities
         Delete entities and their relations:
         ```python
         result = await memory.delete_entities(["EntityName1", "EntityName2"])
         ```
-        
+
         ## Search Operations
-        
+
         ### search_hybrid
         Perform hybrid search across vector and graph stores:
         ```python
         results = await search.hybrid("Search query", limit=5)
         ```
-        
+
         ## Graph Operations
-        
+
         ### graph_query
         Execute a Cypher query against Neo4j:
         ```python
         results = await graph.query("MATCH (n) RETURN n LIMIT 10")
         ```
-        
+
         ## Ingestion Operations
-        
+
         ### ingest_text
         Ingest raw text into memory:
         ```python
         result = await ingest.text("Text content to ingest", metadata={"source": "manual"})
         ```
-        
+
         ### ingest_file
         Ingest a file into memory:
         ```python
         result = await ingest.file("/path/to/document.txt")
         ```
-        
+
         ### ingest_url
         Ingest content from a URL:
         ```python
         result = await ingest.url("https://example.com/article")
         ```
-        
+
         ### ingest_directory
         Ingest all files from a directory:
         ```python
@@ -513,9 +501,9 @@ async def register_resources(mcp: MCPServer) -> None:
             file_extensions=["txt", "pdf", "md"]
         )
         ```
-        
+
         ## Best Practices
-        
+
         1. Always initialize a session with `memory.read_graph()`
         2. Create entities before creating relations
         3. Use descriptive entity types and relation types
