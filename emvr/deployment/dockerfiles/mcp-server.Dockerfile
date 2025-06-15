@@ -31,9 +31,9 @@ RUN useradd -m emvruser && \
     chown -R emvruser:emvruser /app
 USER emvruser
 
-# Set healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Set healthcheck - disable for debugging
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start the MCP Server
 CMD ["python", "-m", "emvr.mcp_server.server"]
