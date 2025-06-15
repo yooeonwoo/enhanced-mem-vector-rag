@@ -17,7 +17,8 @@ from typing import Any
 # from llama_index.graph_stores import Neo4jGraphStore
 # from llama_index.core.schema import NodeWithScore, QueryBundle, TextNode
 from emvr.config import get_settings
-from emvr.memory.interfaces.graphiti_interface import graphiti
+# from emvr.memory.interfaces.graphiti_interface import graphiti
+# Temporarily comment out until interfaces module is available
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class GraphRetriever:
     def __init__(self) -> None:
         """Initialize the graph retriever."""
         self._settings = get_settings()
-        self._graphiti = graphiti
+        # self._graphiti = graphiti  # Temporarily disabled
+        self._graphiti = None  # Placeholder until interfaces module is available
         self._initialized = False
 
         # Will be initialized later
@@ -48,8 +50,10 @@ class GraphRetriever:
         try:
             logger.info("Initializing graph retriever")
 
-            # Ensure Graphiti is initialized
-            await self._graphiti.initialize()
+            # Ensure Graphiti is initialized (temporarily disabled)
+            # await self._graphiti.initialize()
+            if self._graphiti is None:
+                logger.warning("Graphiti interface not available, using placeholder")
 
             # Placeholder for actual LlamaIndex implementation
             # When we integrate with LlamaIndex:
@@ -160,8 +164,14 @@ class GraphRetriever:
             cypher_query = await self._generate_graph_query(query)
             logger.info("Generated Cypher query: %s", cypher_query)
 
-            # Execute the query
-            query_result = await self._graphiti.execute_cypher(cypher_query)
+            # Execute the query (temporarily disabled)
+            # query_result = await self._graphiti.execute_cypher(cypher_query)
+            # Placeholder response
+            query_result = {
+                "success": False,
+                "error": "Graphiti interface not available",
+                "records": []
+            }
 
             # Process the results
             if not query_result.get("success", False):
@@ -262,11 +272,17 @@ class GraphRetriever:
                 LIMIT 100
                 """
 
-            # Execute the query
-            query_result = await self._graphiti.execute_cypher(
-                query,
-                {"entity": entity},
-            )
+            # Execute the query (temporarily disabled)
+            # query_result = await self._graphiti.execute_cypher(
+            #     query,
+            #     {"entity": entity},
+            # )
+            # Placeholder response
+            query_result = {
+                "success": False,
+                "error": "Graphiti interface not available",
+                "records": []
+            }
 
             # Process the results
             if not query_result.get("success", False):
@@ -340,7 +356,13 @@ class GraphRetriever:
             RETURN n.name AS name, n.entityType AS type
             """
 
-            query_result = await self._graphiti.execute_cypher(query)
+            # query_result = await self._graphiti.execute_cypher(query)
+            # Placeholder response (temporarily disabled)
+            query_result = {
+                "success": False,
+                "error": "Graphiti interface not available",
+                "records": []
+            }
 
             if not query_result.get("success", False):
                 return {

@@ -9,7 +9,11 @@ import os
 from typing import Any
 
 import chainlit as cl
-from chainlit.playground.providers import ChatOpenAI
+try:
+    from chainlit.playground.providers import ChatOpenAI
+except ImportError:
+    # Fallback for newer versions of chainlit
+    from langchain_openai import ChatOpenAI
 from chainlit.types import FileDict
 
 # Check if we're in development mode

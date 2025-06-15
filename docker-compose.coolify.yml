@@ -84,51 +84,30 @@ services:
     #   retries: 3
     #   start_period: 40s
 
-  # Grafana - 모니터링 (선택사항)
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./emvr/deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-worldmap-panel,grafana-piechart-panel
-    networks:
-      - emvr-network
-    restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+  # Grafana - 모니터링 (일시적으로 비활성화)
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - "3000"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   networks:
+  #     - emvr-network
+  #   restart: unless-stopped
 
-  # Prometheus - 메트릭 수집 (선택사항)
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090"
-    volumes:
-      - ./emvr/deployment/monitoring/prometheus:/etc/prometheus:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    networks:
-      - emvr-network
-    restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+  # Prometheus - 메트릭 수집 (일시적으로 비활성화)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   ports:
+  #     - "9090"
+  #   volumes:
+  #     - prometheus_data:/prometheus
+  #   networks:
+  #     - emvr-network
+  #   restart: unless-stopped
 
 networks:
   emvr-network:
@@ -143,7 +122,7 @@ volumes:
     driver: local
   uploads:
     driver: local
-  grafana_data:
-    driver: local
-  prometheus_data:
-    driver: local
+  # grafana_data:
+  #   driver: local
+  # prometheus_data:
+  #   driver: local
