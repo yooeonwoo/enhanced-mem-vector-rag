@@ -16,10 +16,12 @@ COPY pyproject.toml requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code and Chainlit configuration
+# Copy application code
 COPY emvr /app/emvr
-COPY chainlit.md /app/ 2>/dev/null || echo "chainlit.md not found, skipping"
-COPY chainlit.yaml /app/ 2>/dev/null || echo "chainlit.yaml not found, skipping"
+
+# Copy chainlit configuration files
+COPY chainlit.md /app/
+COPY chainlit.yaml /app/
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/uploads
